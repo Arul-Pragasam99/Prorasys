@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ productdata.product_name }}{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-5">
+  <div class="product-container">
+      <div class="row align-items-center">
+          <!-- Left Side: Product Details -->
+          <div class="col-md-6 order-md-2">
+              <span>
+                  <a href="{{ url_for('displayCategory', categoryId=category.category_id) }}" class="category-link">
+                      {{ category.category_name }}
+                  </a>
+              </span>
+              <h1 class="mt-2">{{ productdata.product_name }}</h1>
+              
+              <h2 class="text-danger fw-bold">
+                  <span class="badge bg-warning text-dark">{{ productdata.price }} ₹</span>
+              </h2>
+
+              <h3>Product Information</h3>
+              <p>
+                  <strong>Unit Weight:</strong> {{ productdata.unit_weight }}g <br>
+                  {{ productdata.product_description }}
+              </p>
+
+              {% if productdata.quantity_pu > 0 %}
+                  <p class="instock">✔ In Stock</p>
+              {% else %}
+                  <p class="outofstock">✖ Out of Stock</p>
+              {% endif %}
+
+              <h3>Product Rank:</h3> 
+              <h2><span class="rank-badge">#{{ productrankinginfo.rank }}</span></h2>
+
+              <h3>Overall Score:</h3> 
+              <h2><span class="rating-badge">{{ productrankinginfo.rating }}/5</span></h2>
+
+              <h3>User Reviews</h3>
+              <ul class="list-unstyled">
+                  {% for review in reviewData %}
+                  <li class="review-card">
+                      <strong>User Name:</strong> {{ review.userid }} <br>
+                      <strong>Rating:</strong> ⭐ {{ review.rating }}/5 <br>
+                      <strong>Feature Rating:</strong> ⭐ {{ review.frating }}/5 <br>
+                      <strong>Review:</strong> {{ review.review }}
+                  </li>
+                  {% endfor %}
+              </ul>
+          </div>
+
+          <!-- Right Side: Product Image -->
+          <div class="col-md-6 order-md-1 text-center">
+              <img src="{{ url_for('static', filename='uploads/' + productdata.product_image) }}" 
+                   alt="{{ productdata.product_name }}" 
+                   class="img-fluid product-image">
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
