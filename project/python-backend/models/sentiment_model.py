@@ -228,4 +228,4 @@ class SentimentAnalyzer:
             print("✅ Sentiment model loaded successfully")
         except:
             print("⚠️ Could not load saved model. Building new one.")
-            self.build_model()
+            self.build_model()  
