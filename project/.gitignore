@@ -8,3 +8,26 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .vscode/
+
+# Python backend sensitive files
+python-backend/service-account.json
+python-backend/.env
+python-backend/__pycache__/
+python-backend/*.pyc
+python-backend/models/saved/
+python-backend/logs/
+
+# Firebase credentials (anywhere in project)
+service-account.json
+*.service-account.json
+*service-account*.json
+*.firebase*.json
+
+# ⭐ Add these too
+python-backend/*.pkl           # Pickle files (trained models)
+python-backend/*.h5            # TensorFlow/Keras models
+python-backend/*.pt            # PyTorch models
+python-backend/*.onnx          # ONNX models
+*.log                          # All log files
+.DS_Store                      # Mac OS file
+Thumbs.db                      # Windows thumbnail file

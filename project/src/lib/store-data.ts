@@ -7,43 +7,73 @@ export type StoreProduct = {
   rating: number;
   badge: string;
   color: string;
+  image?: string;
+  combinedScore?: number;
+  sentimentScore?: number;
+  trustLevel?: string;
+  reviewCount?: number;
+  featureScores?: Record<string, number>;
+  rank?: number;
 };
 
 export const featuredProducts: StoreProduct[] = [
   {
-    id: 'p-100',
-    name: 'Aurora Headphones',
-    description: 'Immersive sound with noise canceling for work and travel.',
-    price: 189,
+    id: '1',
+    name: 'Premium Headphones',
+    description: 'High-quality wireless headphones with noise cancellation',
+    price: 199.99,
     category: 'Electronics',
     rating: 4.8,
-    badge: 'Best seller',
+    badge: 'Best Seller',
     color: 'from-sky-500 to-cyan-400',
+    image: '/headphones.jpg',
+    combinedScore: 0.92,
+    trustLevel: 'high',
+    reviewCount: 156,
   },
   {
-    id: 'p-101',
-    name: 'Lumen Smart Lamp',
-    description: 'Adaptive lighting with voice control and warm ambience.',
-    price: 89,
-    category: 'Home',
+    id: '2',
+    name: 'Smart Watch Pro',
+    description: 'Advanced fitness tracker with health monitoring',
+    price: 299.99,
+    category: 'Wearables',
     rating: 4.6,
-    badge: 'New arrival',
-    color: 'from-fuchsia-500 to-rose-400',
+    badge: 'New Arrival',
+    color: 'from-purple-500 to-pink-400',
+    image: '/watch.jpg',
+    combinedScore: 0.85,
+    trustLevel: 'high',
+    reviewCount: 89,
   },
   {
-    id: 'p-102',
-    name: 'Northside Backpack',
-    description: 'A durable, weatherproof bag built for daily commutes.',
-    price: 74,
-    category: 'Fashion',
-    rating: 4.7,
+    id: '3',
+    name: 'Wireless Earbuds',
+    description: 'Compact earbuds with premium sound quality',
+    price: 89.99,
+    category: 'Audio',
+    rating: 4.4,
     badge: 'Trending',
-    color: 'from-emerald-500 to-lime-400',
+    color: 'from-emerald-500 to-teal-400',
+    image: '/earbuds.jpg',
+    combinedScore: 0.78,
+    trustLevel: 'medium',
+    reviewCount: 234,
   },
 ];
 
-export const categories = [
-  { title: 'Electronics', description: 'Phones, audio, and smart devices' },
-  { title: 'Fashion', description: 'Everyday essentials and accessories' },
-  { title: 'Home', description: 'Comfort upgrades for modern spaces' },
-];
+export type StoreContextValue = {
+  user: any;
+  cart: StoreProduct[];
+  wishlist: StoreProduct[];
+  isAuthenticated: boolean;
+  userRole: string;
+  addToCart: (product: StoreProduct) => void;
+  removeFromCart: (productId: string) => void;
+  addToWishlist: (product: StoreProduct) => void;
+  removeFromWishlist: (productId: string) => void;
+  logout: () => void;
+  aiRecommendations?: StoreProduct[];
+  loadingRecommendations?: boolean;
+  getRecommendations?: () => Promise<void>;
+  refreshCart?: () => Promise<void>;
+};

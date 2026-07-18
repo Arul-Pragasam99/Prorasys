@@ -1,0 +1,191 @@
+import numpy as np
+from typing import List, Dict, Optional
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
+import json
+import os
+import pickle
+
+class TrustScoreCalculator:
+    def __init__(self):
+        self.model: Optional[RandomForestRegressor] = None
+        self.scaler: Optional[StandardScaler] = None
+        self.model_path = "models/saved/trust_model.pkl"
+        
+        if os.path.exists(self.model_path):
+            self.load_model()
+        else:
+            self.build_model()
+    
+    def build_model(self):
+        """Build trust score model"""
+        self.model = RandomForestRegressor(
+            n_estimators=50,
+            max_depth=10,
+            random_state=42,
+            n_jobs=-1
+        )
+        self.scaler = StandardScaler()
+        print("✅ Trust model built with scikit-learn")
+    
+    def train(self, reviews_data: List[Dict]):
+        """Train trust score model"""
+        if not reviews_data:
+            print("⚠️ No training data available")
+            return
+        
+        try:
+            # Prepare features for each product
+            product_reviews = {}
+            for review in reviews_data:
+                product_id = review.get('productId', review.get('product_id', 'unknown'))
+                if product_id not in product_reviews:
+                    product_reviews[product_id] = []
+                product_reviews[product_id].append(review)
+            
+            # Create training data
+            X = []
+            y = []
+            
+            for product_id, reviews in product_reviews.items():
+                if len(reviews) < 2:
+                    continue
+                    
+                # Extract features
+                ratings = [r.get('rating', 3) for r in reviews]
+                sentiment_scores = [r.get('sentimentScore', 0.5) for r in reviews]
+                
+                features = [
+                    np.mean(ratings),  # Average rating
+                    np.std(ratings) if len(ratings) > 1 else 0,  # Rating variance
+                    np.mean(sentiment_scores),  # Average sentiment
+                    np.std(sentiment_scores) if len(sentiment_scores) > 1 else 0,  # Sentiment variance
+                    len(reviews),  # Number of reviews
+                    min(1, len(reviews) / 50)  # Review volume (normalized)
+                ]
+                
+                # Calculate target trust score (using weighted combination)
+                trust_score = (
+                    0.4 * np.mean(ratings) / 5 +
+                    0.3 * np.mean(sentiment_scores) +
+                    0.2 * min(1, len(reviews) / 50) +
+                    0.1 * (1 - (np.std(ratings) / 5 if len(ratings) > 1 else 0))
+                )
+                
+                X.append(features)
+                y.append(trust_score)
+            
+            if X and len(X) > 5:
+                # Check if scaler is initialized
+                if self.scaler is None:
+                    self.scaler = StandardScaler()
+                    
+                X_scaled = self.scaler.fit_transform(np.array(X))
+                
+                if self.model is not None:
+                    self.model.fit(X_scaled, y)
+                    self.save_model()
+                    print(f"✅ Trust model trained with {len(X)} products")
+                else:
+                    print("❌ Model is None, cannot train")
+            else:
+                print("⚠️ Not enough data for trust model training")
+                
+        except Exception as e:
+            print(f"⚠️ Could not train trust model: {e}")
+    
+    def calculate(self, reviews: List[Dict]) -> Dict:
+        """Calculate trust score for a product"""
+        if not reviews:
+            return {
+                'trustScore': 0.5,
+                'avgRating': 0,
+                'sentimentScore': 0.5,
+                'reviewCount': 0,
+                'trustLevel': 'no_reviews'
+            }
+        
+        # Extract features
+        ratings = [r.get('rating', 3) for r in reviews]
+        sentiment_scores = [r.get('sentimentScore', 0.5) for r in reviews]
+        
+        # Calculate metrics
+        avg_rating = np.mean(ratings)
+        avg_sentiment = np.mean(sentiment_scores)
+        review_count = len(reviews)
+        
+        # Use model if available and enough data
+        if self.model is not None and self.scaler is not None and review_count >= 3:
+            try:
+                features = np.array([[
+                    avg_rating,
+                    np.std(ratings) if len(ratings) > 1 else 0,
+                    avg_sentiment,
+                    np.std(sentiment_scores) if len(sentiment_scores) > 1 else 0,
+                    review_count,
+                    min(1, review_count / 50)
+                ]])
+                
+                features_scaled = self.scaler.transform(features)
+                trust_score = float(self.model.predict(features_scaled)[0])
+                
+                # Clamp between 0 and 1
+                trust_score = max(0, min(1, trust_score))
+            except:
+                # Fallback to heuristic
+                trust_score = (
+                    0.4 * avg_rating / 5 +
+                    0.3 * avg_sentiment +
+                    0.2 * min(1, review_count / 50) +
+                    0.1 * (1 - (np.std(ratings) / 5 if len(ratings) > 1 else 0))
+                )
+        else:
+            # Heuristic for few reviews
+            trust_score = (
+                0.4 * avg_rating / 5 +
+                0.3 * avg_sentiment +
+                0.2 * min(1, review_count / 50) +
+                0.1 * (1 - (np.std(ratings) / 5 if len(ratings) > 1 else 0))
+            )
+        
+        # Determine trust level
+        if trust_score >= 0.8:
+            trust_level = "high"
+        elif trust_score >= 0.6:
+            trust_level = "medium"
+        elif trust_score >= 0.4:
+            trust_level = "low"
+        else:
+            trust_level = "critical"
+        
+        return {
+            'trustScore': trust_score,
+            'avgRating': avg_rating,
+            'sentimentScore': avg_sentiment,
+            'reviewCount': review_count,
+            'trustLevel': trust_level
+        }
+    
+    def save_model(self):
+        """Save the trained model"""
+        os.makedirs('models/saved', exist_ok=True)
+        if self.model is not None and self.scaler is not None:
+            with open(self.model_path, 'wb') as f:
+                pickle.dump({
+                    'model': self.model,
+                    'scaler': self.scaler
+                }, f)
+            print("✅ Trust model saved successfully")
+    
+    def load_model(self):
+        """Load the trained model"""
+        try:
+            with open(self.model_path, 'rb') as f:
+                data = pickle.load(f)
+                self.model = data.get('model')
+                self.scaler = data.get('scaler')
+            print("✅ Trust model loaded successfully")
+        except:
+            print("⚠️ Could not load trust model. Building new one.")
+            self.build_model()

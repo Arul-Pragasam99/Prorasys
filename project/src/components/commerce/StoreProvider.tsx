@@ -1,145 +1,133 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { StoreProduct } from '@/lib/store-data';
-import {
-  addToCartPersistence,
-  addToWishlistPersistence,
-  loadCartSnapshot,
-  removeFromCartPersistence,
-  removeFromWishlistPersistence,
-  saveCartSnapshot,
-} from '@/lib/cart-service';
-import { loginUser, logoutUser, observeAuthState, type AuthUser } from '@/lib/auth-service';
-
-type UserRole = 'guest' | 'customer' | 'admin';
-
-type StoreContextValue = {
-  cart: StoreProduct[];
-  wishlist: StoreProduct[];
-  isAuthenticated: boolean;
-  userRole: UserRole;
-  addToCart: (product: StoreProduct) => Promise<void>;
-  removeFromCart: (productId: string) => Promise<void>;
-  addToWishlist: (product: StoreProduct) => Promise<void>;
-  removeFromWishlist: (productId: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-};
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { AuthUser, observeAuthState } from '@/lib/auth-service';
+import { loadCartSnapshot } from '@/lib/cart-service';
+import { StoreProduct, StoreContextValue } from '@/lib/store-data';
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<StoreProduct[]>([]);
   const [wishlist, setWishlist] = useState<StoreProduct[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<UserRole>('guest');
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [userRole, setUserRole] = useState('customer');
+  const [aiRecommendations, setAiRecommendations] = useState<StoreProduct[]>([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = observeAuthState(async (user) => {
-      setAuthUser(user);
-      if (!user) {
+    const unsubscribe = observeAuthState(async (authUser) => {
+      if (authUser) {
+        setUser(authUser);
+        setIsAuthenticated(true);
+        setUserRole(authUser.role || 'customer');
+        await loadCart();
+        await getRecommendations();
+      } else {
+        setUser(null);
         setIsAuthenticated(false);
-        setUserRole('guest');
+        setUserRole('customer');
         setCart([]);
         setWishlist([]);
-        return;
+        setAiRecommendations([]);
       }
-
-      setIsAuthenticated(true);
-      setUserRole((user.role ?? 'customer') as UserRole);
-      const snapshot = await loadCartSnapshot(user.uid);
-      setCart(snapshot.cart);
-      setWishlist(snapshot.wishlist);
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  const syncSnapshot = async (nextCart: StoreProduct[], nextWishlist: StoreProduct[]) => {
-    if (!authUser?.uid) {
-      return;
+  const loadCart = async () => {
+    if (!user) return;
+    try {
+      const snapshot = await loadCartSnapshot(user.uid);
+      setCart(snapshot.cart || []);
+      setWishlist(snapshot.wishlist || []);
+    } catch (error) {
+      console.error('Error loading cart:', error);
     }
-    setCart(nextCart);
-    setWishlist(nextWishlist);
-    await saveCartSnapshot(authUser.uid, { cart: nextCart, wishlist: nextWishlist });
   };
 
-  const addToCart = async (product: StoreProduct) => {
-    if (!authUser?.uid) {
-      setCart((current) => (current.some((item) => item.id === product.id) ? current : [...current, product]));
-      return;
-    }
-    const nextCart = cart.some((item) => item.id === product.id) ? cart : [...cart, product];
-    await addToCartPersistence(authUser.uid, product);
-    setCart(nextCart);
+  const refreshCart = async () => {
+    await loadCart();
   };
 
-  const removeFromCart = async (productId: string) => {
-    if (!authUser?.uid) {
-      setCart((current) => current.filter((item) => item.id !== productId));
-      return;
-    }
-    const nextCart = cart.filter((item) => item.id !== productId);
-    await removeFromCartPersistence(authUser.uid, productId);
-    setCart(nextCart);
+  const addToCart = (product: StoreProduct) => {
+    if (!user) return;
+    setCart(prev => {
+      const exists = prev.some(item => item.id === product.id);
+      if (exists) return prev;
+      return [...prev, product];
+    });
   };
 
-  const addToWishlist = async (product: StoreProduct) => {
-    if (!authUser?.uid) {
-      setWishlist((current) => (current.some((item) => item.id === product.id) ? current : [...current, product]));
-      return;
-    }
-    const nextWishlist = wishlist.some((item) => item.id === product.id) ? wishlist : [...wishlist, product];
-    await addToWishlistPersistence(authUser.uid, product);
-    setWishlist(nextWishlist);
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const removeFromWishlist = async (productId: string) => {
-    if (!authUser?.uid) {
-      setWishlist((current) => current.filter((item) => item.id !== productId));
-      return;
-    }
-    const nextWishlist = wishlist.filter((item) => item.id !== productId);
-    await removeFromWishlistPersistence(authUser.uid, productId);
-    setWishlist(nextWishlist);
+  const addToWishlist = (product: StoreProduct) => {
+    if (!user) return;
+    setWishlist(prev => {
+      const exists = prev.some(item => item.id === product.id);
+      if (exists) return prev;
+      return [...prev, product];
+    });
   };
 
-  const login = async (email: string, password: string) => {
-    const user = await loginUser(email, password);
-    setAuthUser(user);
-    setIsAuthenticated(true);
-    setUserRole((user.role ?? 'customer') as UserRole);
-    const snapshot = await loadCartSnapshot(user.uid);
-    setCart(snapshot.cart);
-    setWishlist(snapshot.wishlist);
+  const removeFromWishlist = (productId: string) => {
+    setWishlist(prev => prev.filter(item => item.id !== productId));
   };
 
   const logout = async () => {
-    await logoutUser();
-    setAuthUser(null);
+    setUser(null);
     setIsAuthenticated(false);
-    setUserRole('guest');
     setCart([]);
     setWishlist([]);
+    setAiRecommendations([]);
+  };
+
+  const getRecommendations = async () => {
+    if (!user) return;
+    setLoadingRecommendations(true);
+    try {
+      const response = await fetch('/api/ai/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.uid,
+          num_recommendations: 5
+        })
+      });
+      const data = await response.json();
+      setAiRecommendations(data.recommendations || []);
+    } catch (error) {
+      console.error('Failed to get recommendations:', error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
+
+  const value: StoreContextValue = {
+    user,
+    cart,
+    wishlist,
+    isAuthenticated,
+    userRole,
+    addToCart,
+    removeFromCart,
+    addToWishlist,
+    removeFromWishlist,
+    logout,
+    aiRecommendations,
+    loadingRecommendations,
+    getRecommendations,
+    refreshCart,
   };
 
   return (
-    <StoreContext.Provider
-      value={{
-        cart,
-        wishlist,
-        isAuthenticated,
-        userRole,
-        addToCart,
-        removeFromCart,
-        addToWishlist,
-        removeFromWishlist,
-        login,
-        logout,
-      }}
-    >
+    <StoreContext.Provider value={value}>
       {children}
     </StoreContext.Provider>
   );
@@ -147,8 +135,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
 export function useStore() {
   const context = useContext(StoreContext);
-  if (!context) {
-    throw new Error('useStore must be used inside StoreProvider');
+  if (context === undefined) {
+    throw new Error('useStore must be used within a StoreProvider');
   }
   return context;
 }
