@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { StoreProvider } from '@/components/commerce/StoreProvider';
-
-// Import CSS directly (the proper Next.js way)
 import './globals.css';
 
 const inter = Inter({ 
@@ -31,13 +29,6 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
   },
 };
 
@@ -60,4 +51,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+} 
