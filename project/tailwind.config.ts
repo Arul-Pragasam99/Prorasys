@@ -6,27 +6,72 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        primary: {
+          DEFAULT: '#0F6E56',
+          light: '#5DCAA5',
+          dark: '#0F6E56',
+        },
+        secondary: {
+          DEFAULT: '#185FA5',
+          light: '#85B7EB',
+          dark: '#185FA5',
+        },
+        accent: {
+          DEFAULT: '#D85A30',
+          light: '#F0997B',
+          dark: '#D85A30',
+        },
+        success: {
+          DEFAULT: '#639922',
+          light: '#97C459',
+          dark: '#639922',
+        },
+        warning: {
+          DEFAULT: '#BA7517',
+          light: '#EF9F27',
+          dark: '#BA7517',
+        },
+        danger: {
+          DEFAULT: '#A32D2D',
+          light: '#F09595',
+          dark: '#A32D2D',
+        },
+        surface: {
+          DEFAULT: '#FFFFFF',
+          dark: '#161615',
+        },
+        card: {
+          DEFAULT: '#F7F9F8',
+          dark: '#1F1F1D',
+        },
+        text: {
+          primary: {
+            DEFAULT: '#1A1A18',
+            dark: '#F1EFE8',
+          },
+          secondary: {
+            DEFAULT: '#5F5E5A',
+            dark: '#B4B2A9',
+          },
+        },
+        border: {
+          DEFAULT: '#D3D1C7',
+          dark: '#444441',
         },
       },
+      borderRadius: {
+        theme: '8px',
+        'theme-lg': '12px',
+      },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'fade-in': 'fadeIn 0.5s ease-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.5s ease-out',
         'scale-in': 'scaleIn 0.3s ease-out',
@@ -45,7 +90,7 @@ const config: Config = {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         scaleIn: {
-          '0%': { transform: 'scale(0.9)', opacity: '0' },
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
       },

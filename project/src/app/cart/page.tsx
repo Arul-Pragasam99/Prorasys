@@ -1,13 +1,27 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { CartPanel } from '@/components/commerce/CartPanel';
+import { useStore } from '@/components/commerce/StoreProvider';
 
 export default function CartPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/cart');
+    }
+  }, [isAuthenticated, router]);
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-surface text-text-primary">
       <Header />
-      <section className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
         <CartPanel />
-      </section>
+      </div>
     </main>
   );
 }

@@ -26,3 +26,4 @@ export async function DELETE(_request: Request, context: RouteContext) {
   const { productId } = await context.params;
   return NextResponse.json({ deleted: true, id: productId });
 }
+  
