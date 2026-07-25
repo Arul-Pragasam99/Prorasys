@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { StoreProduct, formatPrice } from '@/lib/store-data';
-import { gsap } from 'gsap';
-import { ShoppingBag, Heart, Eye, Star, Sparkles, TrendingUp, Clock } from 'lucide-react';
+import { StoreProduct } from '@/lib/store-data';
+import { ShoppingBag, Heart, Eye, Star, Sparkles } from 'lucide-react';
 
 interface ProductCardProps {
   product: StoreProduct & {
@@ -23,10 +22,6 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
   const { addToCart, addToWishlist, cart, wishlist } = useStore();
   const [isHovered, setIsHovered] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   const inCart = cart.some((item) => item.id === product.id);
   const inWishlist = wishlist.some((item) => item.id === product.id);
@@ -34,203 +29,134 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
   const rating = product.avgRating || product.rating || 4.0;
   const normalizedRating = Math.min(5, Math.max(0, rating));
 
-  useEffect(() => {
-    gsap.from(cardRef.current, {
-      opacity: 0,
-      y: 40,
-      duration: 0.6,
-      delay: index * 0.06,
-      ease: 'power3.out',
-    });
-  }, [index]);
-
-  useEffect(() => {
-    if (isHovered) {
-      gsap.to(imageRef.current, { scale: 1.05, duration: 0.4, ease: 'power2.out' });
-      gsap.to(contentRef.current, { y: -8, duration: 0.3, ease: 'power2.out' });
-      gsap.to(overlayRef.current, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-    } else {
-      gsap.to(imageRef.current, { scale: 1, duration: 0.4, ease: 'power2.out' });
-      gsap.to(contentRef.current, { y: 0, duration: 0.3, ease: 'power2.out' });
-      gsap.to(overlayRef.current, { opacity: 0, duration: 0.3, ease: 'power2.out' });
-    }
-  }, [isHovered]);
-
-  const handleAddToCart = () => {
-    addToCart(product);
-    setIsAdded(true);
-    gsap.from(cardRef.current, { 
-      scale: 0.95, 
-      duration: 0.3, 
-      ease: 'back.out(1.7)' 
-    });
-    setTimeout(() => setIsAdded(false), 2000);
-  };
-
   const renderStars = () => {
     const stars = [];
     const full = Math.floor(normalizedRating);
-    const half = normalizedRating % 1 >= 0.5;
     for (let i = 0; i < 5; i++) {
-      if (i < full) {
-        stars.push(<Star key={i} className="w-3.5 h-3.5 text-warning fill-warning" />);
-      } else if (i === full && half) {
-        stars.push(<Star key={i} className="w-3.5 h-3.5 text-warning fill-warning" />);
-      } else {
-        stars.push(<Star key={i} className="w-3.5 h-3.5 text-border" />);
-      }
+      stars.push(
+        <Star 
+          key={i} 
+          className={`w-3.5 h-3.5 ${i < full ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} 
+        />
+      );
     }
     return stars;
   };
 
-  const getTrustColor = (level?: string) => {
-    switch (level?.toLowerCase()) {
-      case 'high': return 'bg-success/15 text-success border-success/30';
-      case 'medium': return 'bg-warning/15 text-warning border-warning/30';
-      case 'low': return 'bg-danger/15 text-danger border-danger/30';
-      default: return 'bg-card text-text-secondary border-border';
-    }
+  const handleAddToCart = () => {
+    addToCart(product);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const getProductEmoji = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('headphone') || lower.includes('earbud')) return '🎧';
+    if (lower.includes('watch')) return '⌚';
+    if (lower.includes('monitor') || lower.includes('display')) return '🖥️';
+    if (lower.includes('speaker')) return '🔊';
+    if (lower.includes('laptop')) return '💻';
+    if (lower.includes('charger') || lower.includes('battery')) return '🔋';
+    if (lower.includes('phone')) return '📱';
+    if (lower.includes('camera')) return '📷';
+    if (lower.includes('printer')) return '🖨️';
+    if (lower.includes('tablet')) return '📱';
+    if (lower.includes('tv')) return '📺';
+    if (lower.includes('coffee')) return '☕';
+    if (lower.includes('book')) return '📚';
+    if (lower.includes('yoga') || lower.includes('fitness')) return '🧘';
+    return '📦';
+  };
+
+  const getGradient = (name: string) => {
+    const gradients = [
+      'from-blue-500 to-cyan-400',
+      'from-purple-500 to-pink-400',
+      'from-emerald-500 to-teal-400',
+      'from-orange-500 to-red-400',
+      'from-indigo-500 to-blue-400',
+      'from-rose-500 to-pink-400',
+    ];
+    return gradients[name.length % gradients.length];
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
     <div
-      ref={cardRef}
-      className="group relative bg-card rounded-theme-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* AI Badge */}
-      {showAI && aiScore > 0 && (
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-lg animate-fade-in">
-          <Sparkles className="w-3 h-3" />
-          {Math.round(aiScore * 100)}% match
-        </div>
-      )}
-
-      {/* Trust Badge */}
-      {product.trustLevel && (
-        <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-full text-xs font-medium border backdrop-blur-sm ${getTrustColor(product.trustLevel)}`}>
-          {product.trustLevel === 'high' ? '⭐ High Trust' : product.trustLevel === 'medium' ? '📊 Medium' : '⚠️ Low Trust'}
-        </div>
-      )}
-
-      {/* Image Container */}
-      <div ref={imageRef} className="relative overflow-hidden bg-surface aspect-square">
-        <div className="absolute inset-0 flex items-center justify-center text-6xl bg-gradient-to-br from-surface to-card">
-          {product.image || '📦'}
-        </div>
+      {/* Image Section */}
+      <div className={`relative overflow-hidden bg-gradient-to-br ${getGradient(product.name)} aspect-square flex items-center justify-center text-6xl`}>
+        <span className="text-7xl">{getProductEmoji(product.name)}</span>
         
-        {/* Overlay */}
-        <div 
-          ref={overlayRef}
-          className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center gap-3 opacity-0 transition-opacity duration-300"
-        >
-          <Link
-            href={`/products/${product.id}`}
-            className="p-3 bg-white rounded-full hover:bg-primary hover:text-white transition-all duration-200 hover:scale-110 shadow-lg"
-          >
+        {showAI && aiScore > 0 && (
+          <div className="absolute top-3 right-3 bg-blue-600 text-white px-2.5 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            {Math.round(aiScore * 100)}%
+          </div>
+        )}
+
+        <div className={`absolute inset-0 bg-black/50 flex items-center justify-center gap-3 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+          <Link href={`/products/${product.id}`} className="p-3 bg-white rounded-full hover:bg-blue-600 hover:text-white transition-all hover:scale-110 shadow-lg">
             <Eye className="w-5 h-5" />
           </Link>
-          <button
-            onClick={handleAddToCart}
-            className="p-3 bg-white rounded-full hover:bg-primary hover:text-white transition-all duration-200 hover:scale-110 shadow-lg"
-          >
+          <button onClick={handleAddToCart} className="p-3 bg-white rounded-full hover:bg-blue-600 hover:text-white transition-all hover:scale-110 shadow-lg">
             <ShoppingBag className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Rating & Quick Info */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 bg-surface/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
-            {renderStars()}
-            <span className="ml-1 text-text-secondary font-semibold">{normalizedRating.toFixed(1)}</span>
-          </div>
-          {product.reviewCount && (
-            <div className="bg-surface/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-medium text-text-secondary shadow-lg">
-              {product.reviewCount} reviews
-            </div>
-          )}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-2.5 py-1.5 rounded-full text-xs font-medium shadow-lg">
+          {renderStars()}
+          <span className="ml-1 text-gray-700 dark:text-gray-300">{normalizedRating.toFixed(1)}</span>
         </div>
       </div>
 
       {/* Content */}
-      <div ref={contentRef} className="p-4 sm:p-5">
+      <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <Link href={`/products/${product.id}`}>
-              <h3 className="font-semibold text-text-primary hover:text-primary transition-colors line-clamp-1 text-base sm:text-lg">
+              <h3 className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1">
                 {product.name}
               </h3>
             </Link>
-            <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
-              {product.category || 'General'}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{product.category}</p>
           </div>
-          <div className="text-right flex-shrink-0">
-            <p className="text-lg sm:text-xl font-bold text-primary">
-              {formatPrice(product.price || 0)}
-            </p>
-          </div>
+          <p className="text-lg font-bold text-blue-600 dark:text-blue-400 flex-shrink-0">
+            {formatPrice(product.price || 0)}
+          </p>
         </div>
 
-        <p className="text-sm text-text-secondary mt-2 line-clamp-2 leading-relaxed">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
           {product.description}
         </p>
 
-        {/* Trust Score Bar */}
-        {product.combinedScore !== undefined && (
-          <div className="flex items-center gap-2 mt-3">
-            <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-              <div 
-                className={`h-full rounded-full transition-all duration-1000 ${
-                  product.combinedScore > 7 ? 'bg-success' :
-                  product.combinedScore > 5 ? 'bg-warning' : 'bg-danger'
-                }`}
-                style={{ width: `${Math.min(100, product.combinedScore * 10)}%` }}
-              />
-            </div>
-            <span className="text-xs font-medium text-text-secondary">
-              {product.combinedScore.toFixed(1)}/10
-            </span>
-          </div>
-        )}
-
-        {/* Feature Tags */}
         {product.featureScores && Object.keys(product.featureScores).length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {Object.entries(product.featureScores)
-              .slice(0, 3)
-              .map(([name, score]) => {
-                const numScore = typeof score === 'number' ? score : 0.5;
-                return (
-                  <span 
-                    key={name} 
-                    className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium ${
-                      numScore > 0.7 ? 'bg-success/10 text-success' :
-                      numScore > 0.4 ? 'bg-warning/10 text-warning' :
-                      'bg-danger/10 text-danger'
-                    }`}
-                  >
-                    {name}: {Math.round(numScore * 100)}%
-                  </span>
-                );
-              })}
-            {Object.keys(product.featureScores).length > 3 && (
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-card border border-border text-text-secondary">
-                +{Object.keys(product.featureScores).length - 3} more
+            {Object.entries(product.featureScores).slice(0, 3).map(([name, score]) => (
+              <span key={name} className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
+                {name}: {Math.round((score || 0) * 100)}%
               </span>
-            )}
+            ))}
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/50">
+        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
           <button
             onClick={handleAddToCart}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-theme text-sm font-medium transition-all duration-200 hover:scale-105 ${
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
               inCart || isAdded
-                ? 'bg-success/15 text-success border border-success/30'
-                : 'bg-primary text-white hover:bg-primary-light shadow-lg shadow-primary/20'
+                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -238,20 +164,14 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
           </button>
           <button
             onClick={() => addToWishlist(product)}
-            className={`p-2.5 rounded-theme border-2 transition-all duration-200 hover:scale-110 ${
+            className={`p-2.5 rounded-lg border-2 transition-all ${
               inWishlist 
-                ? 'border-accent bg-accent/10 text-accent' 
-                : 'border-border hover:border-primary hover:text-primary'
+                ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-900/20' 
+                : 'border-gray-300 dark:border-gray-600 hover:border-blue-500'
             }`}
           >
-            <Heart className={`w-4 h-4 ${inWishlist ? 'fill-accent' : ''}`} />
+            <Heart className={`w-4 h-4 ${inWishlist ? 'fill-red-500' : ''}`} />
           </button>
-          <Link 
-            href={`/products/${product.id}`} 
-            className="px-4 py-2.5 rounded-theme border-2 border-border text-sm font-medium text-text-secondary hover:bg-card hover:border-primary transition-all duration-200"
-          >
-            Details
-          </Link>
         </div>
       </div>
     </div>
