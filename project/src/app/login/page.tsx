@@ -36,7 +36,9 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (isAuthenticated && user) router.push(redirect);
+    if (isAuthenticated && user) {
+      router.push(redirect);
+    }
   }, [isAuthenticated, user, router, redirect]);
 
   useEffect(() => {
@@ -115,13 +117,14 @@ export default function LoginPage() {
     { icon: Sparkles, text: 'AI recommendations' },
   ];
 
-  const showGoogleLogin = !isLogin || (isLogin && formData.role === 'customer');
+  // Show Google login for customers only (both login and signup)
+  const showGoogleLogin = formData.role === 'customer';
 
   return (
     <main className="min-h-screen bg-surface text-text-primary">
       <Header />
-      <section ref={sectionRef} className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-16 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+      <section ref={sectionRef} className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
+        <div className="pt-20 lg:pt-24 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           <div ref={leftRef} className="space-y-6">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
@@ -305,11 +308,6 @@ export default function LoginPage() {
                       </span>
                     </button>
                   </>
-                )}
-                {formData.role === 'admin' && (
-                  <div className="p-3 bg-warning/10 border border-warning/20 rounded-theme">
-                    <p className="text-xs text-warning">🔒 Admin accounts cannot use Google login. Use email and password.</p>
-                  </div>
                 )}
               </form>
             </div>

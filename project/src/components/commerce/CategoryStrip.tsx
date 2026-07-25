@@ -20,22 +20,19 @@ export function CategoryStrip() {
   const stripRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(stripRef.current?.children || [], {
-        scrollTrigger: {
-          trigger: stripRef.current,
-          start: 'top 90%',
-          toggleActions: 'play none none reverse',
-        },
-        opacity: 0,
-        y: 30,
+    const items = stripRef.current?.children;
+    if (items) {
+      gsap.set(items, { opacity: 0, y: 20 });
+      
+      gsap.to(items, {
+        opacity: 1,
+        y: 0,
         duration: 0.5,
         stagger: 0.06,
         ease: 'power2.out',
+        delay: 0.6,
       });
-    }, stripRef);
-
-    return () => ctx.revert();
+    }
   }, []);
 
   return (

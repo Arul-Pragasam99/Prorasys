@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const AI_SERVICE_URL = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'http://localhost:8000';
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,12 +12,16 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
+    if (!response.ok) {
+      throw new Error(`AI service returned ${response.status}`);
+    }
+
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error('AI recommendations error:', error);
     return NextResponse.json(
-      { error: 'AI service unavailable' },
+      { error: 'AI service unavailable', recommendations: [] },
       { status: 503 }
     );
   }

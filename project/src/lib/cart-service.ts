@@ -22,21 +22,25 @@ export async function loadCartSnapshot(uid: string): Promise<CartSnapshot> {
 export async function addToCartPersistence(uid: string, product: StoreProduct) {
   const ref = doc(db, 'carts', uid);
   const current = await loadCartSnapshot(uid);
-  await setDoc(ref, { cart: [...current.cart.filter((item) => item.id !== product.id), product], wishlist: current.wishlist }, { merge: true });
+  const newCart = [...current.cart.filter((item) => item.id !== product.id), product];
+  await setDoc(ref, { cart: newCart, wishlist: current.wishlist }, { merge: true });
 }
 
 export async function removeFromCartPersistence(uid: string, productId: string) {
   const current = await loadCartSnapshot(uid);
-  await setDoc(doc(db, 'carts', uid), { cart: current.cart.filter((item) => item.id !== productId), wishlist: current.wishlist }, { merge: true });
+  const newCart = current.cart.filter((item) => item.id !== productId);
+  await setDoc(doc(db, 'carts', uid), { cart: newCart, wishlist: current.wishlist }, { merge: true });
 }
 
 export async function addToWishlistPersistence(uid: string, product: StoreProduct) {
   const ref = doc(db, 'carts', uid);
   const current = await loadCartSnapshot(uid);
-  await setDoc(ref, { cart: current.cart, wishlist: [...current.wishlist.filter((item) => item.id !== product.id), product] }, { merge: true });
+  const newWishlist = [...current.wishlist.filter((item) => item.id !== product.id), product];
+  await setDoc(ref, { cart: current.cart, wishlist: newWishlist }, { merge: true });
 }
 
 export async function removeFromWishlistPersistence(uid: string, productId: string) {
   const current = await loadCartSnapshot(uid);
-  await setDoc(doc(db, 'carts', uid), { cart: current.cart, wishlist: current.wishlist.filter((item) => item.id !== productId) }, { merge: true });
+  const newWishlist = current.wishlist.filter((item) => item.id !== productId);
+  await setDoc(doc(db, 'carts', uid), { cart: current.cart, wishlist: newWishlist }, { merge: true });
 }

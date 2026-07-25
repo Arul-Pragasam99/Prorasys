@@ -12,82 +12,113 @@ export function HeroSection() {
   const ctaRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const floatingRef = useRef<HTMLDivElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Main timeline
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      
-      tl.from(heroRef.current, { opacity: 0, duration: 0.8 })
-        .from(titleRef.current, { 
-          opacity: 0, 
-          y: 60, 
-          duration: 1.2, 
-          ease: 'back.out(1.7)' 
-        }, '-=0.4')
-        .from(subtitleRef.current, { 
-          opacity: 0, 
-          y: 30, 
-          duration: 0.8 
-        }, '-=0.6')
-        .from(ctaRef.current, { 
-          opacity: 0, 
-          y: 20, 
-          duration: 0.6 
-        }, '-=0.4')
-        .from(statsRef.current?.children || [], {
-          opacity: 0,
-          y: 30,
-          duration: 0.6,
-          stagger: 0.12,
-        }, '-=0.3');
+    // Set initial states
+    gsap.set(titleRef.current, { opacity: 0, y: 60 });
+    gsap.set(subtitleRef.current, { opacity: 0, y: 40 });
+    gsap.set(ctaRef.current, { opacity: 0, y: 30 });
+    gsap.set(statsRef.current?.children || [], { opacity: 0, y: 30 });
+    gsap.set(badgeRef.current, { opacity: 0, scale: 0.9 });
 
-      // Floating animation
-      gsap.to(floatingRef.current, {
-        y: 20,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
+    // Main timeline
+    const tl = gsap.timeline({ 
+      defaults: { ease: 'power3.out' },
+      delay: 0.2,
+    });
+
+    // Animate badge first
+    tl.to(badgeRef.current, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: 'back.out(1.7)',
+    })
+    // Animate title with bounce effect
+    .to(titleRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 1,
+      ease: 'back.out(1.7)',
+    }, '-=0.2')
+    // Animate subtitle
+    .to(subtitleRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      ease: 'power2.out',
+    }, '-=0.5')
+    // Animate CTA buttons
+    .to(ctaRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      ease: 'power2.out',
+    }, '-=0.3')
+    // Animate stats with stagger
+    .to(statsRef.current?.children || [], {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      stagger: 0.15,
+      ease: 'back.out(1.4)',
+    }, '-=0.3');
+
+    // Floating animation for background elements
+    gsap.to(floatingRef.current, {
+      y: 20,
+      duration: 3,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut',
+    });
+
+    // Second floating element with different timing
+    const floatingElements = heroRef.current?.querySelectorAll('.floating-bg');
+    if (floatingElements) {
+      floatingElements.forEach((el, i) => {
+        gsap.to(el, {
+          y: i === 0 ? 25 : -20,
+          x: i === 0 ? 10 : -10,
+          duration: 4 + i * 1.5,
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.5,
+        });
       });
+    }
 
-      // Parallax effect
-      gsap.to(heroRef.current, {
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1,
-        },
-        y: -30,
-        opacity: 0.9,
-      });
-    }, heroRef);
-
-    return () => ctx.revert();
   }, []);
 
   return (
     <section 
       ref={heroRef} 
-      className="relative min-h-[90vh] flex items-center overflow-hidden"
+      className="relative min-h-[90vh] flex items-center overflow-hidden pt-16"
       style={{
-        background: 'radial-gradient(ellipse at 30% 50%, var(--color-primary)/5 0%, var(--color-surface) 70%)',
+        background: 'radial-gradient(ellipse at 30% 50%, rgba(15, 110, 86, 0.08) 0%, var(--color-surface) 70%)',
       }}
     >
-      {/* Floating elements */}
-      <div ref={floatingRef} className="absolute top-20 right-10 lg:right-20 opacity-30">
+      {/* Floating background elements */}
+      <div className="floating-bg absolute top-20 right-10 lg:right-20 opacity-30">
         <div className="w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
       </div>
-      <div className="absolute bottom-20 left-10 lg:left-20 opacity-20">
+      <div className="floating-bg absolute bottom-20 left-10 lg:left-20 opacity-20">
         <div className="w-80 h-80 rounded-full bg-secondary/10 blur-3xl" />
+      </div>
+      <div ref={floatingRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5">
+        <div className="w-96 h-96 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-0">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm animate-fade-in">
+            <div 
+              ref={badgeRef}
+              className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm opacity-0"
+            >
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-text-secondary">
                 AI-Powered Shopping Experience
