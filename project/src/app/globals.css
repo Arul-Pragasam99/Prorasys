@@ -117,7 +117,7 @@
   }
 }
 
-/* Smooth scroll */
+/* ✅ Smooth scroll - Keep this, but add data-scroll-behavior to html */
 html {
   scroll-behavior: smooth;
 }

@@ -11,7 +11,7 @@ export function AuthStatusCard() {
     <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
       <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Session</p>
       <h3 className="mt-2 text-xl font-semibold text-text-primary">
-        {isAuthenticated ? `Signed in as ${userRole}` : 'Guest mode'}
+        {isAuthenticated ? `Signed in as ${userRole}` : 'Not signed in'}
       </h3>
       {isAuthenticated && (
         <p className="text-sm text-text-secondary mt-1">Welcome, {displayName}!</p>

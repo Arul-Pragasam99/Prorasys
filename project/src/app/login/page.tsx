@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
-import { AuthStatusCard } from '@/components/commerce/AuthStatusCard';
 import { gsap } from 'gsap';
 import { Shield, Star, Users, Sparkles, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useStore } from '@/components/commerce/StoreProvider';
@@ -93,15 +92,12 @@ function LoginPageContent() {
         }
       }
     } catch (err: any) {
-      // ✅ Improved error handling with user-friendly messages
       if (err.code === 'auth/user-not-found') {
         setError('No account found with this email. Please sign up first.');
       } else if (err.code === 'auth/wrong-password') {
         setError('Incorrect password. Please try again or click "Forgot password".');
       } else if (err.code === 'auth/email-already-in-use') {
-        // ✅ Clear message suggesting to sign in instead
         setError('This email is already registered. Please sign in instead.');
-        // ✅ Optionally switch to login mode after a moment
         setTimeout(() => {
           setIsLogin(true);
           setFormData({ ...formData, password: '', confirmPassword: '' });
@@ -113,8 +109,6 @@ function LoginPageContent() {
         setError('Too many failed attempts. Please try again later or reset your password.');
       } else if (err.code === 'auth/weak-password') {
         setError('Password is too weak. Please use at least 6 characters.');
-      } else if (err.code === 'auth/network-request-failed') {
-        setError('Network error. Please check your internet connection.');
       } else {
         setError(err.message || 'Authentication failed. Please try again.');
       }
@@ -163,7 +157,6 @@ function LoginPageContent() {
       setShowForgotPassword(false);
     } catch (err: any) {
       if (err.code === 'auth/user-not-found') {
-        // ✅ Security best practice: don't reveal if email exists
         setResetMessage('If an account exists with this email, a reset link has been sent.');
         setShowForgotPassword(false);
       } else {
@@ -181,7 +174,6 @@ function LoginPageContent() {
     { icon: Sparkles, text: 'AI recommendations' },
   ];
 
-  // Show Google login for customers only
   const showGoogleLogin = formData.role === 'customer';
 
   return (
@@ -189,6 +181,7 @@ function LoginPageContent() {
       <Header />
       <section ref={sectionRef} className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
         <div className="pt-20 lg:pt-24 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Left Column - Info */}
           <div ref={leftRef} className="space-y-6">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
@@ -204,6 +197,7 @@ function LoginPageContent() {
                   : 'Start your journey with AI-powered recommendations.'}
               </p>
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               {features.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-2 p-3 bg-card rounded-theme border border-border hover:shadow-sm transition-all">
@@ -212,7 +206,9 @@ function LoginPageContent() {
                 </div>
               ))}
             </div>
-            <AuthStatusCard />
+
+            {/* ✅ Session Card Removed */}
+
             <div className="p-4 bg-card rounded-theme border border-border">
               <p className="text-sm text-text-secondary">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
@@ -233,6 +229,7 @@ function LoginPageContent() {
             </div>
           </div>
 
+          {/* Right Column - Login Form */}
           <div ref={rightRef} className="lg:sticky lg:top-24">
             <div className="bg-card rounded-theme-lg border border-border p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
