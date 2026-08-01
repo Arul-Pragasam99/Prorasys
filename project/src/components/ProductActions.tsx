@@ -62,7 +62,7 @@ export function ProductActions({ productId, product }: ProductActionsProps) {
         <button
           onClick={handleAddToCart}
           disabled={isAddingToCart}
-          className="flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 font-medium text-white hover:bg-slate-800 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-medium text-white hover:bg-primary-light transition-colors disabled:opacity-50"
         >
           {isAddingToCart ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -75,7 +75,7 @@ export function ProductActions({ productId, product }: ProductActionsProps) {
         <button
           onClick={handleAddToWishlist}
           disabled={isAddingToWishlist}
-          className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-3 font-medium text-text-primary hover:bg-card transition-colors disabled:opacity-50"
         >
           {isAddingToWishlist ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -87,15 +87,15 @@ export function ProductActions({ productId, product }: ProductActionsProps) {
       </div>
 
       {showSuccess && (
-        <div className="mt-3 flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+        <div className="mt-3 flex items-center gap-2 text-sm text-emerald-700 bg-emerald-100 border border-emerald-200 p-3 rounded-lg dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20">
           <Check className="w-4 h-4" />
           <span>Added to your {isAddingToCart ? 'cart' : 'wishlist'} successfully!</span>
         </div>
       )}
 
       {!user && (
-        <p className="mt-3 text-sm text-slate-500">
-          <Link href={`/login?redirect=/products/${productId}`} className="text-brand-600 hover:underline">
+        <p className="mt-3 text-sm text-text-secondary">
+          <Link href={`/login?redirect=/products/${productId}`} className="text-primary hover:underline">
             Sign in
           </Link>
           {' '}to add items to your cart or wishlist

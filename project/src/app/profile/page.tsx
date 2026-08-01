@@ -53,34 +53,34 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50">
+      <main className="min-h-screen bg-surface text-text-primary">
         <Header />
         <div className="flex justify-center items-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-surface text-text-primary">
       <Header />
       
       <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-16">
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <div className="bg-card rounded-3xl border border-border p-6 sm:p-8 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-brand-50 rounded-2xl">
-                <User className="w-6 h-6 text-brand-600" />
+              <div className="p-3 bg-primary/10 rounded-2xl">
+                <User className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
-                <p className="text-sm text-slate-500">Manage your account settings</p>
+                <h1 className="text-2xl font-bold text-text-primary">My Profile</h1>
+                <p className="text-sm text-text-secondary">Manage your account settings</p>
               </div>
             </div>
             <button
               onClick={() => setEditing(!editing)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
             >
               {editing ? 'Cancel' : <><Edit2 className="w-4 h-4" /> Edit Profile</>}
             </button>
@@ -89,8 +89,8 @@ export default function ProfilePage() {
           {message && (
             <div className={`p-3 rounded-lg mb-4 ${
               message.type === 'success' 
-                ? 'bg-green-50 text-green-700 border border-green-200' 
-                : 'bg-red-50 text-red-700 border border-red-200'
+                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20' 
+                : 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/20'
             }`}>
               {message.text}
             </div>
@@ -99,7 +99,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             {/* Display Name */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Display Name
               </label>
               {editing ? (
@@ -107,11 +107,11 @@ export default function ProfilePage() {
                   type="text"
                   value={formData.displayName}
                   onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                  className="w-full p-3 border border-border bg-surface text-text-primary rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
                 />
               ) : (
-                <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                  <User className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-2 p-3 bg-surface rounded-xl border border-border">
+                  <User className="w-4 h-4 text-text-secondary" />
                   <span>{formData.displayName || 'Not set'}</span>
                 </div>
               )}
@@ -119,25 +119,25 @@ export default function ProfilePage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Email Address
               </label>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                <Mail className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 p-3 bg-surface rounded-xl border border-border">
+                <Mail className="w-4 h-4 text-text-secondary" />
                 <span>{formData.email}</span>
               </div>
             </div>
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Account Type
               </label>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                <Shield className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 p-3 bg-surface rounded-xl border border-border">
+                <Shield className="w-4 h-4 text-text-secondary" />
                 <span className="capitalize">{user?.role || 'Customer'}</span>
                 {user?.role === 'admin' && (
-                  <span className="ml-2 px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full text-xs font-medium">
+                  <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
                     Admin
                   </span>
                 )}
@@ -146,11 +146,11 @@ export default function ProfilePage() {
 
             {/* Member Since */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 Member Since
               </label>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                <Calendar className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 p-3 bg-surface rounded-xl border border-border">
+                <Calendar className="w-4 h-4 text-text-secondary" />
                 <span>{new Date().toLocaleDateString('en-US', { 
                   year: 'numeric', 
                   month: 'long', 
@@ -163,7 +163,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary-light transition-colors disabled:opacity-50"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

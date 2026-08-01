@@ -110,13 +110,13 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
         <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center gap-3 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
           <Link
             href={`/products/${product.id}`}
-            className="p-3 bg-white rounded-full hover:bg-primary hover:text-white transition-all duration-200 hover:scale-110 shadow-lg"
+            className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all duration-200 hover:scale-110 shadow-lg"
           >
             <Eye className="w-5 h-5" />
           </Link>
           <button
             onClick={handleAddToCart}
-            className="p-3 bg-white rounded-full hover:bg-primary hover:text-white transition-all duration-200 hover:scale-110 shadow-lg"
+            className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all duration-200 hover:scale-110 shadow-lg"
           >
             <ShoppingBag className="w-5 h-5" />
           </button>

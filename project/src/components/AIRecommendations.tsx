@@ -22,12 +22,12 @@ export function AIRecommendations({ productId }: AIRecommendationsProps) {
 
   if (!user || loadingRecommendations) {
     return (
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Sparkles className="w-4 h-4" />
+      <div className="mt-8 p-4 bg-card border border-border rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
+          <Sparkles className="w-4 h-4 text-primary" />
           {loadingRecommendations ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
               <span>Finding personalized recommendations...</span>
             </>
           ) : (
@@ -45,9 +45,9 @@ export function AIRecommendations({ productId }: AIRecommendationsProps) {
   return (
     <div className="mt-8">
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-purple-500" />
-        <h3 className="font-semibold text-gray-800">AI Recommended for You</h3>
-        <span className="text-xs text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">Powered by AI</span>
+        <Sparkles className="w-5 h-5 text-primary" />
+        <h3 className="font-semibold text-text-primary">AI Recommended for You</h3>
+        <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">Powered by AI</span>
       </div>
       
       <div className="grid grid-cols-2 gap-3">
@@ -55,17 +55,17 @@ export function AIRecommendations({ productId }: AIRecommendationsProps) {
           <Link
             key={rec.id}
             href={`/products/${rec.id}`}
-            className="group p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all hover:border-purple-300"
+            className="group p-3 bg-surface border border-border rounded-lg hover:shadow-md transition-all hover:border-primary/50"
           >
-            <p className="font-medium text-sm group-hover:text-purple-600 transition-colors">
+            <p className="font-medium text-sm text-text-primary group-hover:text-primary transition-colors">
               {rec.name || 'Product'}
             </p>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-text-secondary">
                 ${rec.price?.toFixed(2) || 'N/A'}
               </span>
               {rec.recommendation_score && (
-                <span className="text-xs text-purple-600">
+                <span className="text-xs text-primary">
                   Match: {(rec.recommendation_score * 100).toFixed(0)}%
                 </span>
               )}

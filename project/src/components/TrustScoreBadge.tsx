@@ -92,7 +92,7 @@ export function TrustScoreBadge({
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2 bg-white/50 rounded-full mt-2 overflow-hidden">
+      <div className="w-full h-2 bg-surface/80 rounded-full mt-2 overflow-hidden border border-border/60">
         <div 
           ref={progressRef}
           className={`h-full rounded-full transition-colors ${
@@ -118,8 +118,8 @@ export function TrustScoreBadge({
       )}
 
       {showDetails && (
-        <div className="flex items-center gap-2 mt-1 text-xs text-gray-600">
-          <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+        <div className="flex items-center gap-2 mt-1 text-xs text-text-secondary">
+          <Star className="w-3 h-3 text-warning fill-warning" />
           <span>Based on real user sentiment</span>
         </div>
       )}

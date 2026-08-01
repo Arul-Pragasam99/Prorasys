@@ -21,6 +21,21 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const themeScript = `
+  (function() {
+    try {
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = stored ? stored === 'dark' : prefersDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    } catch (error) {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+    }
+  })();
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -29,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ThemeProvider>
           <StoreProvider>
             {children}

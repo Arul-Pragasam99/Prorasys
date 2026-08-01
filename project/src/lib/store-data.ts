@@ -33,8 +33,9 @@ export type StoreContextValue = {
   cart: CartItem[];
   wishlist: StoreProduct[];
   isAuthenticated: boolean;
-  isLoading: boolean;  // ✅ Add this
+  isLoading: boolean;
   userRole: string;
+  login: (email: string, password: string) => Promise<any>;
   addToCart: (product: StoreProduct) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;

@@ -17,13 +17,13 @@ export function ReviewCard({ review }: ReviewCardProps) {
     const sentiment = label?.toLowerCase() || 'neutral';
     switch (sentiment) {
       case 'positive':
-        return { emoji: '😊', color: 'text-green-600 bg-green-50 border-green-200', label: 'Positive' };
+        return { emoji: '😊', color: 'text-success bg-success/10 border-success/30', label: 'Positive' };
       case 'negative':
-        return { emoji: '😞', color: 'text-red-600 bg-red-50 border-red-200', label: 'Negative' };
+        return { emoji: '😞', color: 'text-danger bg-danger/10 border-danger/30', label: 'Negative' };
       case 'neutral':
-        return { emoji: '😐', color: 'text-gray-600 bg-gray-50 border-gray-200', label: 'Neutral' };
+        return { emoji: '😐', color: 'text-text-secondary bg-card border-border', label: 'Neutral' };
       default:
-        return { emoji: '🤔', color: 'text-gray-600 bg-gray-50 border-gray-200', label: 'Unknown' };
+        return { emoji: '🤔', color: 'text-text-secondary bg-card border-border', label: 'Unknown' };
     }
   };
 
@@ -48,7 +48,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
       <Star
         key={i}
         className={`w-4 h-4 ${
-          i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+          i < rating ? 'text-warning fill-warning' : 'text-border'
         }`}
       />
     ));
@@ -74,14 +74,14 @@ export function ReviewCard({ review }: ReviewCardProps) {
 
   return (
     <div className={`rounded-2xl border p-5 transition-all hover:shadow-md ${
-      review.isFlagged ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'
+      review.isFlagged ? 'border-red-200 bg-red-50 dark:border-red-500/30 dark:bg-red-500/10' : 'border-border bg-surface'
     }`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <p className="font-semibold text-slate-900">{review.userName}</p>
+            <p className="font-semibold text-text-primary">{review.userName}</p>
             {review.isFlagged && (
-              <span className="flex items-center gap-1 text-xs text-red-600">
+              <span className="flex items-center gap-1 text-xs text-red-600 dark:text-red-300">
                 <Flag className="w-3 h-3" />
                 Flagged
               </span>
@@ -89,7 +89,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </div>
           <div className="flex items-center gap-2 mt-1">
             <div className="flex">{renderStars(review.starRating)}</div>
-            <span className="text-sm text-slate-500">({review.starRating}/5)</span>
+            <span className="text-sm text-text-secondary">({review.starRating}/5)</span>
           </div>
         </div>
         
@@ -99,24 +99,24 @@ export function ReviewCard({ review }: ReviewCardProps) {
         </div>
       </div>
 
-      <p className={`mt-3 text-sm text-slate-700 ${!isExpanded && review.text.length > 200 ? 'line-clamp-3' : ''}`}>
+      <p className={`mt-3 text-sm text-text-secondary ${!isExpanded && review.text.length > 200 ? 'line-clamp-3' : ''}`}>
         {review.text}
       </p>
       
       {review.text.length > 200 && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-1 text-sm text-brand-600 hover:underline"
+          className="mt-1 text-sm text-primary hover:underline"
         >
           {isExpanded ? 'Show less' : 'Show more'}
         </button>
       )}
 
       {review.sentimentScore !== undefined && (
-        <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+        <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-text-secondary">
           <div className="flex items-center gap-1">
             <span>🤖 AI Trust:</span>
-            <span className="font-medium">
+            <span className="font-medium text-text-primary">
               {(review.sentimentScore * 100).toFixed(0)}%
             </span>
           </div>
@@ -139,10 +139,10 @@ export function ReviewCard({ review }: ReviewCardProps) {
         <button
           onClick={handleHelpfulClick}
           className={`flex items-center gap-1 text-xs transition-colors ${
-            isHelpful ? 'text-brand-600' : 'text-slate-500 hover:text-brand-600'
+            isHelpful ? 'text-primary' : 'text-text-secondary hover:text-primary'
           }`}
         >
-          <ThumbsUp className={`w-4 h-4 ${isHelpful ? 'fill-brand-600' : ''}`} />
+          <ThumbsUp className={`w-4 h-4 ${isHelpful ? 'fill-primary' : ''}`} />
           <span>Helpful</span>
           {helpfulCount > 0 && <span className="text-xs">({helpfulCount})</span>}
         </button>
@@ -150,7 +150,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
         {review.isFlagged && review.flagReasons && review.flagReasons.length > 0 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-xs text-red-500 hover:text-red-700"
+            className="text-xs text-red-500 hover:text-red-700 dark:text-red-300"
           >
             ⚠️ View flags
           </button>
@@ -158,9 +158,9 @@ export function ReviewCard({ review }: ReviewCardProps) {
       </div>
 
       {isExpanded && review.isFlagged && review.flagReasons && (
-        <div className="mt-3 p-3 bg-red-100 rounded-lg">
-          <p className="text-xs font-medium text-red-700">Flagged for:</p>
-          <ul className="mt-1 list-disc pl-4 text-xs text-red-600">
+        <div className="mt-3 p-3 bg-red-100 dark:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20">
+          <p className="text-xs font-medium text-red-700 dark:text-red-300">Flagged for:</p>
+          <ul className="mt-1 list-disc pl-4 text-xs text-red-600 dark:text-red-200">
             {review.flagReasons.map((reason, index) => (
               <li key={index}>{reason}</li>
             ))}

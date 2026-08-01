@@ -39,7 +39,7 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
       stars.push(
         <Star 
           key={i} 
-          className={`w-3.5 h-3.5 ${i < full ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} 
+          className={`w-3.5 h-3.5 ${i < full ? 'text-warning fill-warning' : 'text-border'}`} 
         />
       );
     }
@@ -98,7 +98,7 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
   return (
     <div
       ref={cardRef}
-      className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -113,17 +113,17 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
         )}
 
         <div className={`absolute inset-0 bg-black/50 flex items-center justify-center gap-3 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <Link href={`/products/${product.id}`} className="p-3 bg-white rounded-full hover:bg-blue-600 hover:text-white transition-all hover:scale-110 shadow-lg">
+          <Link href={`/products/${product.id}`} className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg">
             <Eye className="w-5 h-5" />
           </Link>
-          <button onClick={handleAddToCart} className="p-3 bg-white rounded-full hover:bg-blue-600 hover:text-white transition-all hover:scale-110 shadow-lg">
+          <button onClick={handleAddToCart} className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg">
             <ShoppingBag className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-2.5 py-1.5 rounded-full text-xs font-medium shadow-lg">
+        <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-surface/90 backdrop-blur px-2.5 py-1.5 rounded-full text-xs font-medium shadow-lg">
           {renderStars()}
-          <span className="ml-1 text-gray-700 dark:text-gray-300">{normalizedRating.toFixed(1)}</span>
+          <span className="ml-1 text-text-secondary">{normalizedRating.toFixed(1)}</span>
         </div>
       </div>
 
@@ -131,48 +131,48 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <Link href={`/products/${product.id}`}>
-              <h3 className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1">
+              <h3 className="font-semibold text-text-primary hover:text-primary transition-colors line-clamp-1">
                 {product.name}
               </h3>
             </Link>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{product.category}</p>
+            <p className="text-sm text-text-secondary mt-0.5">{product.category}</p>
           </div>
-          <p className="text-lg font-bold text-blue-600 dark:text-blue-400 flex-shrink-0">
+          <p className="text-lg font-bold text-primary flex-shrink-0">
             {formatPrice(product.price || 0)}
           </p>
         </div>
 
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+        <p className="text-sm text-text-secondary mt-2 line-clamp-2">
           {product.description}
         </p>
 
         {product.featureScores && Object.keys(product.featureScores).length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {Object.entries(product.featureScores).slice(0, 3).map(([name, score]) => (
-              <span key={name} className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
+              <span key={name} className="text-[10px] px-2 py-0.5 bg-card text-text-secondary rounded-full border border-border">
                 {name}: {Math.round((score || 0) * 100)}%
               </span>
             ))}
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/80">
           {inCart ? (
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <div className="flex items-center gap-2 bg-card rounded-lg p-1 border border-border">
               <button
                 onClick={handleDecrement}
-                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-surface rounded-lg transition-colors"
               >
-                <Minus className="w-4 h-4" />
+                <Minus className="w-4 h-4 text-text-secondary" />
               </button>
-              <span className="w-6 text-center text-sm font-medium text-gray-900 dark:text-white">
+              <span className="w-6 text-center text-sm font-medium text-text-primary">
                 {quantity}
               </span>
               <button
                 onClick={handleIncrement}
-                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-surface rounded-lg transition-colors"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 text-text-secondary" />
               </button>
             </div>
           ) : (
@@ -180,8 +180,8 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
               onClick={handleAddToCart}
               className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isAdded
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-success/15 text-success border border-success/30'
+                  : 'bg-primary text-white hover:bg-primary-light'
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
@@ -192,11 +192,11 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
             onClick={() => addToWishlist(product)}
             className={`p-2.5 rounded-lg border-2 transition-all ${
               inWishlist 
-                ? 'border-red-500 bg-red-50 text-red-500 dark:bg-red-900/20' 
-                : 'border-gray-300 dark:border-gray-600 hover:border-blue-500'
+                ? 'border-accent bg-accent/10 text-accent' 
+                : 'border-border hover:border-primary hover:text-primary'
             }`}
           >
-            <Heart className={`w-4 h-4 ${inWishlist ? 'fill-red-500' : ''}`} />
+            <Heart className={`w-4 h-4 ${inWishlist ? 'fill-accent' : ''}`} />
           </button>
         </div>
       </div>

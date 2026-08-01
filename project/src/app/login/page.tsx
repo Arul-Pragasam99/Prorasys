@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { AuthStatusCard } from '@/components/commerce/AuthStatusCard';
@@ -10,6 +10,14 @@ import { useStore } from '@/components/commerce/StoreProvider';
 import { loginUser, registerUser, loginWithGoogle } from '@/lib/auth-service';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-surface text-text-primary"><Header /><div className="mx-auto max-w-7xl px-4 py-12 text-text-secondary">Loading...</div></main>}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';

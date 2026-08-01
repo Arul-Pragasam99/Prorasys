@@ -81,40 +81,40 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const getTrustColor = (level?: string) => {
     switch (level?.toLowerCase()) {
-      case 'high': return 'text-green-600 bg-green-50 border-green-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'critical': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'high': return 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/20';
+      case 'medium': return 'text-yellow-700 bg-yellow-50 border-yellow-200 dark:text-yellow-300 dark:bg-yellow-500/10 dark:border-yellow-500/20';
+      case 'low': return 'text-orange-700 bg-orange-50 border-orange-200 dark:text-orange-300 dark:bg-orange-500/10 dark:border-orange-500/20';
+      case 'critical': return 'text-red-700 bg-red-50 border-red-200 dark:text-red-300 dark:bg-red-500/10 dark:border-red-500/20';
+      default: return 'text-text-secondary bg-card border-border';
     }
   };
 
   const storeProduct = toStoreProduct(product);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-surface text-text-primary">
       <Header />
       <section className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-        <Link href="/products" className="text-sm font-medium text-brand-700 hover:underline">
+        <Link href="/products" className="text-sm font-medium text-primary hover:underline">
           ← Back to products
         </Link>
         
         <div className="mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">
+          <div className="rounded-3xl border border-border bg-card p-8 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">
               Product detail
             </p>
             
-            <h1 className="mt-3 text-3xl font-semibold">{product.name}</h1>
+            <h1 className="mt-3 text-3xl font-semibold text-text-primary">{product.name}</h1>
             
-            <p className="mt-4 text-slate-600">{product.description}</p>
+            <p className="mt-4 text-text-secondary">{product.description}</p>
             
             <div className="mt-6 flex flex-wrap gap-3">
               <TrustScoreBadge score={product.combinedScore || 0} />
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+              <span className="rounded-full bg-surface px-3 py-1 text-sm font-medium text-text-primary border border-border">
                 ⭐ {product.rating?.toFixed(1) || 'N/A'} / 5
               </span>
-              <span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                 ${product.price?.toFixed(2)}
               </span>
               {product.trustLevel && (
@@ -123,7 +123,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </span>
               )}
               {product.reviewCount !== undefined && (
-                <span className="rounded-full bg-purple-50 px-3 py-1 text-sm font-medium text-purple-700">
+                <span className="rounded-full bg-secondary/10 px-3 py-1 text-sm font-medium text-secondary">
                   📝 {product.reviewCount} reviews
                 </span>
               )}
@@ -132,9 +132,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {product.featureScores && Object.keys(product.featureScores).length > 0 && (
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
                 {Object.entries(product.featureScores).map(([name, score]) => (
-                  <div key={name} className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm text-slate-500 capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</p>
-                    <p className="mt-2 text-xl font-semibold">{score.toFixed(1)}</p>
+                  <div key={name} className="rounded-2xl bg-surface border border-border p-4">
+                    <p className="text-sm text-text-secondary capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</p>
+                    <p className="mt-2 text-xl font-semibold text-text-primary">{score.toFixed(1)}</p>
                   </div>
                 ))}
               </div>
@@ -145,14 +145,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Customer Reviews</h2>
-                <span className="text-sm text-slate-500">{productReviews.length} reviews</span>
+                <h2 className="text-xl font-semibold text-text-primary">Customer Reviews</h2>
+                <span className="text-sm text-text-secondary">{productReviews.length} reviews</span>
               </div>
               
               {productReviews.length === 0 ? (
-                <div className="mt-4 text-center py-8 text-slate-500">
+                <div className="mt-4 text-center py-8 text-text-secondary">
                   <p>No reviews yet</p>
                   <p className="text-sm mt-2">Be the first to review this product!</p>
                 </div>

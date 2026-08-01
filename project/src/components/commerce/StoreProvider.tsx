@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { AuthUser, observeAuthState } from '@/lib/auth-service';
+import { AuthUser, observeAuthState, loginUser, logoutUser } from '@/lib/auth-service';
 import { 
   loadCartSnapshot, 
   saveCartSnapshot, 
@@ -136,9 +136,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const login = async (email: string, password: string) => {
+    try {
+      const result = await loginUser(email, password);
+      if (result) {
+        setUser({
+          uid: result.uid,
+          email: result.email,
+          role: result.role,
+          displayName: result.displayName,
+          photoURL: 'photoURL' in result ? result.photoURL : undefined,
+          emailVerified: result.emailVerified,
+        });
+        setIsAuthenticated(true);
+        setUserRole(result.role || 'customer');
+      }
+      return result;
+    } catch (error) {
+      console.error('Store login error:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     setUser(null);
     setIsAuthenticated(false);
+    setUserRole('customer');
     setCart([]);
     setWishlist([]);
     setAiRecommendations([]);
@@ -149,8 +177,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     cart,
     wishlist,
     isAuthenticated,
-    isLoading,  // ✅ Add this
+    isLoading,
     userRole,
+    login,
     addToCart,
     removeFromCart,
     updateCartQuantity,

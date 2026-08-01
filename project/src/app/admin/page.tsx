@@ -70,10 +70,10 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50">
+      <main className="min-h-screen bg-surface text-text-primary">
         <Header />
         <div className="flex justify-center items-center min-h-[400px]">
-          <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </main>
     );
@@ -84,26 +84,26 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden">
+    <main className="min-h-screen bg-surface text-text-primary overflow-x-hidden">
       <Header />
       
       <section ref={sectionRef} className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-16 lg:px-8">
         {/* Header */}
         <div ref={headerRef} className="mb-8">
           <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-brand-600" />
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">
+            <Shield className="w-6 h-6 text-primary" />
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">
               Admin Panel
             </p>
-            <span className="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium flex items-center gap-1">
+            <span className="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 rounded-full text-xs font-medium flex items-center gap-1">
               <CheckCircle className="w-3 h-3" />
               Verified
             </span>
           </div>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">
+          <h1 className="mt-2 text-3xl font-bold text-text-primary">
             Manage Products, Users, and Reviews
           </h1>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-text-secondary">
             Monitor and control your e-commerce platform with AI-powered insights.
             {user?.displayName && ` Welcome back, ${user.displayName}!`}
           </p>
@@ -114,16 +114,16 @@ export default function AdminPage() {
           {stats.map(({ icon: Icon, label, value, change, trend }) => (
             <div 
               key={label}
-              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+              className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-brand-50 rounded-lg">
-                  <Icon className="w-4 h-4 text-brand-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Icon className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">{label}</p>
-                  <p className="text-lg font-bold text-slate-900">{value}</p>
-                  <p className={`text-xs ${trend === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <p className="text-xs text-text-secondary uppercase tracking-wider">{label}</p>
+                  <p className="text-lg font-bold text-text-primary">{value}</p>
+                  <p className={`text-xs ${trend === 'up' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                     {trend === 'up' ? '↑' : '↓'} {change}
                   </p>
                 </div>
@@ -142,25 +142,25 @@ export default function AdminPage() {
 
         {/* Quick Actions */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button className="p-4 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-all hover:-translate-y-1 text-left">
-            <Package className="w-5 h-5 text-brand-600 mb-2" />
-            <h3 className="font-medium text-slate-900">Add Product</h3>
-            <p className="text-xs text-slate-500">Create a new product listing</p>
+          <button className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-left">
+            <Package className="w-5 h-5 text-primary mb-2" />
+            <h3 className="font-medium text-text-primary">Add Product</h3>
+            <p className="text-xs text-text-secondary">Create a new product listing</p>
           </button>
-          <button className="p-4 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-all hover:-translate-y-1 text-left">
-            <Users className="w-5 h-5 text-blue-600 mb-2" />
-            <h3 className="font-medium text-slate-900">Manage Users</h3>
-            <p className="text-xs text-slate-500">View and manage user accounts</p>
+          <button className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-left">
+            <Users className="w-5 h-5 text-secondary mb-2" />
+            <h3 className="font-medium text-text-primary">Manage Users</h3>
+            <p className="text-xs text-text-secondary">View and manage user accounts</p>
           </button>
-          <button className="p-4 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-all hover:-translate-y-1 text-left">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 mb-2" />
-            <h3 className="font-medium text-slate-900">Review Moderation</h3>
-            <p className="text-xs text-slate-500">Moderate flagged reviews</p>
+          <button className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-left">
+            <AlertTriangle className="w-5 h-5 text-warning mb-2" />
+            <h3 className="font-medium text-text-primary">Review Moderation</h3>
+            <p className="text-xs text-text-secondary">Moderate flagged reviews</p>
           </button>
-          <button className="p-4 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-all hover:-translate-y-1 text-left">
-            <TrendingUp className="w-5 h-5 text-purple-600 mb-2" />
-            <h3 className="font-medium text-slate-900">AI Analytics</h3>
-            <p className="text-xs text-slate-500">View AI insights and trends</p>
+          <button className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-left">
+            <TrendingUp className="w-5 h-5 text-accent mb-2" />
+            <h3 className="font-medium text-text-primary">AI Analytics</h3>
+            <p className="text-xs text-text-secondary">View AI insights and trends</p>
           </button>
         </div>
       </section>
