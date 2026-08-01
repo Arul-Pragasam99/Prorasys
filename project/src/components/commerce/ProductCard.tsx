@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/components/commerce/StoreProvider';
 import { StoreProduct } from '@/lib/store-data';
-import { ShoppingBag, Heart, Eye, Star, Sparkles } from 'lucide-react';
+import { ShoppingBag, Heart, Eye, Star, Sparkles, Plus, Minus } from 'lucide-react';
 
 interface ProductCardProps {
   product: StoreProduct & {
@@ -19,11 +19,15 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }: ProductCardProps) {
-  const { addToCart, addToWishlist, cart, wishlist } = useStore();
+  const { addToCart, addToWishlist, cart, wishlist, updateCartQuantity } = useStore();
   const [isHovered, setIsHovered] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const inCart = cart.some((item) => item.id === product.id);
+  // Find if product is in cart and get its quantity
+  const cartItem = cart.find((item) => item.id === product.id);
+  const quantity = cartItem?.quantity || 0;
+  const inCart = quantity > 0;
   const inWishlist = wishlist.some((item) => item.id === product.id);
 
   const rating = product.avgRating || product.rating || 4.0;
@@ -47,6 +51,18 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
     addToCart(product);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleIncrement = () => {
+    updateCartQuantity(product.id, quantity + 1);
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      updateCartQuantity(product.id, quantity - 1);
+    } else {
+      updateCartQuantity(product.id, 0);
+    }
   };
 
   const getProductEmoji = (name: string) => {
@@ -90,6 +106,7 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
 
   return (
     <div
+      ref={cardRef}
       className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -150,18 +167,38 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
           </div>
         )}
 
-        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-          <button
-            onClick={handleAddToCart}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              inCart || isAdded
-                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            <ShoppingBag className="w-4 h-4" />
-            {inCart || isAdded ? 'Added ✓' : 'Add to Cart'}
-          </button>
+        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          {inCart ? (
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={handleDecrement}
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="w-6 text-center text-sm font-medium text-gray-900 dark:text-white">
+                {quantity}
+              </span>
+              <button
+                onClick={handleIncrement}
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isAdded
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              {isAdded ? 'Added ✓' : 'Add to Cart'}
+            </button>
+          )}
           <button
             onClick={() => addToWishlist(product)}
             className={`p-2.5 rounded-lg border-2 transition-all ${

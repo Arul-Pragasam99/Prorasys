@@ -2,7 +2,16 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { AuthUser, observeAuthState } from '@/lib/auth-service';
-import { loadCartSnapshot, saveCartSnapshot } from '@/lib/cart-service';
+import { 
+  loadCartSnapshot, 
+  saveCartSnapshot, 
+  addToCartPersistence, 
+  removeFromCartPersistence,
+  updateCartQuantityPersistence,
+  addToWishlistPersistence,
+  removeFromWishlistPersistence,
+  CartItem 
+} from '@/lib/cart-service';
 import { StoreProduct, StoreContextValue } from '@/lib/store-data';
 import { featuredProducts } from '@/lib/store-data';
 
@@ -13,7 +22,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('customer');
-  const [cart, setCart] = useState<StoreProduct[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<StoreProduct[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<StoreProduct[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
@@ -58,52 +67,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addToCart = async (product: StoreProduct) => {
     if (!user) return;
-    const newCart = [...cart, product];
-    setCart(newCart);
-    try {
-      await saveCartSnapshot(user.uid, { cart: newCart, wishlist });
-    } catch (error) {
-      console.error('Error saving cart:', error);
-    }
+    await addToCartPersistence(user.uid, product);
+    await loadCartData(user.uid);
   };
 
   const removeFromCart = async (productId: string) => {
     if (!user) return;
-    const newCart = cart.filter(item => item.id !== productId);
-    setCart(newCart);
-    try {
-      await saveCartSnapshot(user.uid, { cart: newCart, wishlist });
-    } catch (error) {
-      console.error('Error saving cart:', error);
-    }
+    await removeFromCartPersistence(user.uid, productId);
+    await loadCartData(user.uid);
+  };
+
+  const updateCartQuantity = async (productId: string, quantity: number) => {
+    if (!user) return;
+    await updateCartQuantityPersistence(user.uid, productId, quantity);
+    await loadCartData(user.uid);
   };
 
   const addToWishlist = async (product: StoreProduct) => {
     if (!user) return;
-    const newWishlist = [...wishlist, product];
-    setWishlist(newWishlist);
-    try {
-      await saveCartSnapshot(user.uid, { cart, wishlist: newWishlist });
-    } catch (error) {
-      console.error('Error saving wishlist:', error);
-    }
+    await addToWishlistPersistence(user.uid, product);
+    await loadCartData(user.uid);
   };
 
   const removeFromWishlist = async (productId: string) => {
     if (!user) return;
-    const newWishlist = wishlist.filter(item => item.id !== productId);
-    setWishlist(newWishlist);
-    try {
-      await saveCartSnapshot(user.uid, { cart, wishlist: newWishlist });
-    } catch (error) {
-      console.error('Error saving wishlist:', error);
-    }
+    await removeFromWishlistPersistence(user.uid, productId);
+    await loadCartData(user.uid);
   };
 
   const getRecommendations = async (uid: string) => {
     setLoadingRecommendations(true);
     try {
-      // Try to fetch from AI API
       const response = await fetch('/api/ai/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,9 +149,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     cart,
     wishlist,
     isAuthenticated,
+    isLoading,  // ✅ Add this
     userRole,
     addToCart,
     removeFromCart,
+    updateCartQuantity,
     addToWishlist,
     removeFromWishlist,
     logout,

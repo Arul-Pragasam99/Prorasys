@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { ProductCard } from '@/components/commerce/ProductCard';
-import { featuredProducts } from '@/lib/store-data';
+import { fetchProductsFromFirestore } from '@/lib/product-service';
 import { useStore } from '@/components/commerce/StoreProvider';
 import { 
   Search, 
@@ -23,7 +23,7 @@ import Link from 'next/link';
 export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isAuthenticated, loading } = useStore();
+  const { user, isAuthenticated, isLoading } = useStore(); // ✅ Changed loading → isLoading
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -34,34 +34,80 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState<string>('popularity');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [minRating, setMinRating] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
+  // Get unique categories from products
   const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
 
   // Check authentication
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login?redirect=/products');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  // Load products
+  // Load products from Firestore
   useEffect(() => {
     if (isAuthenticated) {
-      const productsWithPrice = featuredProducts.map(p => ({
-        ...p,
-        price: p.price || 0,
-        rating: p.rating || 4.0,
-      }));
-      setProducts(productsWithPrice);
-      setFilteredProducts(productsWithPrice);
-      setLoadingProducts(false);
+      loadProducts();
     }
   }, [isAuthenticated]);
 
   // Apply filters
   useEffect(() => {
-    if (products.length === 0) return;
-    
+    if (products.length > 0) {
+      applyFilters();
+    }
+  }, [products, searchQuery, selectedCategory, priceRange, minRating, sortBy]);
+
+  const loadProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      setError(null);
+      
+      const data = await fetchProductsFromFirestore();
+      
+      if (data && data.length > 0) {
+        const realProducts = data.filter((p: any) => {
+          const name = p.name?.toLowerCase() || '';
+          return !name.includes('dummy') && !name.includes('demo') && !name.includes('test');
+        });
+        
+        if (realProducts.length > 0) {
+          const enhancedProducts = realProducts.map((p: any) => ({
+            ...p,
+            id: p.id || `product_${Math.random().toString(36).substr(2, 9)}`,
+            name: p.name || 'Unnamed Product',
+            description: p.description || 'No description available',
+            price: p.price || 0,
+            rating: p.avgRating || p.rating || 4.0,
+            category: p.category || 'General',
+            badge: p.badge || 'Featured',
+            color: p.color || 'from-blue-500 to-cyan-400',
+            combinedScore: p.combinedScore || 0,
+            trustLevel: p.trustLevel || 'medium',
+            reviewCount: p.reviewCount || 0,
+            featureScores: p.featureScores || {},
+            rank: p.rank || 0,
+          }));
+          setProducts(enhancedProducts);
+        } else {
+          setError('No real products found. Please add products to your store.');
+          setProducts([]);
+        }
+      } else {
+        setError('No products found. Please add products to your store.');
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error('Error loading products:', err);
+      setError('Failed to load products. Please refresh the page.');
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const applyFilters = () => {
     let result = [...products];
 
     if (searchQuery) {
@@ -99,7 +145,7 @@ export default function ProductsPage() {
     }
 
     setFilteredProducts(result);
-  }, [products, searchQuery, selectedCategory, priceRange, minRating, sortBy]);
+  };
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -114,7 +160,8 @@ export default function ProductsPage() {
   const hasActiveFilters = searchQuery || selectedCategory !== 'all' || minRating > 0 || 
     priceRange[1] < (Math.max(...products.map(p => p.price || 0)) || 100000);
 
-  if (loading || !isAuthenticated) {
+  // Loading state
+  if (isLoading || !isAuthenticated) { // ✅ Changed loading → isLoading
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
@@ -148,12 +195,34 @@ export default function ProductsPage() {
     );
   }
 
+  if (error || products.length === 0) {
+    return (
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="text-6xl mb-4">📦</div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No Products Available</h3>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              {error || 'Please add products to your store'}
+            </p>
+            <button
+              onClick={loadProducts}
+              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Products</h1>
           <p className="mt-1 text-gray-600 dark:text-gray-400">
@@ -161,7 +230,6 @@ export default function ProductsPage() {
           </p>
         </div>
 
-        {/* Search & Filters Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -222,7 +290,6 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Active Filters */}
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <span className="text-sm text-gray-600 dark:text-gray-400">Active filters:</span>
@@ -253,7 +320,6 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {/* Filters Panel */}
         {showFilters && (
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
@@ -341,9 +407,8 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {/* Product Grid */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No products found</h3>
             <p className="text-gray-600 dark:text-gray-400 mt-1">Try adjusting your filters</p>
@@ -370,7 +435,6 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {/* Footer Stats */}
         {filteredProducts.length > 0 && (
           <div className="mt-6 flex flex-wrap justify-between items-center text-sm text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-4">
             <span>Showing {filteredProducts.length} of {products.length} products</span>

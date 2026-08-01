@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function RecommendationsPage() {
   const router = useRouter();
-  const { user, isAuthenticated, loading } = useStore();
+  const { user, isAuthenticated, isLoading } = useStore(); // ✅ Changed loading → isLoading
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -19,10 +19,10 @@ export default function RecommendationsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated) { // ✅ Changed loading → isLoading
       router.push('/login?redirect=/recommendations');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -43,7 +43,6 @@ export default function RecommendationsPage() {
         return;
       }
 
-      // Filter out dummy products
       const realProducts = data.filter((p: any) => {
         const name = p.name?.toLowerCase() || '';
         return !name.includes('dummy') && !name.includes('demo') && !name.includes('test');
@@ -55,7 +54,6 @@ export default function RecommendationsPage() {
         return;
       }
 
-      // Enhance products with AI scores
       const enhancedProducts = realProducts.map((p: any) => {
         let score = 0.5;
         if (p.avgRating) score += (p.avgRating / 5) * 0.3;
@@ -90,7 +88,7 @@ export default function RecommendationsPage() {
     setRefreshing(false);
   };
 
-  if (loading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated) { // ✅ Changed loading → isLoading
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
@@ -120,7 +118,7 @@ export default function RecommendationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
           <div className="flex flex-col items-center justify-center min-h-[50vh]">
             <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading real products...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading products...</p>
           </div>
         </div>
       </main>
@@ -136,9 +134,6 @@ export default function RecommendationsPage() {
             <div className="text-6xl mb-4">📦</div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No Products Available</h3>
             <p className="text-gray-600 dark:text-gray-400 mt-1">{error}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-              Run the seed script to add real products to Firestore
-            </p>
             <button
               onClick={handleRefresh}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -158,8 +153,8 @@ export default function RecommendationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
           <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="text-6xl mb-4">🤔</div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No Real Products Found</h3>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Add real products to your store</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No products found</h3>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Add products to your store to get AI recommendations</p>
             <Link
               href="/products"
               className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

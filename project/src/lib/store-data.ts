@@ -1,5 +1,9 @@
-// Store data with INR prices
+import type { CartItem as CartItemType } from '@/lib/cart-service';
 
+// Re-export CartItem type for use in other files
+export type { CartItemType };
+
+// Define StoreProduct type
 export type StoreProduct = {
   id: string;
   name: string;
@@ -18,21 +22,29 @@ export type StoreProduct = {
   rank?: number;
 };
 
+// CartItem is a StoreProduct with quantity
+export type CartItem = StoreProduct & {
+  quantity: number;
+};
+
+// Store context value type
 export type StoreContextValue = {
   user: any;
-  cart: StoreProduct[];
+  cart: CartItem[];
   wishlist: StoreProduct[];
   isAuthenticated: boolean;
+  isLoading: boolean;  // ✅ Add this
   userRole: string;
   addToCart: (product: StoreProduct) => void;
   removeFromCart: (productId: string) => void;
+  updateCartQuantity: (productId: string, quantity: number) => void;
   addToWishlist: (product: StoreProduct) => void;
   removeFromWishlist: (productId: string) => void;
   logout: () => void;
+  refreshCart?: () => Promise<void>;
   aiRecommendations?: StoreProduct[];
   loadingRecommendations?: boolean;
   getRecommendations?: () => Promise<void>;
-  refreshCart?: () => Promise<void>;
 };
 
 // Helper to convert USD to INR
@@ -45,7 +57,7 @@ export const featuredProducts: StoreProduct[] = [
     id: '1',
     name: 'Premium Wireless Headphones',
     description: 'High-quality wireless headphones with active noise cancellation and 40-hour battery life.',
-    price: usdToInr(199.99), // ₹16,599
+    price: usdToInr(199.99),
     category: 'Electronics',
     rating: 4.8,
     badge: '⭐ Best Seller',
@@ -54,7 +66,7 @@ export const featuredProducts: StoreProduct[] = [
     trustLevel: 'high',
     reviewCount: 156,
     featureScores: {
-      sound: 0.92,
+      sound_quality: 0.92,
       comfort: 0.88,
       battery: 0.85,
       noise_cancellation: 0.90,
@@ -66,7 +78,7 @@ export const featuredProducts: StoreProduct[] = [
     id: '2',
     name: 'Smart Fitness Watch Pro',
     description: 'Advanced health tracker with heart rate monitoring, sleep tracking, GPS, and 14-day battery life.',
-    price: usdToInr(299.99), // ₹24,899
+    price: usdToInr(299.99),
     category: 'Wearables',
     rating: 4.6,
     badge: '🔥 Trending',
@@ -87,7 +99,7 @@ export const featuredProducts: StoreProduct[] = [
     id: '3',
     name: 'Premium Wireless Earbuds',
     description: 'Compact wireless earbuds with premium sound quality and active noise cancellation.',
-    price: usdToInr(89.99), // ₹7,469
+    price: usdToInr(89.99),
     category: 'Audio',
     rating: 4.4,
     badge: '🎯 Popular',
@@ -107,8 +119,8 @@ export const featuredProducts: StoreProduct[] = [
   {
     id: '4',
     name: '4K Gaming Monitor 32"',
-    description: 'Ultra HD 4K gaming monitor with 144Hz refresh rate and HDR support. Perfect for gaming.',
-    price: usdToInr(499.99), // ₹41,499
+    description: 'Ultra HD 4K gaming monitor with 144Hz refresh rate and HDR support.',
+    price: usdToInr(499.99),
     category: 'Electronics',
     rating: 4.7,
     badge: '🏆 Top Rated',
@@ -129,7 +141,7 @@ export const featuredProducts: StoreProduct[] = [
     id: '5',
     name: 'Smart AI Speaker',
     description: 'Voice-controlled smart speaker with premium sound and built-in AI assistant.',
-    price: usdToInr(129.99), // ₹10,789
+    price: usdToInr(129.99),
     category: 'Audio',
     rating: 4.3,
     badge: '📢 Popular',
@@ -150,7 +162,7 @@ export const featuredProducts: StoreProduct[] = [
     id: '6',
     name: 'Ultra-Slim Laptop Pro',
     description: 'Powerful ultra-slim laptop with 16GB RAM, 512GB SSD, and 15-hour battery life.',
-    price: usdToInr(899.99), // ₹74,699
+    price: usdToInr(899.99),
     category: 'Electronics',
     rating: 4.9,
     badge: '💻 Premium',
@@ -159,19 +171,19 @@ export const featuredProducts: StoreProduct[] = [
     trustLevel: 'high',
     reviewCount: 45,
     featureScores: {
-      performance: 0.92,
-      battery: 0.88,
-      display: 0.85,
-      build: 0.90,
-      value: 0.82,
+      performance: 0.96,
+      battery: 0.92,
+      display: 0.90,
+      build: 0.93,
+      value: 0.85,
     },
     rank: 6,
   },
   {
     id: '7',
     name: 'Wireless Charging Pad',
-    description: 'Fast wireless charging pad compatible with all Qi-enabled devices. Sleek and safe.',
-    price: usdToInr(39.99), // ₹3,319
+    description: 'Fast wireless charging pad compatible with all Qi-enabled devices.',
+    price: usdToInr(39.99),
     category: 'Accessories',
     rating: 4.2,
     badge: '⚡ Fast Charge',
@@ -192,7 +204,7 @@ export const featuredProducts: StoreProduct[] = [
     id: '8',
     name: 'Premium Yoga Mat',
     description: 'Eco-friendly, non-slip yoga mat with 6mm thickness for optimal comfort and support.',
-    price: usdToInr(49.99), // ₹4,149
+    price: usdToInr(49.99),
     category: 'Fitness',
     rating: 4.5,
     badge: '🧘 Premium',
@@ -211,7 +223,7 @@ export const featuredProducts: StoreProduct[] = [
   },
 ];
 
-export const initialCart: StoreProduct[] = [];
+export const initialCart: CartItem[] = [];
 export const initialWishlist: StoreProduct[] = [];
 
 // Price formatter for INR
@@ -226,4 +238,31 @@ export const formatPrice = (price: number): string => {
 // Alternative price formatter (simpler)
 export const formatPriceSimple = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
-}; 
+};
+
+// Utility function to get product by ID
+export const getProductById = (id: string): StoreProduct | undefined => {
+  return featuredProducts.find(product => product.id === id);
+};
+
+// Utility function to get products by category
+export const getProductsByCategory = (category: string): StoreProduct[] => {
+  if (category === 'all') return featuredProducts;
+  return featuredProducts.filter(product => 
+    product.category.toLowerCase() === category.toLowerCase()
+  );
+};
+
+// Utility function to get top rated products
+export const getTopRatedProducts = (limit: number = 4): StoreProduct[] => {
+  return [...featuredProducts]
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    .slice(0, limit);
+};
+
+// Utility function to get products by price range
+export const getProductsByPriceRange = (min: number, max: number): StoreProduct[] => {
+  return featuredProducts.filter(product => 
+    (product.price || 0) >= min && (product.price || 0) <= max
+  );
+};
