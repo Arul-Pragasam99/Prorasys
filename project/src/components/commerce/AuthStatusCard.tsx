@@ -3,7 +3,9 @@
 import { useStore } from '@/components/commerce/StoreProvider';
 
 export function AuthStatusCard() {
-  const { isAuthenticated, userRole, cart, wishlist } = useStore();
+  const { isAuthenticated, userRole, cart, wishlist, user } = useStore();
+  
+  const displayName = user?.displayName || 'User';
 
   return (
     <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
@@ -11,6 +13,9 @@ export function AuthStatusCard() {
       <h3 className="mt-2 text-xl font-semibold text-text-primary">
         {isAuthenticated ? `Signed in as ${userRole}` : 'Guest mode'}
       </h3>
+      {isAuthenticated && (
+        <p className="text-sm text-text-secondary mt-1">Welcome, {displayName}!</p>
+      )}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl bg-surface border border-border p-4">
           <p className="text-sm text-text-secondary">Cart items</p>

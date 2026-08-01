@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { useStore } from '@/components/commerce/StoreProvider';
 import { gsap } from 'gsap';
@@ -18,11 +19,11 @@ import {
   Clock,
   LogIn,
   ShoppingBag,
-  User
 } from 'lucide-react';
 
 export default function HomePage() {
-  const { user, isAuthenticated, isLoading } = useStore();
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, userRole } = useStore();
   const [mounted, setMounted] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -32,15 +33,24 @@ export default function HomePage() {
   const featuresRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
+  // ✅ Redirect authenticated users based on role
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      if (userRole === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/products');
+      }
+    }
+  }, [isAuthenticated, isLoading, userRole, router]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    // Skip animations if not mounted
-    if (!mounted) return;
+    if (!mounted || isAuthenticated) return;
 
-    // Set initial states
     gsap.set(badgeRef.current, { opacity: 0, scale: 0.9 });
     gsap.set(titleRef.current, { opacity: 0, y: 60 });
     gsap.set(subtitleRef.current, { opacity: 0, y: 40 });
@@ -48,7 +58,6 @@ export default function HomePage() {
     gsap.set(statsRef.current?.children || [], { opacity: 0, y: 30 });
     gsap.set(featuresRef.current?.children || [], { opacity: 0, y: 40 });
 
-    // Main timeline
     const tl = gsap.timeline({ 
       defaults: { ease: 'power3.out' },
       delay: 0.2,
@@ -93,7 +102,6 @@ export default function HomePage() {
       ease: 'power2.out',
     }, '-=0.1');
 
-    // Floating animations
     const floatingEls = document.querySelectorAll('.floating-bg');
     floatingEls.forEach((el, i) => {
       gsap.to(el, {
@@ -107,9 +115,11 @@ export default function HomePage() {
       });
     });
 
-  }, [mounted]);
+  }, [mounted, isAuthenticated]);
 
-  // Show loading state
+  const displayName = user?.displayName || 'User';
+
+  // ✅ Loading state
   if (isLoading || !mounted) {
     return (
       <main className="min-h-screen bg-surface text-text-primary">
@@ -121,8 +131,20 @@ export default function HomePage() {
     );
   }
 
-  const displayName = user?.displayName || 'User';
+  // ✅ If authenticated, show nothing (redirecting)
+  if (isAuthenticated) {
+    return (
+      <main className="min-h-screen bg-surface text-text-primary">
+        <Header />
+        <div className="flex items-center justify-center min-h-[70vh]">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="mt-4 text-text-secondary">Redirecting...</p>
+        </div>
+      </main>
+    );
+  }
 
+  // ─── GUEST LANDING PAGE ──────────────────────────────────────────────────
   return (
     <main className="min-h-screen bg-surface text-text-primary overflow-x-hidden">
       <Header />
@@ -146,119 +168,68 @@ export default function HomePage() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
             <div 
               ref={badgeRef}
               className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm opacity-0 mx-auto"
             >
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-text-secondary">
-                {isAuthenticated ? `👋 Welcome back, ${displayName}!` : 'AI-Powered Product Discovery'}
+                AI-Powered Product Discovery
               </span>
             </div>
 
-            {/* Title */}
             <h1 
               ref={titleRef}
               className="mt-6 text-4xl sm:text-5xl lg:text-7xl font-bold text-text-primary leading-[1.1]"
             >
-              {isAuthenticated ? 'Find Your Next' : 'Discover Products'}
+              Discover Products
               <span className="block text-primary mt-2">
-                {isAuthenticated ? 'Favorite Product' : 'Built on Trust'}
+                Built on Trust
               </span>
             </h1>
 
-            {/* Subtitle */}
             <p 
               ref={subtitleRef}
               className="mt-6 text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed"
             >
-              {isAuthenticated 
-                ? 'Explore personalized recommendations and trusted products tailored just for you.'
-                : 'AI-powered trust scores, sentiment analysis, and personalized recommendations — helping you make confident purchasing decisions.'
-              }
+              AI-powered trust scores, sentiment analysis, and personalized recommendations 
+              — helping you make confident purchasing decisions.
             </p>
 
-            {/* CTA Buttons */}
             <div ref={ctaRef} className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    href="/products"
-                    className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-theme font-medium hover:bg-primary-light hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-1"
-                  >
-                    Browse Products
-                    <ShoppingBag className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                  <Link
-                    href="/recommendations"
-                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                  >
-                    View AI Picks
-                    <Sparkles className="w-4 h-4" />
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/products"
-                    className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-theme font-medium hover:bg-primary-light hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-1"
-                  >
-                    Start Exploring
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                  >
-                    Sign In
-                    <LogIn className="w-4 h-4" />
-                  </Link>
-                </>
-              )}
+              <Link
+                href="/products"
+                className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-theme font-medium hover:bg-primary-light hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-1"
+              >
+                Start Exploring
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                Sign In
+                <LogIn className="w-4 h-4" />
+              </Link>
             </div>
 
-            {/* Stats */}
             <div ref={statsRef} className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              {isAuthenticated ? (
-                <>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-primary">10+</p>
-                    <p className="text-sm text-text-secondary">Products Viewed</p>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-secondary">4.8★</p>
-                    <p className="text-sm text-text-secondary">Your Avg Rating</p>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-accent">95%</p>
-                    <p className="text-sm text-text-secondary">Trust Score</p>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-success">5</p>
-                    <p className="text-sm text-text-secondary">Reviews Given</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-primary">10K+</p>
-                    <p className="text-sm text-text-secondary">Happy Users</p>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-secondary">4.8★</p>
-                    <p className="text-sm text-text-secondary">Avg Rating</p>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-accent">95%</p>
-                    <p className="text-sm text-text-secondary">Trust Score</p>
-                  </div>
-                  <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                    <p className="text-3xl font-bold text-success">24/7</p>
-                    <p className="text-sm text-text-secondary">AI Support</p>
-                  </div>
-                </>
-              )}
+              <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p className="text-3xl font-bold text-primary">10K+</p>
+                <p className="text-sm text-text-secondary">Happy Users</p>
+              </div>
+              <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p className="text-3xl font-bold text-secondary">4.8★</p>
+                <p className="text-sm text-text-secondary">Avg Rating</p>
+              </div>
+              <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p className="text-3xl font-bold text-accent">95%</p>
+                <p className="text-sm text-text-secondary">Trust Score</p>
+              </div>
+              <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p className="text-3xl font-bold text-success">24/7</p>
+                <p className="text-sm text-text-secondary">AI Support</p>
+              </div>
             </div>
           </div>
         </div>
@@ -361,50 +332,26 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 lg:py-20">
         <div className="bg-primary/5 rounded-theme-xl border border-primary/20 p-8 sm:p-12 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary">
-            {isAuthenticated ? 'Continue Your Shopping Journey' : 'Ready to Find Your Perfect Product?'}
+            Ready to Find Your Perfect Product?
           </h2>
           <p className="mt-3 text-text-secondary max-w-2xl mx-auto">
-            {isAuthenticated 
-              ? 'Explore personalized recommendations and discover products you\'ll love.'
-              : 'Join thousands of users who trust Prorasys to help them make better purchasing decisions.'
-            }
+            Join thousands of users who trust Prorasys to help them make better purchasing decisions.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            {isAuthenticated ? (
-              <>
-                <Link
-                  href="/products"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-theme font-medium hover:bg-primary-light hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-1"
-                >
-                  Browse Products
-                  <ShoppingBag className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/recommendations"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary transition-all duration-300 hover:-translate-y-1"
-                >
-                  View AI Picks
-                  <Sparkles className="w-4 h-4" />
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/products"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-theme font-medium hover:bg-primary-light hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-1"
-                >
-                  Start Exploring
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary transition-all duration-300 hover:-translate-y-1"
-                >
-                  Get Started
-                  <Users className="w-4 h-4" />
-                </Link>
-              </>
-            )}
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-theme font-medium hover:bg-primary-light hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-1"
+            >
+              Start Exploring
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary transition-all duration-300 hover:-translate-y-1"
+            >
+              Get Started
+              <Users className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>

@@ -50,9 +50,8 @@ export async function registerUser(
     await setDoc(doc(db, 'users', credential.user.uid), profile);
     return profile;
   } catch (error) {
-    // Suppress console error for email-already-in-use
     if (error.code === 'auth/email-already-in-use') {
-      throw error; // Still throw, but don't log
+      throw error;
     }
     console.error('Registration error:', error);
     throw error;
@@ -128,7 +127,6 @@ export async function loginWithGoogle() {
       emailVerified: user.emailVerified || false,
     };
   } catch (error) {
-    // Suppress console error for account-exists-with-different-credential
     if (error.code === 'auth/account-exists-with-different-credential') {
       throw error;
     }
@@ -156,7 +154,6 @@ export async function resetPassword(email: string) {
     await sendPasswordResetEmail(auth, normalizedEmail);
     return { success: true, message: 'Password reset email sent' };
   } catch (error) {
-    // Suppress console error for user-not-found (security best practice)
     if (error.code === 'auth/user-not-found') {
       throw error;
     }

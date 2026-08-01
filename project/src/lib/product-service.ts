@@ -46,7 +46,7 @@ export async function fetchProductsFromFirestore(): Promise<Product[]> {
         description: data.description || 'No description available',
         price: data.price || 0,
         category: data.category || 'General',
-        rating: data.avgRating || 4.0, // Map avgRating to rating
+        rating: data.avgRating || 4.0,
         badge: data.combinedScore ? `${(data.combinedScore * 100).toFixed(0)}% Trust` : 'Featured',
         color: 'from-brand-500 to-blue-500',
         image: '/placeholder.jpg',
@@ -77,5 +77,41 @@ export async function fetchReviewsFromFirestore(productId: string) {
   } catch (error) {
     console.error('Error fetching reviews:', error);
     return [];
+  }
+}
+
+// New function to fetch all reviews for admin
+export async function fetchAllReviews() {
+  try {
+    const snapshot = await getDocs(collection(db, 'reviews'));
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error('Error fetching all reviews:', error);
+    return [];
+  }
+}
+
+// New function to get total count of products
+export async function getTotalProducts(): Promise<number> {
+  try {
+    const snapshot = await getDocs(collection(db, 'products'));
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error counting products:', error);
+    return 0;
+  }
+}
+
+// New function to get total count of users
+export async function getTotalUsers(): Promise<number> {
+  try {
+    const snapshot = await getDocs(collection(db, 'users'));
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error counting users:', error);
+    return 0;
   }
 }
