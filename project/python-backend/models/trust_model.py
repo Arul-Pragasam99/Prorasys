@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
@@ -9,8 +9,8 @@ import pickle
 
 class TrustScoreCalculator:
     def __init__(self):
-        self.model: Optional[RandomForestRegressor] = None
-        self.scaler: Optional[StandardScaler] = None
+        self.model = None
+        self.scaler = None
         self.model_path = "models/saved/trust_model.pkl"
         
         if os.path.exists(self.model_path):
@@ -27,12 +27,12 @@ class TrustScoreCalculator:
             n_jobs=-1
         )
         self.scaler = StandardScaler()
-        print("✅ Trust model built with scikit-learn")
+        print("[OK] Trust model built with scikit-learn")
     
     def train(self, reviews_data: List[Dict]):
         """Train trust score model"""
         if not reviews_data:
-            print("⚠️ No training data available")
+            print("[WARN] No training data available")
             return
         
         try:
@@ -77,23 +77,36 @@ class TrustScoreCalculator:
                 y.append(trust_score)
             
             if X and len(X) > 5:
-                # Check if scaler is initialized
-                if self.scaler is None:
-                    self.scaler = StandardScaler()
-                    
-                X_scaled = self.scaler.fit_transform(np.array(X))
+                # Convert X to numpy array
+                X_array = np.array(X)
+                y_array = np.array(y)
                 
-                if self.model is not None:
-                    self.model.fit(X_scaled, y)
-                    self.save_model()
-                    print(f"✅ Trust model trained with {len(X)} products")
+                # Check if scaler is initialized
+                if self.scaler is not None:
+                    X_scaled = self.scaler.fit_transform(X_array)
                 else:
-                    print("❌ Model is None, cannot train")
+                    self.scaler = StandardScaler()
+                    X_scaled = self.scaler.fit_transform(X_array)
+                
+                # Check if model is initialized
+                if self.model is not None:
+                    self.model.fit(X_scaled, y_array)
+                else:
+                    self.model = RandomForestRegressor(
+                        n_estimators=50,
+                        max_depth=10,
+                        random_state=42,
+                        n_jobs=-1
+                    )
+                    self.model.fit(X_scaled, y_array)
+                    
+                self.save_model()
+                print(f"[OK] Trust model trained with {len(X)} products")
             else:
-                print("⚠️ Not enough data for trust model training")
+                print("[WARN] Not enough data for trust model training (need at least 6 products)")
                 
         except Exception as e:
-            print(f"⚠️ Could not train trust model: {e}")
+            print(f"[WARN] Could not train trust model: {e}")
     
     def calculate(self, reviews: List[Dict]) -> Dict:
         """Calculate trust score for a product"""
@@ -132,7 +145,8 @@ class TrustScoreCalculator:
                 
                 # Clamp between 0 and 1
                 trust_score = max(0, min(1, trust_score))
-            except:
+            except Exception as e:
+                print(f"[WARN] Model prediction error: {e}")
                 # Fallback to heuristic
                 trust_score = (
                     0.4 * avg_rating / 5 +
@@ -141,7 +155,7 @@ class TrustScoreCalculator:
                     0.1 * (1 - (np.std(ratings) / 5 if len(ratings) > 1 else 0))
                 )
         else:
-            # Heuristic for few reviews
+            # Heuristic for few reviews or when model is not available
             trust_score = (
                 0.4 * avg_rating / 5 +
                 0.3 * avg_sentiment +
@@ -170,13 +184,12 @@ class TrustScoreCalculator:
     def save_model(self):
         """Save the trained model"""
         os.makedirs('models/saved', exist_ok=True)
-        if self.model is not None and self.scaler is not None:
-            with open(self.model_path, 'wb') as f:
-                pickle.dump({
-                    'model': self.model,
-                    'scaler': self.scaler
-                }, f)
-            print("✅ Trust model saved successfully")
+        with open(self.model_path, 'wb') as f:
+            pickle.dump({
+                'model': self.model,
+                'scaler': self.scaler
+            }, f)
+        print("[OK] Trust model saved successfully")
     
     def load_model(self):
         """Load the trained model"""
@@ -185,7 +198,7 @@ class TrustScoreCalculator:
                 data = pickle.load(f)
                 self.model = data.get('model')
                 self.scaler = data.get('scaler')
-            print("✅ Trust model loaded successfully")
+            print("[OK] Trust model loaded successfully")
         except:
-            print("⚠️ Could not load trust model. Building new one.")
+            print("[WARN] Could not load trust model. Building new one.")
             self.build_model()

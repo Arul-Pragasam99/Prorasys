@@ -13,7 +13,7 @@ class RecommendationEngine:
         self.user_item_matrix = None
         self.svd_model = None
         self.product_features = None
-        self.model = None  # Add this property
+        self.model = None
         self.model_path = "models/saved/recommendation_model.pkl"
         
         # Load pre-trained model if exists
@@ -23,7 +23,7 @@ class RecommendationEngine:
     def train(self, reviews_data: List[Dict]):
         """Train collaborative filtering model"""
         if not reviews_data:
-            print("⚠️ No training data available")
+            print("[WARN] No training data available")
             return
         
         try:
@@ -32,7 +32,6 @@ class RecommendationEngine:
             
             # Extract user_id, product_id, rating
             if 'userId' not in df.columns:
-                # If no userId, create synthetic ones
                 df['userId'] = [f"user_{i%10}" for i in range(len(df))]
             if 'productId' not in df.columns:
                 df['productId'] = [f"product_{i%5}" for i in range(len(df))]
@@ -40,7 +39,7 @@ class RecommendationEngine:
             df = df[['userId', 'productId', 'rating']].dropna()
             
             if len(df) < 10:
-                print("⚠️ Not enough data for recommendation model")
+                print("[WARN] Not enough data for recommendation model")
                 return
             
             # Create pivot table
@@ -58,16 +57,16 @@ class RecommendationEngine:
                 
             self.svd_model = TruncatedSVD(n_components=n_components, random_state=42)
             self.user_item_matrix = user_item_matrix
-            self.model = self.svd_model  # Set the model property
+            self.model = self.svd_model
             self.user_features = self.svd_model.fit_transform(user_item_matrix)
             self.product_features = self.svd_model.components_.T
             
-            print(f"✅ Recommendation model trained with {len(df)} interactions")
+            print(f"[OK] Recommendation model trained with {len(df)} interactions")
             
             # Save model
             self.save_model()
         except Exception as e:
-            print(f"⚠️ Could not train recommendation model: {e}")
+            print(f"[WARN] Could not train recommendation model: {e}")
     
     def get_recommendations(self, user_id: str, all_products: List[Dict], 
                            user_interactions: List, num_recommendations: int = 5) -> List[Dict]:
@@ -91,7 +90,6 @@ class RecommendationEngine:
                 )[:num_recommendations]
             
             # Simple content-based filtering
-            # Score each product based on category and rating similarity
             for product in candidate_products:
                 score = 0
                 # Boost based on rating
@@ -114,7 +112,7 @@ class RecommendationEngine:
             return recommendations
             
         except Exception as e:
-            print(f"⚠️ Recommendation error: {e}")
+            print(f"[WARN] Recommendation error: {e}")
             # Fallback to top rated products
             return sorted(
                 all_products,
@@ -132,7 +130,7 @@ class RecommendationEngine:
                 'product_features': self.product_features,
                 'model': self.model
             }, f)
-        print("✅ Recommendation model saved successfully")
+        print("[OK] Recommendation model saved successfully")
     
     def load_model(self):
         """Load the trained model"""
@@ -142,7 +140,7 @@ class RecommendationEngine:
                 self.user_item_matrix = data.get('user_item_matrix')
                 self.svd_model = data.get('svd_model')
                 self.product_features = data.get('product_features')
-                self.model = data.get('model', self.svd_model)  # Load model or use svd_model
-            print("✅ Recommendation model loaded successfully")
+                self.model = data.get('model', self.svd_model)
+            print("[OK] Recommendation model loaded successfully")
         except:
-            print("⚠️ Could not load recommendation model")
+            print("[WARN] Could not load recommendation model")

@@ -111,7 +111,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
       
       if (!response.ok) {
-        // If AI service fails, use fallback recommendations
         console.warn('AI service unavailable, using fallback recommendations');
         const fallback = featuredProducts.slice(0, 8).map(p => ({
           ...p,
@@ -125,7 +124,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (data.recommendations && data.recommendations.length > 0) {
         setAiRecommendations(data.recommendations);
       } else {
-        // Fallback to featured products
         const fallback = featuredProducts.slice(0, 8).map(p => ({
           ...p,
           recommendation_score: 0.7 + (Math.random() * 0.25),
@@ -133,7 +131,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setAiRecommendations(fallback);
       }
     } catch (error) {
-      // Silently handle error and use fallback
       console.warn('AI service error, using fallback recommendations');
       const fallback = featuredProducts.slice(0, 8).map(p => ({
         ...p,

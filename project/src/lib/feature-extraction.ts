@@ -16,19 +16,16 @@ export type FeatureAnalysis = {
 
 export class FeatureExtractor {
   private readonly FEATURES: Record<string, string[]> = {
-    electronics: ['battery', 'display', 'performance', 'sound', 'camera', 'design', 'durability', 'screen', 'processor', 'storage'],
-    clothing: ['quality', 'fit', 'color', 'material', 'comfort', 'style', 'size', 'fabric', 'design', 'durability'],
-    books: ['content', 'writing', 'cover', 'pages', 'quality', 'story', 'characters', 'plot', 'value'],
-    general: ['price', 'quality', 'delivery', 'service', 'packaging', 'value', 'durability', 'design'],
+    electronics: ['battery', 'display', 'performance', 'sound', 'camera', 'design', 'durability'],
+    clothing: ['quality', 'fit', 'color', 'material', 'comfort', 'style', 'size'],
+    books: ['content', 'writing', 'cover', 'pages', 'quality', 'story'],
+    general: ['price', 'quality', 'delivery', 'service', 'packaging', 'value'],
   };
 
   private readonly SENTIMENT_WORDS = {
-    positive: ['good', 'great', 'amazing', 'excellent', 'awesome', 'fantastic', 'perfect', 'best', 
-               'love', 'like', 'beautiful', 'wonderful', 'superb', 'outstanding', 'remarkable',
-               'superior', 'exceptional', 'flawless', 'impressive', 'satisfied', 'happy'],
-    negative: ['bad', 'terrible', 'poor', 'awful', 'horrible', 'worst', 'hate', 'disappointed', 
-               'disappointing', 'fail', 'failure', 'useless', 'waste', 'annoying', 'frustrating',
-               'mediocre', 'inferior', 'subpar', 'disgusting', 'unacceptable', 'broken'],
+    positive: ['good', 'great', 'amazing', 'excellent', 'awesome', 'fantastic', 'perfect', 
+               'best', 'love', 'like', 'beautiful', 'wonderful', 'superb'],
+    negative: ['bad', 'terrible', 'poor', 'awful', 'horrible', 'worst', 'hate', 'disappointed'],
   };
 
   extractFeatures(text: string, category: string = 'general'): Record<string, number> {
@@ -43,10 +40,8 @@ export class FeatureExtractor {
       let mentions = 0;
 
       words.forEach((word, index) => {
-        // Check if the word or a variation is a feature
         if (word.includes(feature) || word === feature || feature.includes(word)) {
           mentions++;
-          // Look at surrounding words for sentiment
           const start = Math.max(0, index - 3);
           const end = Math.min(words.length, index + 4);
           const context = words.slice(start, end);
@@ -58,18 +53,12 @@ export class FeatureExtractor {
             score += 1;
           } else if (hasNegative && !hasPositive) {
             score -= 1;
-          } else {
-            // Check for modifier words
-            const modifiers = context.filter(w => ['very', 'really', 'extremely', 'quite', 'somewhat'].includes(w));
-            if (modifiers.length > 0) {
-              score += 0.5;
-            }
           }
         }
       });
 
       if (mentions > 0) {
-        const normalizedScore = (score / mentions + 1) / 2; // Normalize to 0-1
+        const normalizedScore = (score / mentions + 1) / 2;
         featureScores[feature] = Math.max(0, Math.min(1, normalizedScore));
       }
     });
@@ -97,10 +86,8 @@ export class FeatureExtractor {
       count++;
     });
 
-    // Sort by mentions (most mentioned features first)
     features.sort((a, b) => b.mentions - a.mentions);
 
-    // Find top positive and negative features
     const positiveFeatures = features.filter(f => f.sentimentScore > 0.7);
     const negativeFeatures = features.filter(f => f.sentimentScore < 0.3);
 
@@ -113,7 +100,6 @@ export class FeatureExtractor {
     };
   }
 
-  // Aggregate features from multiple reviews
   aggregateFeatures(reviews: string[], category: string = 'general'): FeatureAnalysis {
     const allFeatures: Record<string, number[]> = {};
     const allMentions: Record<string, number> = {};

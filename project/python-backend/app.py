@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
@@ -36,7 +36,6 @@ app.add_middleware(
 # Initialize Firebase Admin - Using service-account.json file
 def init_firebase():
     try:
-        # Try using service-account.json file
         if os.path.exists('service-account.json'):
             cred = credentials.Certificate('service-account.json')
             firebase_admin.initialize_app(cred)
@@ -69,7 +68,67 @@ class RecommendationRequest(BaseModel):
     user_id: str
     num_recommendations: int = 5
 
-# API Endpoints
+# Helper to extract features from text (Python version)
+def extract_features_from_text(text: str, category: str = 'general') -> Dict[str, float]:
+    """Extract feature scores from review text"""
+    feature_scores = {}
+    
+    # Define feature categories
+    feature_categories = {
+        'electronics': ['battery', 'display', 'performance', 'sound', 'camera', 'design', 'durability'],
+        'wearables': ['health_tracking', 'battery', 'display', 'design', 'comfort'],
+        'audio': ['sound', 'comfort', 'connectivity', 'battery', 'noise_cancellation'],
+        'home_kitchen': ['versatility', 'ease_of_use', 'durability', 'design', 'value'],
+        'fashion': ['comfort', 'durability', 'design', 'quality', 'fit'],
+        'general': ['quality', 'design', 'durability', 'price', 'value']
+    }
+    
+    # Get features for category
+    features = feature_categories.get(category.lower(), feature_categories['general'])
+    
+    # Sentiment words
+    positive_words = ['good', 'great', 'amazing', 'excellent', 'awesome', 'fantastic', 'perfect', 
+                      'best', 'love', 'like', 'beautiful', 'wonderful', 'superb', 'outstanding',
+                      'superior', 'exceptional', 'flawless', 'impressive', 'satisfied', 'happy']
+    negative_words = ['bad', 'terrible', 'poor', 'awful', 'horrible', 'worst', 'hate', 'disappointed',
+                      'disappointing', 'fail', 'failure', 'useless', 'waste', 'annoying', 'frustrating']
+    
+    text_lower = text.lower()
+    words = text_lower.split()
+    
+    for feature in features:
+        score = 0.5  # Neutral baseline
+        feature_mentions = 0
+        
+        # Check if feature is mentioned
+        if feature in text_lower or any(word in text_lower for word in feature.split('_')):
+            feature_mentions += 1
+            
+            # Check surrounding words for sentiment
+            for i, word in enumerate(words):
+                if feature in word or word in feature:
+                    # Look at surrounding context
+                    start = max(0, i - 3)
+                    end = min(len(words), i + 4)
+                    context = words[start:end]
+                    
+                    positive_count = sum(1 for w in context if w in positive_words)
+                    negative_count = sum(1 for w in context if w in negative_words)
+                    
+                    if positive_count > negative_count:
+                        score += 0.1
+                    elif negative_count > positive_count:
+                        score -= 0.1
+        
+        # If feature mentioned multiple times, adjust score
+        if feature_mentions > 0:
+            # Boost if mentioned many times (positive sentiment)
+            if feature_mentions > 2:
+                score += 0.05
+            score = max(0.1, min(0.95, score))
+            feature_scores[feature] = score
+    
+    return feature_scores
 
 @app.get("/")
 def read_root():
@@ -101,30 +160,106 @@ async def ai_status():
 
 @app.post("/api/ai/analyze-sentiment")
 async def analyze_sentiment(review: ReviewData):
-    """Analyze sentiment using local model"""
+    """Analyze sentiment using local model and update product"""
     try:
-        # Get sentiment score using local model
+        # 1. READ REVIEW TEXT → ANALYZE SENTIMENT
         sentiment_result = sentiment_analyzer.analyze(review.text)
         
-        # Calculate combined score
+        # 2. CALCULATE SENTIMENT SCORE
         rating_score = review.rating / 5.0
         sentiment_score = sentiment_result['score']
+        
+        # 3. UPDATE COMBINED SCORE
         combined_score = (sentiment_score + rating_score) / 2
         
-        # Save to Firestore if connected
+        # 4. EXTRACT FEATURES FROM REVIEW
+        # Get product category from Firestore
+        product_category = 'general'
         if db:
+            try:
+                product_doc = db.collection('products').document(review.product_id).get()
+                if product_doc.exists:
+                    product_category = product_doc.to_dict().get('category', 'general')
+            except:
+                pass
+        
+        feature_scores = extract_features_from_text(review.text, product_category)
+        
+        # 5. SAVE REVIEW TO FIRESTORE
+        review_data = {
+            'productId': review.product_id,
+            'userId': review.user_id,
+            'rating': review.rating,
+            'text': review.text,
+            'sentimentScore': sentiment_score,
+            'combinedScore': combined_score,
+            'sentimentLabel': sentiment_result['label'],
+            'timestamp': review.timestamp or datetime.now().isoformat(),
+            'featureScores': feature_scores,
+        }
+        
+        if db:
+            # Save review
             review_ref = db.collection('reviews').document()
-            review_ref.set({
-                'productId': review.product_id,
-                'userId': review.user_id,
-                'rating': review.rating,
-                'text': review.text,
-                'sentimentScore': sentiment_score,
-                'combinedScore': combined_score,
-                'sentimentLabel': sentiment_result['label'],
-                'timestamp': review.timestamp or datetime.now().isoformat()
-            })
+            review_ref.set(review_data)
             print(f"[OK] Review saved to Firestore: {review.product_id}")
+            
+            # 6. UPDATE PRODUCT IN FIRESTORE
+            try:
+                # Get all reviews for this product
+                reviews_query = db.collection('reviews').where('productId', '==', review.product_id).stream()
+                all_reviews = []
+                for doc in reviews_query:
+                    all_reviews.append(doc.to_dict())
+                
+                if all_reviews:
+                    # Calculate average rating
+                    ratings = [r.get('rating', 3) for r in all_reviews]
+                    avg_rating = sum(ratings) / len(ratings)
+                    
+                    # Calculate average sentiment
+                    sentiments = [r.get('sentimentScore', 0.5) for r in all_reviews]
+                    avg_sentiment = sum(sentiments) / len(sentiments)
+                    
+                    # Calculate combined score
+                    avg_combined = sum([r.get('combinedScore', 0.5) for r in all_reviews]) / len(all_reviews)
+                    
+                    # Calculate trust level
+                    trust_result = trust_calculator.calculate(all_reviews)
+                    
+                    # Aggregate feature scores from all reviews
+                    aggregated_features = {}
+                    for r in all_reviews:
+                        if r.get('featureScores'):
+                            for feature, score in r['featureScores'].items():
+                                if feature not in aggregated_features:
+                                    aggregated_features[feature] = []
+                                aggregated_features[feature].append(score)
+                    
+                    # Average feature scores
+                    final_feature_scores = {}
+                    for feature, scores in aggregated_features.items():
+                        final_feature_scores[feature] = sum(scores) / len(scores)
+                    
+                    # Update product
+                    product_ref = db.collection('products').document(review.product_id)
+                    product_ref.update({
+                        'avgRating': avg_rating,
+                        'combinedScore': avg_combined,
+                        'sentimentScore': avg_sentiment,
+                        'trustLevel': trust_result['trustLevel'],
+                        'reviewCount': len(all_reviews),
+                        'featureScores': final_feature_scores,
+                        'updatedAt': datetime.now().isoformat()
+                    })
+                    print(f"[OK] Product {review.product_id} updated in Firestore")
+                    print(f"   - Avg Rating: {avg_rating:.2f}")
+                    print(f"   - Combined Score: {avg_combined:.2f}")
+                    print(f"   - Trust Level: {trust_result['trustLevel']}")
+                    print(f"   - Review Count: {len(all_reviews)}")
+                    print(f"   - Features: {len(final_feature_scores)}")
+            except Exception as e:
+                print(f"[WARN] Error updating product: {e}")
         else:
             print(f"[INFO] Review saved locally (mock mode): {review.product_id}")
         
@@ -133,6 +268,7 @@ async def analyze_sentiment(review: ReviewData):
             'sentimentScore': sentiment_score,
             'ratingScore': rating_score,
             'combinedScore': combined_score,
+            'featureScores': feature_scores,
             'savedToFirebase': db is not None
         }
     except Exception as e:

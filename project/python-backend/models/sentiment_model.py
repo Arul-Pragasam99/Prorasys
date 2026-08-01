@@ -53,12 +53,12 @@ class SentimentAnalyzer:
         """Build a simple logistic regression model for sentiment analysis"""
         self.vectorizer = TfidfVectorizer(max_features=1000)
         self.model = LogisticRegression(max_iter=1000, random_state=42)
-        print("✅ Sentiment model built with scikit-learn")
+        print("[OK] Sentiment model built with scikit-learn")
     
     def train(self, reviews_data: List[Dict]):
         """Train the sentiment model with review data"""
         if not reviews_data:
-            print("⚠️ No training data available - using mock data")
+            print("[WARN] No training data available - using mock data")
             reviews_data = self.get_mock_training_data()
         
         # Prepare data
@@ -77,7 +77,7 @@ class SentimentAnalyzer:
             labels.append(label)
         
         if len(texts) < 10:
-            print(f"⚠️ Only {len(texts)} reviews. Adding more mock data...")
+            print(f"[WARN] Only {len(texts)} reviews. Adding more mock data...")
             mock_reviews = self.get_mock_training_data()
             for r in mock_reviews:
                 text = r.get('text', '')
@@ -89,7 +89,7 @@ class SentimentAnalyzer:
         # Check if we have both classes
         unique_labels = set(labels)
         if len(unique_labels) < 2:
-            print("⚠️ Need both positive and negative examples. Adding balanced data...")
+            print("[WARN] Need both positive and negative examples. Adding balanced data...")
             balanced_reviews = [
                 {'text': 'This product is amazing! I love it!', 'rating': 5},
                 {'text': 'Very poor quality. Disappointed.', 'rating': 1},
@@ -106,7 +106,7 @@ class SentimentAnalyzer:
                     labels.append(1 if rating > 3 else 0)
         
         if len(texts) < 10:
-            print("❌ Still not enough training data")
+            print("[ERROR] Still not enough training data")
             return
         
         # Convert to numpy arrays
@@ -125,11 +125,11 @@ class SentimentAnalyzer:
             else:
                 self.model = LogisticRegression(max_iter=1000, random_state=42)
                 self.model.fit(X, y)
-            print(f"✅ Sentiment model trained with {len(texts)} reviews")
+            print(f"[OK] Sentiment model trained with {len(texts)} reviews")
             print(f"   Positive: {sum(y)} reviews, Negative: {len(y) - sum(y)} reviews")
             self.save_model()
         except Exception as e:
-            print(f"❌ Training error: {e}")
+            print(f"[ERROR] Training error: {e}")
     
     def get_mock_training_data(self):
         """Generate mock training data"""
@@ -154,7 +154,7 @@ class SentimentAnalyzer:
     def analyze(self, text: str) -> Dict:
         """Analyze sentiment of a single text"""
         if self.model is None:
-            print("⚠️ Model not trained. Using rule-based fallback.")
+            print("[WARN] Model not trained. Using rule-based fallback.")
             return self.rule_based_sentiment(text)
         
         try:
@@ -185,7 +185,7 @@ class SentimentAnalyzer:
                 'score': score
             }
         except Exception as e:
-            print(f"⚠️ Analysis error: {e}")
+            print(f"[WARN] Analysis error: {e}")
             return self.rule_based_sentiment(text)
     
     def rule_based_sentiment(self, text: str) -> Dict:
@@ -216,7 +216,7 @@ class SentimentAnalyzer:
             pickle.dump(self.model, f)
         with open(self.vectorizer_path, 'wb') as f:
             pickle.dump(self.vectorizer, f)
-        print("✅ Sentiment model saved successfully")
+        print("[OK] Sentiment model saved successfully")
     
     def load_model(self):
         """Load the trained model"""
@@ -225,7 +225,7 @@ class SentimentAnalyzer:
                 self.model = pickle.load(f)
             with open(self.vectorizer_path, 'rb') as f:
                 self.vectorizer = pickle.load(f)
-            print("✅ Sentiment model loaded successfully")
+            print("[OK] Sentiment model loaded successfully")
         except:
-            print("⚠️ Could not load saved model. Building new one.")
-            self.build_model()  
+            print("[WARN] Could not load saved model. Building new one.")
+            self.build_model()

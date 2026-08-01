@@ -31,12 +31,11 @@ export async function POST(request: NextRequest) {
       // Return empty recommendations instead of error
       return NextResponse.json(
         { recommendations: [], error: 'AI service unavailable' },
-        { status: 200 } // Return 200 with empty data
+        { status: 200 }
       );
     }
   } catch (error) {
     console.error('AI recommendations error:', error);
-    // Always return 200 with empty data to prevent frontend errors
     return NextResponse.json(
       { recommendations: [], error: 'AI service unavailable' },
       { status: 200 }
