@@ -28,9 +28,11 @@ const themeScript = `
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isDark = stored ? stored === 'dark' : prefersDark;
       document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
       document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
     } catch (error) {
       document.documentElement.classList.remove('dark');
+      document.documentElement.dataset.theme = 'light';
       document.documentElement.style.colorScheme = 'light';
     }
   })();

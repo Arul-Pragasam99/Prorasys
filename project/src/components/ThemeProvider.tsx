@@ -16,6 +16,7 @@ const applyTheme = (nextTheme: Theme) => {
   const root = document.documentElement;
   root.classList.toggle('dark', nextTheme === 'dark');
   root.style.colorScheme = nextTheme === 'dark' ? 'dark' : 'light';
+  root.setAttribute('data-theme', nextTheme);
   localStorage.setItem('theme', nextTheme);
 };
 

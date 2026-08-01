@@ -54,8 +54,8 @@ export function Header() {
       ref={headerRef}
       className={`fixed top-0 left-0 right-0 z-[99999] transition-all duration-500 ${
         isScrolled
-          ? 'bg-surface/95 backdrop-blur-xl shadow-lg border-b border-border'
-          : 'bg-surface/90 backdrop-blur border-b border-border/50'
+          ? 'bg-surface shadow-lg border-b border-border backdrop-blur-xl'
+          : 'bg-surface border-b border-border/50 backdrop-blur'
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
@@ -109,7 +109,7 @@ export function Header() {
           {isAuthenticated ? (
             <button
               onClick={logout}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-theme bg-primary text-white hover:bg-primary-light shadow-lg shadow-primary/20 transition-all duration-200 text-sm hover:scale-105"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-theme bg-primary text-white hover:bg-primary-light active:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface shadow-lg shadow-primary/20 transition-all duration-200 text-sm hover:scale-105"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Logout</span>
@@ -117,7 +117,7 @@ export function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-theme bg-primary text-white hover:bg-primary-light shadow-lg shadow-primary/20 transition-all duration-200 text-sm hover:scale-105"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-theme bg-primary text-white hover:bg-primary-light active:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface shadow-lg shadow-primary/20 transition-all duration-200 text-sm hover:scale-105"
             >
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Sign In</span>

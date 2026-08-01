@@ -7,7 +7,7 @@ import { AuthStatusCard } from '@/components/commerce/AuthStatusCard';
 import { gsap } from 'gsap';
 import { Shield, Star, Users, Sparkles, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { loginUser, registerUser, loginWithGoogle } from '@/lib/auth-service';
+import { loginUser, registerUser, loginWithGoogle, resetPassword } from '@/lib/auth-service';
 
 export default function LoginPage() {
   return (
@@ -27,8 +27,12 @@ function LoginPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const sectionRef = useRef<HTMLElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
@@ -89,12 +93,31 @@ function LoginPageContent() {
         }
       }
     } catch (err: any) {
-      if (err.code === 'auth/user-not-found') setError('No account found with this email');
-      else if (err.code === 'auth/wrong-password') setError('Incorrect password');
-      else if (err.code === 'auth/email-already-in-use') setError('Email already registered');
-      else if (err.code === 'auth/invalid-email') setError('Invalid email address');
-      else if (err.code === 'auth/too-many-requests') setError('Too many failed attempts. Try again later.');
-      else setError(err.message || 'Authentication failed.');
+      // ✅ Improved error handling with user-friendly messages
+      if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email. Please sign up first.');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again or click "Forgot password".');
+      } else if (err.code === 'auth/email-already-in-use') {
+        // ✅ Clear message suggesting to sign in instead
+        setError('This email is already registered. Please sign in instead.');
+        // ✅ Optionally switch to login mode after a moment
+        setTimeout(() => {
+          setIsLogin(true);
+          setFormData({ ...formData, password: '', confirmPassword: '' });
+          setError(null);
+        }, 2000);
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Invalid email address. Please check and try again.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later or reset your password.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use at least 6 characters.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network error. Please check your internet connection.');
+      } else {
+        setError(err.message || 'Authentication failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -111,10 +134,43 @@ function LoginPageContent() {
         setTimeout(() => router.push(redirect), 1500);
       }
     } catch (err: any) {
-      if (err.code === 'auth/popup-closed-by-user') setError('Sign in cancelled');
-      else setError(err.message || 'Google login failed.');
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Sign in cancelled. Please try again.');
+      } else if (err.code === 'auth/account-exists-with-different-credential') {
+        setError('An account exists with this email. Please sign in using your password.');
+      } else {
+        setError(err.message || 'Google login failed. Please try again.');
+      }
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const email = formData.email.trim();
+    setResetError(null);
+    setResetMessage(null);
+
+    if (!email) {
+      setResetError('Please enter your email address first.');
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      await resetPassword(email);
+      setResetMessage('✅ Password reset email sent! Check your inbox and spam folder.');
+      setShowForgotPassword(false);
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found') {
+        // ✅ Security best practice: don't reveal if email exists
+        setResetMessage('If an account exists with this email, a reset link has been sent.');
+        setShowForgotPassword(false);
+      } else {
+        setResetError(err.message || 'Unable to send reset email. Please try again.');
+      }
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -125,7 +181,7 @@ function LoginPageContent() {
     { icon: Sparkles, text: 'AI recommendations' },
   ];
 
-  // Show Google login for customers only (both login and signup)
+  // Show Google login for customers only
   const showGoogleLogin = formData.role === 'customer';
 
   return (
@@ -161,7 +217,14 @@ function LoginPageContent() {
               <p className="text-sm text-text-secondary">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
                 <button
-                  onClick={() => { setIsLogin(!isLogin); setError(null); setSuccess(null); setFormData({ ...formData, password: '', confirmPassword: '' }); }}
+                  onClick={() => { 
+                    setIsLogin(!isLogin); 
+                    setError(null); 
+                    setSuccess(null); 
+                    setResetError(null);
+                    setResetMessage(null);
+                    setFormData({ ...formData, password: '', confirmPassword: '' }); 
+                  }}
                   className="ml-2 text-primary font-medium hover:underline"
                 >
                   {isLogin ? 'Sign up' : 'Sign in'}
@@ -179,8 +242,22 @@ function LoginPageContent() {
                 <h2 className="text-xl font-semibold text-text-primary">{isLogin ? 'Sign In' : 'Sign Up'}</h2>
               </div>
 
-              {error && <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-theme text-danger text-sm">{error}</div>}
+              {error && (
+                <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-theme text-danger text-sm">
+                  {error}
+                  {error.includes('already registered') && (
+                    <button 
+                      onClick={() => { setIsLogin(true); setError(null); }}
+                      className="ml-2 underline font-medium hover:no-underline"
+                    >
+                      Sign in instead
+                    </button>
+                  )}
+                </div>
+              )}
               {success && <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-theme text-success text-sm">{success}</div>}
+              {resetError && <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-theme text-danger text-sm">{resetError}</div>}
+              {resetMessage && <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-theme text-success text-sm">{resetMessage}</div>}
 
               <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
@@ -267,11 +344,45 @@ function LoginPageContent() {
                   </p>
                 </div>
                 {isLogin && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="flex items-center gap-2 text-sm text-text-secondary">
                       <input type="checkbox" className="rounded border-border text-primary focus:ring-primary" /> Remember me
                     </label>
-                    <button type="button" className="text-sm text-primary hover:underline">Forgot password?</button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword((prev) => !prev);
+                        setResetError(null);
+                        setResetMessage(null);
+                      }}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
+                {isLogin && showForgotPassword && (
+                  <div className="rounded-theme border border-border bg-surface p-3">
+                    <p className="text-sm font-medium text-text-primary">Reset password for your account</p>
+                    <p className="mt-1 text-xs text-text-secondary">Use the email linked to your customer or admin account.</p>
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="input flex-1"
+                        placeholder="you@example.com"
+                      />
+                      <button
+                        type="button"
+                        onClick={handlePasswordReset}
+                        disabled={resetLoading}
+                        className="px-4 py-2 bg-secondary text-white rounded-theme font-medium hover:bg-secondary-light transition-colors disabled:opacity-50"
+                      >
+                        {resetLoading ? 'Sending...' : 'Send link'}
+                      </button>
+                    </div>
                   </div>
                 )}
                 <button

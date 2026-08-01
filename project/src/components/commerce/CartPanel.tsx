@@ -126,7 +126,7 @@ export function CartPanel() {
               )}
             </div>
 
-            <button className="w-full mt-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors hover:shadow-lg hover:shadow-blue-600/20">
+            <button className="w-full mt-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-light transition-colors hover:shadow-lg hover:shadow-primary/20">
               Proceed to Checkout
             </button>
           </>
@@ -181,17 +181,17 @@ export function CartPanel() {
           </div>
         )}
 
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">AI Suggestions</span>
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">AI Suggestions</span>
           </div>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+          <p className="text-xs text-text-secondary mt-1">
             Based on your saved items, you might also like similar products.
           </p>
           <Link
             href="/recommendations"
-            className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline group"
+            className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline group"
           >
             View recommendations
             <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />

@@ -106,7 +106,7 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
         <span className="text-7xl">{getProductEmoji(product.name)}</span>
         
         {showAI && aiScore > 0 && (
-          <div className="absolute top-3 right-3 bg-blue-600 text-white px-2.5 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
+          <div className="absolute top-3 right-3 bg-primary text-white px-2.5 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
             {Math.round(aiScore * 100)}%
           </div>
