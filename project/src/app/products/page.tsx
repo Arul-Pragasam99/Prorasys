@@ -11,19 +11,18 @@ import {
   Loader2, 
   Grid3x3, 
   LayoutList, 
-  SlidersHorizontal, 
-  X, 
+  Filter,
+  X,
   Sparkles,
   Lock,
-  ArrowRight,
-  Filter
+  ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isAuthenticated, isLoading } = useStore(); // ✅ Changed loading → isLoading
+  const { user, isAuthenticated, isLoading } = useStore();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -161,7 +160,7 @@ export default function ProductsPage() {
     priceRange[1] < (Math.max(...products.map(p => p.price || 0)) || 100000);
 
   // Loading state
-  if (isLoading || !isAuthenticated) { // ✅ Changed loading → isLoading
+  if (isLoading || !isAuthenticated) {
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />

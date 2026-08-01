@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/components/commerce/StoreProvider';
 import { ShoppingCart, Heart, Trash2, ArrowRight, Sparkles, Plus, Minus } from 'lucide-react';
@@ -8,39 +7,7 @@ import { ShoppingCart, Heart, Trash2, ArrowRight, Sparkles, Plus, Minus } from '
 export function CartPanel() {
   const { cart, removeFromCart, wishlist, removeFromWishlist, updateCartQuantity } = useStore();
 
-  // Create unique key using id and a random string to ensure uniqueness
-  const getUniqueKey = (item: any, index: number) => {
-    return `${item.id}-${index}-${Date.now()}`;
-  };
-
-  // Remove duplicate items from cart (keep only one with combined quantity)
-  const getUniqueCart = () => {
-    const uniqueMap = new Map();
-    cart.forEach(item => {
-      if (uniqueMap.has(item.id)) {
-        const existing = uniqueMap.get(item.id);
-        existing.quantity = (existing.quantity || 1) + (item.quantity || 1);
-      } else {
-        uniqueMap.set(item.id, { ...item });
-      }
-    });
-    return Array.from(uniqueMap.values());
-  };
-
-  // Remove duplicate items from wishlist
-  const getUniqueWishlist = () => {
-    const seen = new Set();
-    return wishlist.filter(item => {
-      if (seen.has(item.id)) return false;
-      seen.add(item.id);
-      return true;
-    });
-  };
-
-  const uniqueCart = getUniqueCart();
-  const uniqueWishlist = getUniqueWishlist();
-
-  const total = uniqueCart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+  const total = cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -84,7 +51,7 @@ export function CartPanel() {
           </Link>
         </div>
 
-        {uniqueCart.length === 0 ? (
+        {cart.length === 0 ? (
           <div className="mt-8 text-center py-12">
             <div className="text-6xl mb-4">🛒</div>
             <p className="text-gray-600 dark:text-gray-400">Your cart is empty</p>
@@ -93,9 +60,9 @@ export function CartPanel() {
         ) : (
           <>
             <div className="mt-6 space-y-3">
-              {uniqueCart.map((item, index) => (
+              {cart.map((item) => (
                 <div
-                  key={`${item.id}-${index}`}
+                  key={`${item.id}-${item.quantity}`}
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-4 hover:shadow-sm transition-shadow gap-3"
                 >
                   <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -113,7 +80,6 @@ export function CartPanel() {
                   </div>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    {/* Quantity Controls */}
                     <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-1">
                       <button
                         onClick={() => handleDecrement(item.id, item.quantity || 1)}
@@ -143,10 +109,9 @@ export function CartPanel() {
               ))}
             </div>
 
-            {/* Cart Summary */}
             <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Subtotal ({uniqueCart.length} items)</span>
+                <span className="text-gray-600 dark:text-gray-400">Subtotal ({cart.length} items)</span>
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {formatPrice(total)}
                 </span>
@@ -163,7 +128,7 @@ export function CartPanel() {
                   {formatPrice(total * 1.1)}
                 </span>
               </div>
-              {total < 10000 && uniqueCart.length > 0 && (
+              {total < 10000 && cart.length > 0 && (
                 <p className="text-xs text-green-600 dark:text-green-400 mt-2">
                   🎉 Add {formatPrice(10000 - total)} more for free shipping!
                 </p>
@@ -189,16 +154,16 @@ export function CartPanel() {
           Saved for later
         </h3>
 
-        {uniqueWishlist.length === 0 ? (
+        {wishlist.length === 0 ? (
           <div className="mt-8 text-center py-8">
             <div className="text-4xl mb-3">💝</div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Save items to review them later</p>
           </div>
         ) : (
           <div className="mt-6 space-y-3">
-            {uniqueWishlist.map((item, index) => (
+            {wishlist.map((item) => (
               <div
-                key={`${item.id}-${index}`}
+                key={item.id}
                 className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-4"
               >
                 <div className="flex items-center gap-4 min-w-0">

@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function RecommendationsPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useStore(); // ✅ Changed loading → isLoading
+  const { user, isAuthenticated, isLoading } = useStore();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -19,7 +19,7 @@ export default function RecommendationsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) { // ✅ Changed loading → isLoading
+    if (!isLoading && !isAuthenticated) {
       router.push('/login?redirect=/recommendations');
     }
   }, [isAuthenticated, isLoading, router]);
@@ -88,7 +88,7 @@ export default function RecommendationsPage() {
     setRefreshing(false);
   };
 
-  if (isLoading || !isAuthenticated) { // ✅ Changed loading → isLoading
+  if (isLoading || !isAuthenticated) {
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />

@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* Light theme */
     --color-primary: #0F6E56;
     --color-primary-light: #5DCAA5;
     --color-secondary: #185FA5;
@@ -16,34 +17,43 @@
     --color-warning-light: #EF9F27;
     --color-danger: #A32D2D;
     --color-danger-light: #F09595;
+    
     --color-surface: #FFFFFF;
     --color-card: #F7F9F8;
     --color-text-primary: #1A1A18;
     --color-text-secondary: #5F5E5A;
     --color-border: #D3D1C7;
-    --radius-theme: 12px;
-    --radius-theme-lg: 16px;
-    --radius-theme-xl: 20px;
+    
+    --radius-theme: 8px;
+    --radius-theme-lg: 12px;
+    --radius-theme-xl: 16px;
   }
-
+  
   .dark {
     --color-primary: #5DCAA5;
+    --color-primary-light: #0F6E56;
     --color-secondary: #85B7EB;
+    --color-secondary-light: #185FA5;
     --color-accent: #F0997B;
+    --color-accent-light: #D85A30;
     --color-success: #97C459;
+    --color-success-light: #639922;
     --color-warning: #EF9F27;
+    --color-warning-light: #BA7517;
     --color-danger: #F09595;
+    --color-danger-light: #A32D2D;
+    
     --color-surface: #161615;
     --color-card: #1F1F1D;
     --color-text-primary: #F1EFE8;
     --color-text-secondary: #B4B2A9;
     --color-border: #444441;
   }
-
+  
   * {
     border-color: var(--color-border);
   }
-
+  
   body {
     background-color: var(--color-surface);
     color: var(--color-text-primary);
@@ -65,14 +75,8 @@
   .btn-outline {
     @apply border-2 border-border bg-transparent px-6 py-3 rounded-theme font-medium hover:bg-card hover:border-primary transition-all duration-300;
   }
-  .btn-ghost {
-    @apply bg-transparent px-6 py-3 rounded-theme font-medium hover:bg-card transition-all duration-300;
-  }
   .card {
     @apply bg-card rounded-theme-lg border border-border p-6 shadow-sm hover:shadow-md transition-all duration-300;
-  }
-  .card-glass {
-    @apply bg-card/80 backdrop-blur-xl rounded-theme-lg border border-border/50 p-6 shadow-sm hover:shadow-lg transition-all duration-300;
   }
   .input {
     @apply w-full px-4 py-3 border-2 border-border rounded-theme bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200;
@@ -82,7 +86,14 @@
   }
 }
 
-/* Smooth scroll behavior */
+/* Utility classes for theme variables */
+.bg-surface { background-color: var(--color-surface); }
+.bg-card { background-color: var(--color-card); }
+.text-primary-brand { color: var(--color-text-primary); }
+.text-secondary-brand { color: var(--color-text-secondary); }
+.border-border { border-color: var(--color-border); }
+
+/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }
@@ -92,22 +103,13 @@ html {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: var(--color-surface);
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--color-primary);
-  border-radius: var(--radius-theme);
+  border-radius: 8px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary-light);
-}
-
-/* Selection */
-::selection {
-  background: var(--color-primary);
-  color: white;
 }

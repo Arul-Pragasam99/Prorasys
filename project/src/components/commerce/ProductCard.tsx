@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { StoreProduct } from '@/lib/store-data';
+import { StoreProduct, formatPrice } from '@/lib/store-data';
 import { ShoppingBag, Heart, Eye, Star, Sparkles, Plus, Minus } from 'lucide-react';
 
 interface ProductCardProps {
@@ -24,7 +24,6 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
   const [isAdded, setIsAdded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Find if product is in cart and get its quantity
   const cartItem = cart.find((item) => item.id === product.id);
   const quantity = cartItem?.quantity || 0;
   const inCart = quantity > 0;
@@ -96,14 +95,6 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
     return gradients[name.length % gradients.length];
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   return (
     <div
       ref={cardRef}
@@ -111,7 +102,6 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image Section */}
       <div className={`relative overflow-hidden bg-gradient-to-br ${getGradient(product.name)} aspect-square flex items-center justify-center text-6xl`}>
         <span className="text-7xl">{getProductEmoji(product.name)}</span>
         
@@ -137,7 +127,6 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">

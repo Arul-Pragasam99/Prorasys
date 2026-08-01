@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
 
 type Theme = 'light' | 'dark';
 
@@ -33,16 +32,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(next);
     document.documentElement.classList.toggle('dark', next === 'dark');
     localStorage.setItem('theme', next);
-    
-    // GSAP animation for theme toggle
-    gsap.from('body', {
-      opacity: 0.8,
-      duration: 0.3,
-      ease: 'power2.out',
-    });
   };
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return <div style={{ visibility: 'hidden' }}>{children}</div>;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
