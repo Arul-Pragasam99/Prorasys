@@ -93,17 +93,18 @@ function LoginPageContent() {
         }
       }
     } catch (err: any) {
-      if (err.code === 'auth/user-not-found') {
-        setError('No account found with this email. Please sign up first.');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Incorrect password. Please try again or click "Forgot password".');
-      } else if (err.code === 'auth/email-already-in-use') {
+      if (err.code === 'auth/email-already-in-use') {
         setError('This email is already registered. Please sign in instead.');
         setTimeout(() => {
           setIsLogin(true);
           setFormData({ ...formData, password: '', confirmPassword: '' });
           setError(null);
         }, 2000);
+        return;
+      } else if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email. Please sign up first.');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again or click "Forgot password".');
       } else if (err.code === 'auth/invalid-email') {
         setError('Invalid email address. Please check and try again.');
       } else if (err.code === 'auth/too-many-requests') {
@@ -129,11 +130,14 @@ function LoginPageContent() {
         setTimeout(() => router.push(redirect), 1500);
       }
     } catch (err: any) {
+      // ✅ Suppress popup-closed-by-user error - don't show any message
       if (err.code === 'auth/popup-closed-by-user') {
-        setError('Sign in cancelled. Please try again.');
+        // User closed the popup - do nothing, silently handle
+        return;
       } else if (err.code === 'auth/account-exists-with-different-credential') {
         setError('An account exists with this email. Please sign in using your password.');
       } else {
+        // Only show error for other types of errors
         setError(err.message || 'Google login failed. Please try again.');
       }
     } finally {
@@ -175,7 +179,6 @@ function LoginPageContent() {
     { icon: Sparkles, text: 'AI recommendations' },
   ];
 
-  // ✅ Google login available for ALL users (both customer and admin, both login and signup)
   const showGoogleLogin = true;
 
   return (
@@ -183,7 +186,6 @@ function LoginPageContent() {
       <Header />
       <section ref={sectionRef} className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
         <div className="pt-20 lg:pt-24 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-          {/* Left Column - Info */}
           <div ref={leftRef} className="space-y-6">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary flex items-center gap-2">
@@ -229,7 +231,6 @@ function LoginPageContent() {
             </div>
           </div>
 
-          {/* Right Column - Auth Form */}
           <div ref={rightRef} className="lg:sticky lg:top-24">
             <div className="bg-card rounded-theme-lg border border-border p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
@@ -405,7 +406,6 @@ function LoginPageContent() {
                   )}
                 </button>
 
-                {/* ✅ Google Login - Available for ALL users (both login and signup) */}
                 <>
                   <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
