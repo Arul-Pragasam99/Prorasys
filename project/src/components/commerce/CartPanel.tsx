@@ -32,15 +32,20 @@ export function CartPanel() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
       {/* Cart Section */}
-      <div className="bg-card rounded-theme-xl border border-border p-6">
+      <div className="bg-card rounded-xl border border-border p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-primary flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" /> Cart
             </p>
-            <h2 className="mt-1 text-2xl font-semibold text-text-primary">Your selected items</h2>
+            <h2 className="mt-1 text-2xl font-semibold text-text-primary">
+              Your selected items
+            </h2>
           </div>
-          <Link href="/products" className="flex items-center gap-1 text-sm text-primary hover:underline group">
+          <Link
+            href="/products"
+            className="flex items-center gap-1 text-sm text-primary hover:underline group"
+          >
             Continue shopping
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
@@ -50,7 +55,7 @@ export function CartPanel() {
           <div className="mt-8 text-center py-12">
             <div className="text-6xl mb-4">🛒</div>
             <p className="text-text-secondary">Your cart is empty</p>
-            <p className="text-sm text-text-secondary mt-1">Add products to get started</p>
+            <p className="text-sm text-text-secondary/70 mt-1">Add products to get started</p>
           </div>
         ) : (
           <>
@@ -58,23 +63,27 @@ export function CartPanel() {
               {cart.map((item) => (
                 <div
                   key={`${item.id}-${item.quantity}`}
-                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-theme border border-border bg-surface p-4 hover:shadow-sm transition-shadow gap-3"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border border-border bg-surface p-4 hover:shadow-sm transition-shadow gap-3"
                 >
                   <div className="flex items-center gap-4 min-w-0 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                       📦
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-text-primary truncate">{item.name || 'Product'}</p>
-                      <p className="text-sm text-text-secondary">{formatPrice(item.price || 0)}</p>
+                      <p className="font-medium text-text-primary truncate">
+                        {item.name || 'Product'}
+                      </p>
+                      <p className="text-sm text-text-secondary">
+                        {formatPrice(item.price || 0)}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    <div className="flex items-center gap-2 bg-card rounded-theme border border-border p-1">
+                    <div className="flex items-center gap-2 bg-surface rounded-lg border border-border p-1">
                       <button
                         onClick={() => handleDecrement(item.id, item.quantity || 1)}
-                        className="p-1.5 hover:bg-surface rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-card rounded-lg transition-colors"
                       >
                         <Minus className="w-4 h-4 text-text-secondary" />
                       </button>
@@ -83,7 +92,7 @@ export function CartPanel() {
                       </span>
                       <button
                         onClick={() => handleIncrement(item.id, item.quantity || 1)}
-                        className="p-1.5 hover:bg-surface rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-card rounded-lg transition-colors"
                       >
                         <Plus className="w-4 h-4 text-text-secondary" />
                       </button>
@@ -100,7 +109,8 @@ export function CartPanel() {
               ))}
             </div>
 
-            <div className="mt-6 p-4 bg-card rounded-lg border border-border">
+            {/* Cart Summary */}
+            <div className="mt-6 p-4 bg-surface rounded-lg border border-border">
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">Subtotal ({cart.length} items)</span>
                 <span className="font-semibold text-text-primary">
@@ -120,21 +130,25 @@ export function CartPanel() {
                 </span>
               </div>
               {total < 10000 && cart.length > 0 && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                <p className="text-xs text-success mt-2">
                   🎉 Add {formatPrice(10000 - total)} more for free shipping!
                 </p>
               )}
             </div>
 
-            <button className="w-full mt-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-light transition-colors hover:shadow-lg hover:shadow-primary/20">
+            <Link
+              href="/checkout"
+              className="w-full mt-4 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-light transition-colors hover:shadow-lg hover:shadow-primary/20 flex items-center justify-center"
+            >
               Proceed to Checkout
-            </button>
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
           </>
         )}
       </div>
 
       {/* Wishlist Section */}
-      <div className="bg-card rounded-theme-xl border border-border p-6">
+      <div className="bg-card rounded-xl border border-border p-6">
         <div className="flex items-center gap-2">
           <Heart className="w-5 h-5 text-accent" />
           <p className="text-sm font-semibold uppercase tracking-wider text-primary">
@@ -158,7 +172,7 @@ export function CartPanel() {
                 className="flex items-center justify-between rounded-lg border border-border bg-surface p-4"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-400 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent/60 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                     📦
                   </div>
                   <div className="min-w-0">
@@ -181,7 +195,7 @@ export function CartPanel() {
           </div>
         )}
 
-        <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+        <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">AI Suggestions</span>

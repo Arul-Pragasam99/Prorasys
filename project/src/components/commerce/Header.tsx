@@ -59,6 +59,8 @@ export function Header() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/products', label: 'Products', icon: Package },
     { href: '/recommendations', label: 'AI Picks', icon: Sparkles },
+    { href: '/orders', label: 'Orders', icon: Package },
+
   ];
 
   return (
