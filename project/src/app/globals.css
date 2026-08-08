@@ -87,13 +87,27 @@
 }
 
 /* Utility classes for theme variables */
-.bg-surface { background-color: var(--color-surface); }
-.bg-card { background-color: var(--color-card); }
-.text-text-primary { color: var(--color-text-primary); }
-.text-text-secondary { color: var(--color-text-secondary); }
-.text-primary-brand { color: var(--color-text-primary); }
-.text-secondary-brand { color: var(--color-text-secondary); }
-.border-border { border-color: var(--color-border); }
+.bg-surface { 
+  background-color: var(--color-surface); 
+}
+.bg-card { 
+  background-color: var(--color-card); 
+}
+.text-text-primary { 
+  color: var(--color-text-primary); 
+}
+.text-text-secondary { 
+  color: var(--color-text-secondary); 
+}
+.text-primary-brand { 
+  color: var(--color-text-primary); 
+}
+.text-secondary-brand { 
+  color: var(--color-text-secondary); 
+}
+.border-border { 
+  border-color: var(--color-border); 
+}
 
 @layer utilities {
   .bg-surface {
@@ -117,7 +131,7 @@
   }
 }
 
-/* ✅ Smooth scroll - Keep this, but add data-scroll-behavior to html */
+/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }

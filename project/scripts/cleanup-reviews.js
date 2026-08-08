@@ -1,4 +1,4 @@
-// scripts/cleanup-products.js
+// scripts/cleanup-reviews.js
 require('dotenv').config();
 
 const { initializeApp } = require('firebase/app');
@@ -21,35 +21,28 @@ if (!firebaseConfig.apiKey) {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function deleteDummyProducts() {
-  console.log('🗑️ Deleting dummy products...\n');
+async function deleteAllReviews() {
+  console.log('🗑️ Deleting ALL reviews from Firestore...\n');
   
   try {
-    const productsCollection = collection(db, 'products');
-    const snapshot = await getDocs(productsCollection);
+    const reviewsCollection = collection(db, 'reviews');
+    const snapshot = await getDocs(reviewsCollection);
     
     let deletedCount = 0;
     
     for (const docSnapshot of snapshot.docs) {
       const data = docSnapshot.data();
-      const name = data.name || '';
-      
-      if (name.toLowerCase().includes('demo') || 
-          name.toLowerCase().includes('dummy') || 
-          name.toLowerCase().includes('test')) {
-        
-        await deleteDoc(doc(db, 'products', docSnapshot.id));
-        deletedCount++;
-        console.log(`🗑️ Deleted: ${name}`);
-      }
+      await deleteDoc(doc(db, 'reviews', docSnapshot.id));
+      deletedCount++;
+      console.log(`🗑️ Deleted review ${deletedCount}: ${data.text?.substring(0, 30) || 'No text'}...`);
     }
     
-    console.log(`\n✅ Deleted ${deletedCount} dummy products!`);
-    console.log(`📊 Remaining: ${snapshot.size - deletedCount} products`);
+    console.log(`\n✅ Deleted ${deletedCount} reviews from Firestore!`);
+    console.log(`📊 Remaining reviews: 0`);
     
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error deleting reviews:', error);
   }
 }
 
-deleteDummyProducts();
+deleteAllReviews();

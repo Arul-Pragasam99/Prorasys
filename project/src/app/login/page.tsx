@@ -43,8 +43,9 @@ function LoginPageContent() {
     password: '',
     confirmPassword: '',
     name: '',
-    role: 'customer' as 'customer' | 'admin',
   });
+
+  const [signupRole, setSignupRole] = useState<'customer' | 'admin'>('customer');
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -85,7 +86,7 @@ function LoginPageContent() {
           setLoading(false);
           return;
         }
-        const result = await registerUser(formData.email, formData.password, formData.role, formData.name);
+        const result = await registerUser(formData.email, formData.password, signupRole, formData.name);
         if (result) {
           setSuccess('Account created! Redirecting...');
           setTimeout(() => router.push(redirect), 1500);
@@ -174,7 +175,8 @@ function LoginPageContent() {
     { icon: Sparkles, text: 'AI recommendations' },
   ];
 
-  const showGoogleLogin = formData.role === 'customer';
+  // ✅ Google login available for ALL users (both customer and admin, both login and signup)
+  const showGoogleLogin = true;
 
   return (
     <main className="min-h-screen bg-surface text-text-primary">
@@ -207,8 +209,6 @@ function LoginPageContent() {
               ))}
             </div>
 
-            {/* ✅ Session Card Removed */}
-
             <div className="p-4 bg-card rounded-theme border border-border">
               <p className="text-sm text-text-secondary">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
@@ -229,7 +229,7 @@ function LoginPageContent() {
             </div>
           </div>
 
-          {/* Right Column - Login Form */}
+          {/* Right Column - Auth Form */}
           <div ref={rightRef} className="lg:sticky lg:top-24">
             <div className="bg-card rounded-theme-lg border border-border p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
@@ -273,6 +273,7 @@ function LoginPageContent() {
                     </div>
                   </div>
                 )}
+
                 <div>
                   <label className="label">Email Address</label>
                   <div className="relative">
@@ -287,6 +288,7 @@ function LoginPageContent() {
                     />
                   </div>
                 </div>
+
                 <div>
                   <label className="label">Password</label>
                   <div className="relative">
@@ -310,6 +312,7 @@ function LoginPageContent() {
                   </div>
                   {!isLogin && <p className="text-xs text-text-secondary mt-1">Must be at least 6 characters</p>}
                 </div>
+
                 {!isLogin && (
                   <div>
                     <label className="label">Confirm Password</label>
@@ -326,20 +329,24 @@ function LoginPageContent() {
                     </div>
                   </div>
                 )}
-                <div>
-                  <label className="label">Account Type</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as 'customer' | 'admin' })}
-                    className="input"
-                  >
-                    <option value="customer">Customer</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {formData.role === 'admin' ? 'Admins can manage products and reviews' : 'Customers can browse, review, and purchase'}
-                  </p>
-                </div>
+
+                {!isLogin && (
+                  <div>
+                    <label className="label">Account Type</label>
+                    <select
+                      value={signupRole}
+                      onChange={(e) => setSignupRole(e.target.value as 'customer' | 'admin')}
+                      className="input"
+                    >
+                      <option value="customer">Customer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {signupRole === 'admin' ? 'Admins can manage products and reviews' : 'Customers can browse, review, and purchase'}
+                    </p>
+                  </div>
+                )}
+
                 {isLogin && (
                   <div className="flex items-center justify-between gap-2">
                     <label className="flex items-center gap-2 text-sm text-text-secondary">
@@ -362,7 +369,7 @@ function LoginPageContent() {
                 {isLogin && showForgotPassword && (
                   <div className="rounded-theme border border-border bg-surface p-3">
                     <p className="text-sm font-medium text-text-primary">Reset password for your account</p>
-                    <p className="mt-1 text-xs text-text-secondary">Use the email linked to your customer or admin account.</p>
+                    <p className="mt-1 text-xs text-text-secondary">Use the email linked to your account.</p>
                     <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                       <input
                         type="email"
@@ -382,6 +389,7 @@ function LoginPageContent() {
                     </div>
                   </div>
                 )}
+
                 <button
                   type="submit"
                   disabled={loading}
@@ -397,34 +405,33 @@ function LoginPageContent() {
                   )}
                 </button>
 
-                {showGoogleLogin && (
-                  <>
-                    <div className="relative my-4">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-                      <div className="relative flex justify-center text-sm"><span className="px-4 bg-card text-text-secondary">Or continue with</span></div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleGoogleLogin}
-                      disabled={googleLoading}
-                      className="w-full flex items-center justify-center gap-3 py-3 border border-border rounded-theme hover:bg-surface transition-colors disabled:opacity-50"
-                    >
-                      {googleLoading ? (
-                        <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <svg className="w-5 h-5" viewBox="0 0 48 48">
-                          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-                          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-                          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-                          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
-                        </svg>
-                      )}
-                      <span className="text-sm font-medium text-text-primary">
-                        {googleLoading ? 'Signing in...' : 'Sign in with Google'}
-                      </span>
-                    </button>
-                  </>
-                )}
+                {/* ✅ Google Login - Available for ALL users (both login and signup) */}
+                <>
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+                    <div className="relative flex justify-center text-sm"><span className="px-4 bg-card text-text-secondary">Or continue with</span></div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={googleLoading}
+                    className="w-full flex items-center justify-center gap-3 py-3 border border-border rounded-theme hover:bg-surface transition-colors disabled:opacity-50"
+                  >
+                    {googleLoading ? (
+                      <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+                        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+                        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+                        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+                      </svg>
+                    )}
+                    <span className="text-sm font-medium text-text-primary">
+                      {googleLoading ? 'Signing in...' : 'Sign in with Google'}
+                    </span>
+                  </button>
+                </>
               </form>
             </div>
           </div>

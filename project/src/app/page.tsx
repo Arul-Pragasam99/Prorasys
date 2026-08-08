@@ -93,12 +93,12 @@ export default function HomePage() {
       const trustScore = user?.trustScore || 85 + Math.floor(Math.random() * 10);
       
       setStats({
-        totalOrders: Math.floor(Math.random() * 20) + 5, // Placeholder - replace with actual orders
+        totalOrders: Math.floor(Math.random() * 20) + 5,
         totalReviews,
         averageRating: avgRating,
         wishlistCount: wishlist.length,
         cartCount: cart.length,
-        productsViewed: Math.floor(Math.random() * 30) + 10, // Placeholder
+        productsViewed: Math.floor(Math.random() * 30) + 10,
         trustScore,
       });
     } catch (error) {
@@ -163,39 +163,44 @@ export default function HomePage() {
       <main className="min-h-screen bg-surface text-text-primary overflow-x-hidden">
         <Header />
         
-        <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-20 sm:pt-24 lg:pt-28"
+        <section 
+          className="relative min-h-[90vh] flex items-center overflow-hidden pt-20 sm:pt-24 lg:pt-28"
           style={{
-            background: 'radial-gradient(ellipse at 30% 50%, rgba(15, 110, 86, 0.08) 0%, var(--color-surface) 70%)',
+            background: 'radial-gradient(ellipse at 30% 50%, rgba(15, 110, 86, 0.05) 0%, var(--color-surface) 70%)',
           }}
         >
-          <div className="floating-bg absolute top-20 right-10 lg:right-20 opacity-30">
-            <div className="w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
+          <div className="floating-bg absolute top-20 right-10 lg:right-20 opacity-20">
+            <div className="w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
           </div>
-          <div className="floating-bg absolute bottom-20 left-10 lg:left-20 opacity-20">
-            <div className="w-80 h-80 rounded-full bg-secondary/10 blur-3xl" />
+          <div className="floating-bg absolute bottom-20 left-10 lg:left-20 opacity-15">
+            <div className="w-80 h-80 rounded-full bg-secondary/5 blur-3xl" />
           </div>
 
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm mx-auto">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm mx-auto">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-text-secondary">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   AI-Powered Product Discovery
                 </span>
               </div>
 
-              <h1 className="mt-6 text-4xl sm:text-5xl lg:text-7xl font-bold text-text-primary leading-[1.1]">
+              {/* Title */}
+              <h1 className="mt-6 text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-[1.1]">
                 Discover Products
                 <span className="block text-primary mt-2">
                   Built on Trust
                 </span>
               </h1>
 
-              <p className="mt-6 text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
+              {/* Subtitle */}
+              <p className="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
                 AI-powered trust scores, sentiment analysis, and personalized recommendations 
                 — helping you make confident purchasing decisions.
               </p>
 
+              {/* CTA Buttons */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
                 <Link
                   href="/products"
@@ -206,29 +211,30 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                 >
                   Sign In
                   <Users className="w-4 h-4" />
                 </Link>
               </div>
 
+              {/* Stats - ✅ Fixed contrast */}
               <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-                <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-primary">10K+</p>
-                  <p className="text-sm text-text-secondary">Happy Users</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Happy Users</p>
                 </div>
-                <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-secondary">4.8★</p>
-                  <p className="text-sm text-text-secondary">Avg Rating</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg Rating</p>
                 </div>
-                <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-accent">95%</p>
-                  <p className="text-sm text-text-secondary">Trust Score</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Trust Score</p>
                 </div>
-                <div className="bg-card/80 backdrop-blur-sm p-4 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-success">24/7</p>
-                  <p className="text-sm text-text-secondary">AI Support</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Support</p>
                 </div>
               </div>
             </div>
@@ -239,52 +245,53 @@ export default function HomePage() {
         <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 lg:py-24">
           <div className="text-center mb-12">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Why Prorasys</p>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-text-primary">Built for Modern Shopping</h2>
-            <p className="mt-3 text-text-secondary max-w-2xl mx-auto">
+            <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Built for Modern Shopping</h2>
+            <p className="mt-3 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Everything you need to make informed purchasing decisions with confidence.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-card rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white dark:bg-gray-800 rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-primary/10 rounded-theme flex items-center justify-center mb-4">
                 <TrendingUp className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="font-semibold text-text-primary text-lg">AI Sentiment Analysis</h3>
-              <p className="text-text-secondary text-sm mt-2 leading-relaxed">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-lg">AI Sentiment Analysis</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed">
                 Advanced AI analyzes reviews to understand real customer sentiment and product quality.
               </p>
             </div>
-            <div className="bg-card rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white dark:bg-gray-800 rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-secondary/10 rounded-theme flex items-center justify-center mb-4">
                 <Shield className="w-7 h-7 text-secondary" />
               </div>
-              <h3 className="font-semibold text-text-primary text-lg">Trust Scores</h3>
-              <p className="text-text-secondary text-sm mt-2 leading-relaxed">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Trust Scores</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed">
                 Every product gets a trust score based on genuine reviews and sentiment analysis.
               </p>
             </div>
-            <div className="bg-card rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-white dark:bg-gray-800 rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-accent/10 rounded-theme flex items-center justify-center mb-4">
                 <Star className="w-7 h-7 text-accent" />
               </div>
-              <h3 className="font-semibold text-text-primary text-lg">Smart Recommendations</h3>
-              <p className="text-text-secondary text-sm mt-2 leading-relaxed">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Smart Recommendations</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 leading-relaxed">
                 Personalized suggestions powered by machine learning and your preferences.
               </p>
             </div>
           </div>
         </section>
 
-        <footer className="border-t border-border py-8 bg-card">
+        {/* Footer */}
+        <footer className="border-t border-border py-8 bg-white dark:bg-gray-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-                <span className="font-semibold text-text-primary">Prorasys</span>
-                <span className="text-xs text-text-secondary">AI-Powered Discovery</span>
+                <span className="font-semibold text-gray-900 dark:text-white">Prorasys</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">AI-Powered Discovery</span>
               </div>
-              <p className="text-sm text-text-secondary">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 © {new Date().getFullYear()} Prorasys. All rights reserved.
               </p>
             </div>
@@ -313,64 +320,60 @@ export default function HomePage() {
               Active
             </span>
           </div>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-text-primary">
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Welcome back, {displayName}! 👋
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Track your activity, reviews, and personalized recommendations
           </p>
         </div>
 
         {/* Stats Grid */}
         <div ref={statsRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {/* Cart Items */}
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <ShoppingBag className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Cart</p>
-                <p className="text-xl font-bold text-text-primary">{stats.cartCount}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cart</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.cartCount}</p>
               </div>
             </div>
           </div>
 
-          {/* Wishlist */}
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-accent/10 rounded-lg">
                 <Heart className="w-4 h-4 text-accent" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Wishlist</p>
-                <p className="text-xl font-bold text-text-primary">{stats.wishlistCount}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Wishlist</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.wishlistCount}</p>
               </div>
             </div>
           </div>
 
-          {/* Reviews Given */}
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-secondary/10 rounded-lg">
                 <Star className="w-4 h-4 text-secondary" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Reviews</p>
-                <p className="text-xl font-bold text-text-primary">{stats.totalReviews}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reviews</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalReviews}</p>
               </div>
             </div>
           </div>
 
-          {/* Avg Rating */}
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-success/10 rounded-lg">
                 <TrendingUp className="w-4 h-4 text-success" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Avg Rating</p>
-                <p className="text-xl font-bold text-text-primary">{stats.averageRating.toFixed(1)}★</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Rating</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.averageRating.toFixed(1)}★</p>
               </div>
             </div>
           </div>
@@ -378,38 +381,38 @@ export default function HomePage() {
 
         {/* Extended Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-warning/10 rounded-lg">
                 <Clock className="w-4 h-4 text-warning" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Products Viewed</p>
-                <p className="text-xl font-bold text-text-primary">{stats.productsViewed}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Products Viewed</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.productsViewed}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Package className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Orders</p>
-                <p className="text-xl font-bold text-text-primary">{stats.totalOrders}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Orders</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalOrders}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-success/10 rounded-lg">
                 <CheckCircle className="w-4 h-4 text-success" />
               </div>
               <div>
-                <p className="text-xs text-text-secondary uppercase tracking-wider">Trust Score</p>
-                <p className="text-xl font-bold text-text-primary">{stats.trustScore}%</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trust Score</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.trustScore}%</p>
               </div>
             </div>
           </div>
@@ -419,54 +422,54 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Link
             href="/products"
-            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <ShoppingBag className="w-6 h-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="font-medium text-text-primary">Browse Products</h3>
-            <p className="text-xs text-text-secondary">Discover new items</p>
+            <h3 className="font-medium text-gray-900 dark:text-white">Browse Products</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Discover new items</p>
           </Link>
 
           <Link
             href="/cart"
-            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <ShoppingBag className="w-6 h-6 text-accent mx-auto mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="font-medium text-text-primary">View Cart</h3>
-            <p className="text-xs text-text-secondary">{stats.cartCount} items in cart</p>
+            <h3 className="font-medium text-gray-900 dark:text-white">View Cart</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{stats.cartCount} items in cart</p>
           </Link>
 
           <Link
             href="/recommendations"
-            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <Sparkles className="w-6 h-6 text-purple-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="font-medium text-text-primary">AI Picks</h3>
-            <p className="text-xs text-text-secondary">Personalized recommendations</p>
+            <h3 className="font-medium text-gray-900 dark:text-white">AI Picks</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Personalized recommendations</p>
           </Link>
 
           <Link
             href="/profile"
-            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <Users className="w-6 h-6 text-secondary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-            <h3 className="font-medium text-text-primary">My Profile</h3>
-            <p className="text-xs text-text-secondary">Manage your account</p>
+            <h3 className="font-medium text-gray-900 dark:text-white">My Profile</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Manage your account</p>
           </Link>
         </div>
 
         {/* Trust Score Bar */}
         <div className="mt-8 p-4 bg-primary/5 rounded-xl border border-primary/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-text-primary">Your Trust Score</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">Your Trust Score</span>
             <span className="text-sm font-bold text-primary">{stats.trustScore}%</span>
           </div>
-          <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-primary to-success rounded-full transition-all duration-1000"
               style={{ width: `${stats.trustScore}%` }}
             />
           </div>
-          <p className="text-xs text-text-secondary mt-2">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
             {stats.trustScore >= 80 
               ? '🌟 Excellent trust score! Keep engaging with the community.'
               : stats.trustScore >= 60

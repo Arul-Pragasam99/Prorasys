@@ -46,6 +46,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(next);
   };
 
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return <div style={{ visibility: 'hidden' }}>{children}</div>;
+  }
+
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
