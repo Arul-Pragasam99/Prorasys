@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { getOrdersByUser, Order } from '@/lib/order-service';
-import { Package, Truck, CheckCircle, Clock, Loader2, ArrowLeft } from 'lucide-react';
+import { cancelOrder, getOrdersByUser, Order } from '@/lib/order-service';
+import { Package, Truck, CheckCircle, Clock, Loader2, ArrowLeft, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrdersPage() {
@@ -13,6 +13,7 @@ export default function OrdersPage() {
   const { user, isAuthenticated, userRole } = useStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -36,6 +37,21 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!window.confirm('Cancel this order? This cannot be undone.')) return;
+
+    setCancellingOrderId(orderId);
+    const cancelled = await cancelOrder(orderId);
+    if (cancelled) {
+      setOrders((currentOrders) => currentOrders.map((order) => (
+        order.id === orderId ? { ...order, status: 'cancelled' } : order
+      )));
+    } else {
+      window.alert('Unable to cancel this order. Please try again.');
+    }
+    setCancellingOrderId(null);
   };
 
   const getStatusIcon = (status: string) => {
@@ -141,6 +157,16 @@ export default function OrdersPage() {
                     >
                       Write a Review ✍️
                     </Link>
+                  )}
+                  {(order.status === 'pending' || order.status === 'confirmed') && (
+                    <button
+                      onClick={() => handleCancelOrder(order.id)}
+                      disabled={cancellingOrderId === order.id}
+                      className="inline-flex items-center gap-2 rounded-theme border border-danger/30 px-4 py-2 text-sm font-medium text-danger hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {cancellingOrderId === order.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                      {cancellingOrderId === order.id ? 'Cancelling...' : 'Cancel Order'}
+                    </button>
                   )}
                 </div>
               </div>

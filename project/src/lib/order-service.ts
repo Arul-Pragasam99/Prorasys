@@ -150,3 +150,17 @@ export async function getUserPurchasedProducts(userId: string): Promise<string[]
     return [];
   }
 }
+
+export async function cancelOrder(orderId: string) {
+  try {
+    const docRef = doc(db, 'orders', orderId);
+    await updateDoc(docRef, {
+      status: 'cancelled' as OrderStatus,
+      updatedAt: new Date().toISOString(),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+    return false;
+  }
+}

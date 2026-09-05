@@ -53,8 +53,9 @@ service cloud.firestore {
         || (signedIn() && resource.data.userId == request.auth.uid);
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin()
-        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow update: if resource.data.status != 'cancelled'
+        && (isAdmin()
+          || (signedIn() && resource.data.userId == request.auth.uid));
       allow delete: if isAdmin();
     }
 

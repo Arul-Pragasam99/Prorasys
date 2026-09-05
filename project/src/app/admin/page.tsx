@@ -316,7 +316,8 @@ export default function AdminPage() {
           ))}
         </div>
 
-        <section className="mt-6 sm:mt-8 rounded-xl border border-border bg-card p-4 sm:p-6">
+        <div className="mt-6 sm:mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg sm:text-xl font-semibold text-text-primary">Manage Products</h2>
@@ -358,7 +359,7 @@ export default function AdminPage() {
           )}
         </section>
 
-          <section className="mt-6 sm:mt-8 rounded-xl border border-border bg-card p-4 sm:p-6">
+          <section className="rounded-xl border border-border bg-card p-4 sm:p-6">
             <div className="mb-4">
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Order Queue</p>
               <h2 className="mt-1 text-lg sm:text-xl font-semibold text-text-primary">Manage customer orders</h2>
@@ -377,6 +378,7 @@ export default function AdminPage() {
                     <select
                       value={order.status || 'pending'}
                       onChange={(event) => handleOrderStatusChange(order.id, event.target.value)}
+                      disabled={order.status === 'cancelled'}
                       className="rounded-theme border border-border bg-card px-3 py-2 text-sm text-text-primary"
                     >
                       <option value="pending">Pending</option>
@@ -398,7 +400,8 @@ export default function AdminPage() {
               </div>
             )}
           </section>
-          </section>
+        </div>
+        </section>
       </div>
     </main>
   );
