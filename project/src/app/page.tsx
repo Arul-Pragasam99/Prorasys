@@ -179,7 +179,7 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm mx-auto">
+              <div className="inline-flex items-center gap-2 bg-card backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm mx-auto">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   AI-Powered Product Discovery
@@ -211,7 +211,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-card text-text-primary rounded-theme border-2 border-border hover:border-primary hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                 >
                   Sign In
                   <Users className="w-4 h-4" />
@@ -220,19 +220,19 @@ export default function HomePage() {
 
               {/* Stats - ✅ Fixed contrast */}
               <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-primary">10K+</p>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Happy Users</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-secondary">4.8★</p>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg Rating</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-accent">95%</p>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Trust Score</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <p className="text-3xl font-bold text-success">24/7</p>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Support</p>
                 </div>
@@ -252,7 +252,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-card rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-primary/10 rounded-theme flex items-center justify-center mb-4">
                 <TrendingUp className="w-7 h-7 text-primary" />
               </div>
@@ -261,7 +261,7 @@ export default function HomePage() {
                 Advanced AI analyzes reviews to understand real customer sentiment and product quality.
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-card rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-secondary/10 rounded-theme flex items-center justify-center mb-4">
                 <Shield className="w-7 h-7 text-secondary" />
               </div>
@@ -270,7 +270,7 @@ export default function HomePage() {
                 Every product gets a trust score based on genuine reviews and sentiment analysis.
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="bg-card rounded-theme-lg border border-border p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-accent/10 rounded-theme flex items-center justify-center mb-4">
                 <Star className="w-7 h-7 text-accent" />
               </div>
@@ -283,7 +283,7 @@ export default function HomePage() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border py-8 bg-white dark:bg-gray-800">
+        <footer className="border-t border-border py-8 bg-card">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export default function HomePage() {
 
         {/* Stats Grid */}
         <div ref={statsRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <ShoppingBag className="w-4 h-4 text-primary" />
@@ -342,7 +342,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-accent/10 rounded-lg">
                 <Heart className="w-4 h-4 text-accent" />
@@ -354,7 +354,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-secondary/10 rounded-lg">
                 <Star className="w-4 h-4 text-secondary" />
@@ -366,7 +366,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-success/10 rounded-lg">
                 <TrendingUp className="w-4 h-4 text-success" />
@@ -381,7 +381,7 @@ export default function HomePage() {
 
         {/* Extended Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-warning/10 rounded-lg">
                 <Clock className="w-4 h-4 text-warning" />
@@ -393,7 +393,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Package className="w-4 h-4 text-primary" />
@@ -405,7 +405,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-success/10 rounded-lg">
                 <CheckCircle className="w-4 h-4 text-success" />
@@ -422,7 +422,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Link
             href="/products"
-            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <ShoppingBag className="w-6 h-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <h3 className="font-medium text-gray-900 dark:text-white">Browse Products</h3>
@@ -431,7 +431,7 @@ export default function HomePage() {
 
           <Link
             href="/cart"
-            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <ShoppingBag className="w-6 h-6 text-accent mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <h3 className="font-medium text-gray-900 dark:text-white">View Cart</h3>
@@ -440,7 +440,7 @@ export default function HomePage() {
 
           <Link
             href="/recommendations"
-            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <Sparkles className="w-6 h-6 text-purple-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <h3 className="font-medium text-gray-900 dark:text-white">AI Picks</h3>
@@ -449,7 +449,7 @@ export default function HomePage() {
 
           <Link
             href="/profile"
-            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
+            className="p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all hover:-translate-y-1 text-center group"
           >
             <Users className="w-6 h-6 text-secondary mx-auto mb-2 group-hover:scale-110 transition-transform" />
             <h3 className="font-medium text-gray-900 dark:text-white">My Profile</h3>
