@@ -336,7 +336,7 @@ export default function AdminPage() {
               No products found.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
               {products.map((product) => (
                 <div key={product.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3">
                   <div className="min-w-0">
@@ -368,7 +368,7 @@ export default function AdminPage() {
             {adminOrders.length === 0 ? (
               <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-secondary">No customer orders yet.</p>
             ) : (
-              <div className="space-y-2">
+              <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
                 {adminOrders.map((order) => (
                   <div key={order.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3">
                     <div>
