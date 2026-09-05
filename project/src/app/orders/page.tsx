@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useStore();
+  const { user, isAuthenticated, userRole } = useStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,8 +19,12 @@ export default function OrdersPage() {
       router.push('/login?redirect=/orders');
       return;
     }
+    if (userRole === 'admin') {
+      router.push('/admin');
+      return;
+    }
     fetchOrders();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, userRole, router]);
 
   const fetchOrders = async () => {
     try {
@@ -51,6 +55,10 @@ export default function OrdersPage() {
       default: return 'text-warning bg-warning/10 border-warning/20';
     }
   };
+
+  if (userRole === 'admin') {
+    return null;
+  }
 
   if (loading) {
     return (

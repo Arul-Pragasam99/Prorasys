@@ -13,7 +13,7 @@ interface ProductActionsProps {
 }
 
 export function ProductActions({ productId, product }: ProductActionsProps) {
-  const { user, refreshCart } = useStore();
+  const { user, userRole, refreshCart } = useStore();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -55,6 +55,14 @@ export function ProductActions({ productId, product }: ProductActionsProps) {
       setIsAddingToWishlist(false);
     }
   };
+
+  if (userRole === 'admin') {
+    return (
+      <div className="mt-8 rounded-lg border border-border bg-card p-4 text-sm text-text-secondary">
+        Admin accounts can view products but cannot buy or add items to a cart.
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8">

@@ -6,9 +6,11 @@ import { Header } from '@/components/commerce/Header';
 import { AdminOverview } from '@/components/admin/AdminOverview';
 import { AuthStatusCard } from '@/components/commerce/AuthStatusCard';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { Shield, Users, Package, Star, TrendingUp, Clock, AlertTriangle, CheckCircle, PlusCircle, BarChart3, Loader2, Trash2 } from 'lucide-react';
+import { Shield, Users, Package, Star, TrendingUp, Clock, AlertTriangle, CheckCircle, PlusCircle, BarChart3, Loader2, Trash2, XCircle } from 'lucide-react';
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { formatPriceSimple } from '@/lib/store-data';
 
 interface AdminStats {
   totalProducts: number;
@@ -29,6 +31,14 @@ interface AdminProduct {
   combinedScore?: number;
 }
 
+interface AdminOrder {
+  id: string;
+  userDisplayName?: string;
+  totalAmount?: number;
+  status?: string;
+  createdAt?: string;
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useStore();
@@ -45,6 +55,7 @@ export default function AdminPage() {
   const [fetchingStats, setFetchingStats] = useState(true);
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+  const [adminOrders, setAdminOrders] = useState<AdminOrder[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -100,6 +111,20 @@ export default function AdminPage() {
       const reviews = reviewsSnapshot.docs.map(doc => doc.data());
       const pendingReviews = reviews.filter(r => !r.isFlagged).length;
       const flaggedReviews = reviews.filter(r => r.isFlagged).length;
+
+      try {
+        const ordersSnapshot = await getDocs(collection(db, 'orders'));
+        const orders = ordersSnapshot.docs
+          .map(orderDoc => ({
+            id: orderDoc.id,
+            ...(orderDoc.data() as Omit<AdminOrder, 'id'>),
+          }))
+          .sort((first, second) => (second.createdAt || '').localeCompare(first.createdAt || ''));
+        setAdminOrders(orders.slice(0, 8));
+      } catch (error) {
+        console.error('Error fetching admin orders:', error);
+        setAdminOrders([]);
+      }
       
       setStats({
         totalProducts,
@@ -135,6 +160,24 @@ export default function AdminPage() {
     } finally {
       setDeletingProductId(null);
     }
+  };
+
+  const handleOrderStatusChange = async (orderId: string, status: string) => {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), {
+        status,
+        updatedAt: new Date().toISOString(),
+      });
+      setAdminOrders((orders) => orders.map((order) => order.id === orderId ? { ...order, status } : order));
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      window.alert('Failed to update order status.');
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!window.confirm('Cancel this customer order?')) return;
+    await handleOrderStatusChange(orderId, 'cancelled');
   };
 
   const statItems = [
@@ -314,7 +357,48 @@ export default function AdminPage() {
             </div>
           )}
         </section>
-        </section>
+
+          <section className="mt-6 sm:mt-8 rounded-xl border border-border bg-card p-4 sm:p-6">
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Order Queue</p>
+              <h2 className="mt-1 text-lg sm:text-xl font-semibold text-text-primary">Manage customer orders</h2>
+              <p className="text-sm text-text-secondary">New orders start as pending until you confirm fulfillment.</p>
+            </div>
+            {adminOrders.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-secondary">No customer orders yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {adminOrders.map((order) => (
+                  <div key={order.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3">
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">#{order.id.slice(0, 8)} · {order.userDisplayName || 'Customer'}</p>
+                      <p className="text-xs text-text-secondary">{formatPriceSimple(order.totalAmount || 0)}</p>
+                    </div>
+                    <select
+                      value={order.status || 'pending'}
+                      onChange={(event) => handleOrderStatusChange(order.id, event.target.value)}
+                      className="rounded-theme border border-border bg-card px-3 py-2 text-sm text-text-primary"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                      <button
+                        onClick={() => handleCancelOrder(order.id)}
+                        className="inline-flex items-center gap-2 rounded-theme border border-danger/30 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10"
+                      >
+                        <XCircle className="h-4 w-4" /> Cancel
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+          </section>
       </div>
     </main>
   );

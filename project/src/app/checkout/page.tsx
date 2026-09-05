@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, isAuthenticated, cart, refreshCart } = useStore();
+  const { user, isAuthenticated, userRole, cart, refreshCart } = useStore();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -31,13 +31,17 @@ export default function CheckoutPage() {
       router.push('/login?redirect=/checkout');
       return;
     }
+    if (userRole === 'admin') {
+      router.push('/admin');
+      return;
+    }
     if (cart.length === 0) {
       router.push('/cart');
       return;
     }
     const total = cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
     setSubtotal(total);
-  }, [isAuthenticated, cart, router]);
+  }, [isAuthenticated, userRole, cart, router]);
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();

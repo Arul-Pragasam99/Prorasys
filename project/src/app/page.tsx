@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { getOrdersByUser, type Order } from '@/lib/order-service';
+import { formatPriceSimple } from '@/lib/store-data';
 
 interface CustomerStats {
   totalOrders: number;
@@ -35,7 +37,7 @@ interface CustomerStats {
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, userRole, cart, wishlist } = useStore();
+  const { user, isAuthenticated, isLoading, userRole, cart, wishlist, aiRecommendations } = useStore();
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState<CustomerStats>({
     totalOrders: 0,
@@ -47,6 +49,7 @@ export default function HomePage() {
     trustScore: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
@@ -66,8 +69,15 @@ export default function HomePage() {
   useEffect(() => {
     if (isAuthenticated && user && userRole === 'customer') {
       fetchCustomerStats();
+      fetchRecentOrders();
     }
   }, [isAuthenticated, user, userRole]);
+
+  const fetchRecentOrders = async () => {
+    if (!user) return;
+    const orders = await getOrdersByUser(user.uid);
+    setRecentOrders(orders.slice(0, 3));
+  };
 
   const fetchCustomerStats = async () => {
     try {
@@ -457,6 +467,71 @@ export default function HomePage() {
             <h3 className="font-medium text-gray-900 dark:text-white">My Profile</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">Manage your account</p>
           </Link>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <section className="lg:col-span-3 rounded-xl border border-border bg-card p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Recent Activity</p>
+                <h2 className="mt-1 text-lg font-semibold text-text-primary">Your latest orders</h2>
+              </div>
+              <Link href="/orders" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                View all <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {recentOrders.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Package className="h-5 w-5 shrink-0 text-primary" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-text-primary">Order #{order.id.slice(0, 8)}</p>
+                        <p className="text-xs text-text-secondary">{order.items.length} item{order.items.length === 1 ? '' : 's'}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-text-primary">{formatPriceSimple(order.totalAmount)}</p>
+                      <p className="text-xs capitalize text-primary">{order.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-lg border border-dashed border-border p-5 text-center">
+                <p className="text-sm text-text-secondary">No orders yet.</p>
+                <Link href="/products" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                  Start shopping <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
+          </section>
+
+          <section className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">For You</p>
+                <h2 className="mt-1 text-lg font-semibold text-text-primary">AI picks</h2>
+              </div>
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div className="mt-4 space-y-3">
+              {(aiRecommendations || []).slice(0, 3).map((product) => (
+                <Link key={product.id} href={`/products/${product.id}`} className="flex items-center justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0 hover:text-primary">
+                  <span className="truncate text-sm font-medium text-text-primary">{product.name}</span>
+                  <span className="shrink-0 text-xs text-text-secondary">{formatPriceSimple(product.price)}</span>
+                </Link>
+              ))}
+              {(!aiRecommendations || aiRecommendations.length === 0) && (
+                <p className="text-sm text-text-secondary">Your personalized picks are being prepared.</p>
+              )}
+            </div>
+            <Link href="/recommendations" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Explore recommendations <ArrowRight className="h-4 w-4" />
+            </Link>
+          </section>
         </div>
 
         {/* Trust Score Bar */}

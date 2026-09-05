@@ -8,13 +8,17 @@ import { useStore } from '@/components/commerce/StoreProvider';
 
 export default function CartPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useStore();
+  const { isAuthenticated, isLoading, userRole } = useStore();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/login?redirect=/cart');
+      return;
     }
-  }, [isAuthenticated, isLoading, router]);
+    if (!isLoading && userRole === 'admin') {
+      router.push('/admin');
+    }
+  }, [isAuthenticated, isLoading, userRole, router]);
 
   if (isLoading) {
     return (
@@ -27,7 +31,7 @@ export default function CartPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || userRole === 'admin') {
     return null;
   }
 

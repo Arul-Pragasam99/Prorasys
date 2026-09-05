@@ -19,7 +19,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }: ProductCardProps) {
-  const { addToCart, addToWishlist, cart, wishlist, updateCartQuantity } = useStore();
+  const { addToCart, addToWishlist, cart, wishlist, updateCartQuantity, userRole } = useStore();
   const [isHovered, setIsHovered] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -116,9 +116,11 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
           <Link href={`/products/${product.id}`} className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg">
             <Eye className="w-5 h-5" />
           </Link>
-          <button onClick={handleAddToCart} className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg">
-            <ShoppingBag className="w-5 h-5" />
-          </button>
+          {userRole !== 'admin' && (
+            <button onClick={handleAddToCart} className="p-3 bg-surface text-text-primary rounded-full hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg">
+              <ShoppingBag className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-surface/90 backdrop-blur px-2.5 py-1.5 rounded-full text-xs font-medium shadow-lg">
@@ -156,7 +158,7 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/80">
+        {userRole !== 'admin' && <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/80">
           {inCart ? (
             <div className="flex items-center gap-2 bg-card rounded-lg p-1 border border-border">
               <button
@@ -198,7 +200,7 @@ export function ProductCard({ product, index = 0, showAI = false, aiScore = 0 }:
           >
             <Heart className={`w-4 h-4 ${inWishlist ? 'fill-accent' : ''}`} />
           </button>
-        </div>
+        </div>}
       </div>
     </div>
   );

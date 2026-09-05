@@ -65,6 +65,9 @@ export function Header() {
     { href: '/recommendations', label: 'AI Picks', icon: Sparkles },
     { href: '/orders', label: 'Orders', icon: OrdersIcon },
   ];
+  const visibleNavLinks = userRole === 'admin'
+    ? navLinks.filter(({ href }) => href !== '/orders')
+    : navLinks;
 
   // Navbar uses the site's theme tokens (--color-surface / --color-border)
   // defined in globals.css, so it automatically matches light/dark mode
@@ -93,7 +96,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-          {navLinks.map(({ href, label, icon: Icon }) => (
+          {visibleNavLinks.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -120,33 +123,37 @@ export function Header() {
             )}
           </button>
 
-          {/* Cart */}
-          <Link
-            href="/cart"
-            className="relative group p-2 rounded-theme hover:bg-card transition-all duration-200"
-            aria-label="Cart"
-          >
-            <ShoppingBag className="w-5 h-5 text-text-secondary group-hover:text-primary transition-colors" />
-            {cart.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold shadow-lg animate-pulse">
-                {cart.length}
-              </span>
-            )}
-          </Link>
+          {userRole !== 'admin' && (
+            <>
+              {/* Cart */}
+              <Link
+                href="/cart"
+                className="relative group p-2 rounded-theme hover:bg-card transition-all duration-200"
+                aria-label="Cart"
+              >
+                <ShoppingBag className="w-5 h-5 text-text-secondary group-hover:text-primary transition-colors" />
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold shadow-lg animate-pulse">
+                    {cart.length}
+                  </span>
+                )}
+              </Link>
 
-          {/* Wishlist */}
-          <Link
-            href="/cart#wishlist"
-            className="relative group p-2 rounded-theme hover:bg-card transition-all duration-200"
-            aria-label="Wishlist"
-          >
-            <Heart className="w-5 h-5 text-text-secondary group-hover:text-accent transition-colors" />
-            {wishlist.length > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white text-[10px] font-bold shadow-lg">
-                {wishlist.length}
-              </span>
-            )}
-          </Link>
+              {/* Wishlist */}
+              <Link
+                href="/cart#wishlist"
+                className="relative group p-2 rounded-theme hover:bg-card transition-all duration-200"
+                aria-label="Wishlist"
+              >
+                <Heart className="w-5 h-5 text-text-secondary group-hover:text-accent transition-colors" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white text-[10px] font-bold shadow-lg">
+                    {wishlist.length}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
 
           {/* Auth */}
           {isAuthenticated ? (
@@ -212,7 +219,7 @@ export function Header() {
               </div>
             )}
 
-            {navLinks.map(({ href, label, icon: Icon }) => (
+            {visibleNavLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
