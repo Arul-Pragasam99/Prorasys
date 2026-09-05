@@ -160,11 +160,12 @@ export default function HomePage() {
   // ─── GUEST LANDING PAGE ──────────────────────────────────────────────────
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen bg-surface text-text-primary overflow-x-hidden">
+      <main className="h-screen bg-surface text-text-primary overflow-hidden">
         <Header />
-        
-        <section 
-          className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24 lg:pt-28"
+
+        <div className="absolute inset-x-0 top-16 bottom-0 overflow-y-auto overflow-x-hidden sm:top-20">
+          <section 
+            className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
           style={{
             background: 'radial-gradient(ellipse at 30% 50%, rgba(15, 110, 86, 0.05) 0%, var(--color-surface) 70%)',
           }}
@@ -239,10 +240,10 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
+          </section>
 
         {/* Features Section */}
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 lg:py-24">
+          <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 lg:py-24">
           <div className="text-center mb-12">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Why Prorasys</p>
             <h2 className="mt-2 text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Built for Modern Shopping</h2>
@@ -280,10 +281,10 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </section>
+          </section>
 
         {/* Footer */}
-        <footer className="border-t border-border py-8 bg-card">
+          <footer className="border-t border-border py-8 bg-card">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
@@ -296,7 +297,8 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </footer>
+          </footer>
+        </div>
       </main>
     );
   }
