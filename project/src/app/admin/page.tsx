@@ -157,10 +157,11 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface text-text-primary overflow-x-hidden">
+    <main className="relative h-screen bg-surface text-text-primary overflow-hidden">
       <Header />
-      
-      <section ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pt-20 sm:pt-24 lg:pt-28">
+
+      <div className="absolute inset-x-0 top-16 bottom-0 overflow-y-auto overflow-x-hidden sm:top-20">
+        <section ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
         <div ref={headerRef} className="mb-6 sm:mb-8">
           <div className="flex flex-wrap items-center gap-2">
@@ -234,7 +235,8 @@ export default function AdminPage() {
             </button>
           ))}
         </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
