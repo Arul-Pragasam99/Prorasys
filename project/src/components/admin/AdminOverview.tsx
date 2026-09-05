@@ -28,7 +28,7 @@ export function AdminOverview({ stats }: AdminOverviewProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4">
       {metrics.map(({ label, value, icon: Icon, color }) => (
-        <div 
+        <div
           key={label}
           className="bg-card p-3 sm:p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 text-center"
         >

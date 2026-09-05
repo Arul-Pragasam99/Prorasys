@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // User profiles. Users can manage their own profile, while admins can
+    // manage profiles from the admin dashboard.
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == 'customer';
+      allow update: if isAdmin()
+        || (signedIn()
+          && request.auth.uid == userId
+          && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    // Cart and wishlist data are private to each user.
+    match /carts/{userId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    // Products are public to read. Product creation and maintenance are
+    // performed by the authenticated admin dashboard or backend.
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Reviews are publicly readable. Customers can create and manage their
+    // own reviews; admins can moderate any review.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // Orders are private to the owning customer. Admins can manage all orders.
+    match /orders/{orderId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Deny all undeclared collections by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
