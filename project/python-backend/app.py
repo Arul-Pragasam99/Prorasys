@@ -41,6 +41,17 @@ def init_firebase():
             firebase_admin.initialize_app(cred)
             print("[OK] Firebase connected using service-account.json")
             return firestore.client()
+        if os.getenv('FIREBASE_ADMIN_PRIVATE_KEY'):
+            cred = credentials.Certificate({
+                'type': 'service_account',
+                'project_id': os.getenv('FIREBASE_ADMIN_PROJECT_ID'),
+                'private_key': os.getenv('FIREBASE_ADMIN_PRIVATE_KEY', '').replace('\\n', '\n'),
+                'client_email': os.getenv('FIREBASE_ADMIN_CLIENT_EMAIL'),
+                'token_uri': 'https://oauth2.googleapis.com/token',
+            })
+            firebase_admin.initialize_app(cred)
+            print("[OK] Firebase connected using environment credentials")
+            return firestore.client()
         else:
             print("[WARN] service-account.json not found - using mock data")
             return None
