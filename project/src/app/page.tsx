@@ -164,7 +164,7 @@ export default function HomePage() {
         <Header />
         
         <section 
-          className="relative min-h-[90vh] flex items-center overflow-hidden pt-20 sm:pt-24 lg:pt-28"
+          className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24 lg:pt-28"
           style={{
             background: 'radial-gradient(ellipse at 30% 50%, rgba(15, 110, 86, 0.05) 0%, var(--color-surface) 70%)',
           }}
@@ -176,8 +176,8 @@ export default function HomePage() {
             <div className="w-80 h-80 rounded-full bg-secondary/5 blur-3xl" />
           </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
-            <div className="max-w-4xl mx-auto text-center">
+          <div className="relative w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
+            <div className="w-full max-w-4xl mx-auto text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-card backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-sm mx-auto">
                 <Sparkles className="w-4 h-4 text-primary" />
