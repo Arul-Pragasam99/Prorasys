@@ -6,8 +6,8 @@ import { Header } from '@/components/commerce/Header';
 import { AdminOverview } from '@/components/admin/AdminOverview';
 import { AuthStatusCard } from '@/components/commerce/AuthStatusCard';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { Shield, Users, Package, Star, TrendingUp, Clock, AlertTriangle, CheckCircle, PlusCircle, BarChart3, Loader2 } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { Shield, Users, Package, Star, TrendingUp, Clock, AlertTriangle, CheckCircle, PlusCircle, BarChart3, Loader2, Trash2 } from 'lucide-react';
+import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 interface AdminStats {
@@ -17,6 +17,16 @@ interface AdminStats {
   trustScore: number;
   pendingReviews: number;
   flaggedReviews: number;
+}
+
+interface AdminProduct {
+  id: string;
+  name?: string;
+  category?: string;
+  price?: number;
+  avgRating?: number;
+  rating?: number;
+  combinedScore?: number;
 }
 
 export default function AdminPage() {
@@ -33,6 +43,8 @@ export default function AdminPage() {
     flaggedReviews: 0,
   });
   const [fetchingStats, setFetchingStats] = useState(true);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +70,11 @@ export default function AdminPage() {
       
       // Fetch products
       const productsSnapshot = await getDocs(collection(db, 'products'));
-      const products = productsSnapshot.docs.map(doc => doc.data());
+      const products = productsSnapshot.docs.map(productDoc => ({
+        id: productDoc.id,
+        ...(productDoc.data() as Omit<AdminProduct, 'id'>),
+      }));
+      setProducts(products);
       const totalProducts = productsSnapshot.size;
       
       // Calculate average rating
@@ -97,6 +113,27 @@ export default function AdminPage() {
       console.error('Error fetching admin stats:', error);
     } finally {
       setFetchingStats(false);
+    }
+  };
+
+  const handleDeleteProduct = async (product: AdminProduct) => {
+    if (!window.confirm(`Delete "${product.name || 'this product'}"? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeletingProductId(product.id);
+      await deleteDoc(doc(db, 'products', product.id));
+      setProducts((currentProducts) => currentProducts.filter(({ id }) => id !== product.id));
+      setStats((currentStats) => ({
+        ...currentStats,
+        totalProducts: Math.max(0, currentStats.totalProducts - 1),
+      }));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      window.alert('Failed to delete product. Please try again.');
+    } finally {
+      setDeletingProductId(null);
     }
   };
 
@@ -235,6 +272,48 @@ export default function AdminPage() {
             </button>
           ))}
         </div>
+
+        <section className="mt-6 sm:mt-8 rounded-xl border border-border bg-card p-4 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg sm:text-xl font-semibold text-text-primary">Manage Products</h2>
+              <p className="text-sm text-text-secondary">Remove products from your catalog.</p>
+            </div>
+            <button
+              onClick={() => router.push('/admin/products/add')}
+              className="inline-flex items-center gap-2 rounded-theme bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-light"
+            >
+              <PlusCircle className="h-4 w-4" /> Add Product
+            </button>
+          </div>
+
+          {products.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-secondary">
+              No products found.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {products.map((product) => (
+                <div key={product.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-text-primary">{product.name || 'Unnamed Product'}</p>
+                    <p className="text-xs text-text-secondary">
+                      {product.category || 'General'} · ₹{(product.price || 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteProduct(product)}
+                    disabled={deletingProductId === product.id}
+                    className="inline-flex items-center gap-2 rounded-theme border border-danger/30 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {deletingProductId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    {deletingProductId === product.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
         </section>
       </div>
     </main>
