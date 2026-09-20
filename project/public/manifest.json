@@ -1,0 +1,12 @@
+{
+  "name": "Prorasys - AI-Powered E-Commerce",
+  "short_name": "Prorasys",
+  "description": "Modern trust-aware commerce with AI recommendations",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0F6E56",
+  "categories": ["shopping", "lifestyle"]
+}

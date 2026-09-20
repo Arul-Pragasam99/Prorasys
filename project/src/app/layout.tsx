@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { StoreProvider } from '@/components/commerce/StoreProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import { Analytics } from "@vercel/analytics/next"  
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -15,6 +16,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Prorasys - AI-Powered E-Commerce',
   description: 'Modern trust-aware commerce with AI recommendations',
+  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
@@ -49,6 +51,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <ServiceWorkerRegistration />
         <ThemeProvider>
           <StoreProvider>
             {children}
