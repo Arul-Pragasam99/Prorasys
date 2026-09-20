@@ -11,7 +11,7 @@ export type Review = {
   credibilityWeight: number;
   isFlagged: boolean;
   flagReasons: string[];
-  timestamp?: string;
+  timestamp: string;
 };
 
 // Sample products with all required properties

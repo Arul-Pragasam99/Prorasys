@@ -24,7 +24,7 @@ async function getProductData(productId: string) {
         description: firestoreProduct.description ?? product.description,
         price: firestoreProduct.price ?? product.price,
         category: firestoreProduct.category ?? product.category,
-        rating: firestoreProduct.avgRating ?? product.rating,
+        rating: firestoreProduct.rating ?? product.rating,
         badge: product.badge || 'Featured',
         color: product.color || 'from-brand-500 to-blue-500',
         image: product.image,
