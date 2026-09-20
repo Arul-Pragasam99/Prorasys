@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { StoreProvider } from '@/components/commerce/StoreProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { Analytics } from "@vercel/analytics/next"  
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ 
   subsets: ['latin'],
