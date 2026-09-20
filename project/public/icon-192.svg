@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title">
+  <title>Prorasys</title>
+  <rect width="192" height="192" rx="40" fill="#0F6E56"/>
+  <path fill="#FFFFFF" d="M48 44h48c27 0 48 16 48 40s-21 40-48 40H78v24H48V44Zm30 25v30h17c11 0 19-6 19-15s-8-15-19-15H78Z"/>
+  <circle cx="143" cy="145" r="13" fill="#D85A30"/>
+</svg>
