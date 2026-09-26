@@ -14,8 +14,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Prorasys - AI-Powered E-Commerce',
-  description: 'Modern trust-aware commerce with AI recommendations',
+  title: 'Prorasys | AI-Driven E-Commerce Product Ranking Platform',
+  description: 'Intelligent product discovery with trust-aware recommendations and personalized ranking for e-commerce platforms',
   manifest: '/manifest.json',
   icons: {
     icon: '/Prorasys%20Logo.png',
