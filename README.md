@@ -28,6 +28,8 @@ The project includes AI-related sentiment, recommendation, and trust-score servi
 
 The light and dark themes use the following CSS variables from `project/src/app/globals.css`:
 
+![Prorasys light and dark theme colors with swatches and hex codes](project/public/theme-palette.svg)
+
 | Token | Light | Dark |
 | --- | --- | --- |
 | Primary | `#0F6E56` | `#5DCAA5` |
