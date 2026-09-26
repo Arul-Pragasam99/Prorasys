@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Default theme */
+    /* Light theme */
     --color-primary: #0F6E56;
     --color-primary-light: #5DCAA5;
     --color-secondary: #185FA5;
@@ -18,11 +18,11 @@
     --color-danger: #A32D2D;
     --color-danger-light: #F09595;
     
-    --color-surface: #000000;
-    --color-card: #111111;
-    --color-text-primary: #F5F5F5;
-    --color-text-secondary: #A1A1AA;
-    --color-border: #2D2D2D;
+    --color-surface: #FFFFFF;
+    --color-card: #F7F9F8;
+    --color-text-primary: #1A1A18;
+    --color-text-secondary: #5F5E5A;
+    --color-border: #D3D1C7;
     
     --radius-theme: 8px;
     --radius-theme-lg: 12px;
