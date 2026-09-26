@@ -22,5 +22,19 @@
       "purpose": "any"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/pwa-desktop.png",
+      "sizes": "1917x897",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/pwa-mobile.png",
+      "sizes": "527x801",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
   "categories": ["shopping", "lifestyle"]
 }
