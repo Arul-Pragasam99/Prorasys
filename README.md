@@ -28,31 +28,25 @@ The project includes AI-related sentiment, recommendation, and trust-score servi
 
 The light and dark themes use the following CSS variables from `project/src/app/globals.css`:
 
-<table>
-  <thead>
-    <tr><th rowspan="2">Token</th><th colspan="2">Light</th><th colspan="2">Dark</th></tr>
-    <tr><th>Swatch</th><th>Hex</th><th>Swatch</th><th>Hex</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>Primary</td><td bgcolor="#0F6E56" width="24">&nbsp;</td><td><code>#0F6E56</code></td><td bgcolor="#5DCAA5" width="24">&nbsp;</td><td><code>#5DCAA5</code></td></tr>
-    <tr><td>Primary light</td><td bgcolor="#5DCAA5" width="24">&nbsp;</td><td><code>#5DCAA5</code></td><td bgcolor="#0F6E56" width="24">&nbsp;</td><td><code>#0F6E56</code></td></tr>
-    <tr><td>Secondary</td><td bgcolor="#185FA5" width="24">&nbsp;</td><td><code>#185FA5</code></td><td bgcolor="#85B7EB" width="24">&nbsp;</td><td><code>#85B7EB</code></td></tr>
-    <tr><td>Secondary light</td><td bgcolor="#85B7EB" width="24">&nbsp;</td><td><code>#85B7EB</code></td><td bgcolor="#185FA5" width="24">&nbsp;</td><td><code>#185FA5</code></td></tr>
-    <tr><td>Accent</td><td bgcolor="#D85A30" width="24">&nbsp;</td><td><code>#D85A30</code></td><td bgcolor="#F0997B" width="24">&nbsp;</td><td><code>#F0997B</code></td></tr>
-    <tr><td>Accent light</td><td bgcolor="#F0997B" width="24">&nbsp;</td><td><code>#F0997B</code></td><td bgcolor="#D85A30" width="24">&nbsp;</td><td><code>#D85A30</code></td></tr>
-    <tr><td>Success</td><td bgcolor="#639922" width="24">&nbsp;</td><td><code>#639922</code></td><td bgcolor="#97C459" width="24">&nbsp;</td><td><code>#97C459</code></td></tr>
-    <tr><td>Success light</td><td bgcolor="#97C459" width="24">&nbsp;</td><td><code>#97C459</code></td><td bgcolor="#639922" width="24">&nbsp;</td><td><code>#639922</code></td></tr>
-    <tr><td>Warning</td><td bgcolor="#BA7517" width="24">&nbsp;</td><td><code>#BA7517</code></td><td bgcolor="#EF9F27" width="24">&nbsp;</td><td><code>#EF9F27</code></td></tr>
-    <tr><td>Warning light</td><td bgcolor="#EF9F27" width="24">&nbsp;</td><td><code>#EF9F27</code></td><td bgcolor="#BA7517" width="24">&nbsp;</td><td><code>#BA7517</code></td></tr>
-    <tr><td>Danger</td><td bgcolor="#A32D2D" width="24">&nbsp;</td><td><code>#A32D2D</code></td><td bgcolor="#F09595" width="24">&nbsp;</td><td><code>#F09595</code></td></tr>
-    <tr><td>Danger light</td><td bgcolor="#F09595" width="24">&nbsp;</td><td><code>#F09595</code></td><td bgcolor="#A32D2D" width="24">&nbsp;</td><td><code>#A32D2D</code></td></tr>
-    <tr><td>Surface</td><td bgcolor="#FFFFFF" width="24">&nbsp;</td><td><code>#FFFFFF</code></td><td bgcolor="#000000" width="24">&nbsp;</td><td><code>#000000</code></td></tr>
-    <tr><td>Card</td><td bgcolor="#F7F9F8" width="24">&nbsp;</td><td><code>#F7F9F8</code></td><td bgcolor="#111111" width="24">&nbsp;</td><td><code>#111111</code></td></tr>
-    <tr><td>Primary text</td><td bgcolor="#1A1A18" width="24">&nbsp;</td><td><code>#1A1A18</code></td><td bgcolor="#F1EFE8" width="24">&nbsp;</td><td><code>#F1EFE8</code></td></tr>
-    <tr><td>Secondary text</td><td bgcolor="#5F5E5A" width="24">&nbsp;</td><td><code>#5F5E5A</code></td><td bgcolor="#B4B2A9" width="24">&nbsp;</td><td><code>#B4B2A9</code></td></tr>
-    <tr><td>Border</td><td bgcolor="#D3D1C7" width="24">&nbsp;</td><td><code>#D3D1C7</code></td><td bgcolor="#2D2D2D" width="24">&nbsp;</td><td><code>#2D2D2D</code></td></tr>
-  </tbody>
-</table>
+| Token | Light | Hex (Light) | Dark | Hex (Dark) |
+|---|---|---|---|---|
+| Primary | ![#0F6E56](https://placehold.co/24x24/0F6E56/0F6E56.png) | `#0F6E56` | ![#5DCAA5](https://placehold.co/24x24/5DCAA5/5DCAA5.png) | `#5DCAA5` |
+| Primary light | ![#5DCAA5](https://placehold.co/24x24/5DCAA5/5DCAA5.png) | `#5DCAA5` | ![#0F6E56](https://placehold.co/24x24/0F6E56/0F6E56.png) | `#0F6E56` |
+| Secondary | ![#185FA5](https://placehold.co/24x24/185FA5/185FA5.png) | `#185FA5` | ![#85B7EB](https://placehold.co/24x24/85B7EB/85B7EB.png) | `#85B7EB` |
+| Secondary light | ![#85B7EB](https://placehold.co/24x24/85B7EB/85B7EB.png) | `#85B7EB` | ![#185FA5](https://placehold.co/24x24/185FA5/185FA5.png) | `#185FA5` |
+| Accent | ![#D85A30](https://placehold.co/24x24/D85A30/D85A30.png) | `#D85A30` | ![#F0997B](https://placehold.co/24x24/F0997B/F0997B.png) | `#F0997B` |
+| Accent light | ![#F0997B](https://placehold.co/24x24/F0997B/F0997B.png) | `#F0997B` | ![#D85A30](https://placehold.co/24x24/D85A30/D85A30.png) | `#D85A30` |
+| Success | ![#639922](https://placehold.co/24x24/639922/639922.png) | `#639922` | ![#97C459](https://placehold.co/24x24/97C459/97C459.png) | `#97C459` |
+| Success light | ![#97C459](https://placehold.co/24x24/97C459/97C459.png) | `#97C459` | ![#639922](https://placehold.co/24x24/639922/639922.png) | `#639922` |
+| Warning | ![#BA7517](https://placehold.co/24x24/BA7517/BA7517.png) | `#BA7517` | ![#EF9F27](https://placehold.co/24x24/EF9F27/EF9F27.png) | `#EF9F27` |
+| Warning light | ![#EF9F27](https://placehold.co/24x24/EF9F27/EF9F27.png) | `#EF9F27` | ![#BA7517](https://placehold.co/24x24/BA7517/BA7517.png) | `#BA7517` |
+| Danger | ![#A32D2D](https://placehold.co/24x24/A32D2D/A32D2D.png) | `#A32D2D` | ![#F09595](https://placehold.co/24x24/F09595/F09595.png) | `#F09595` |
+| Danger light | ![#F09595](https://placehold.co/24x24/F09595/F09595.png) | `#F09595` | ![#A32D2D](https://placehold.co/24x24/A32D2D/A32D2D.png) | `#A32D2D` |
+| Surface | ![#FFFFFF](https://placehold.co/24x24/FFFFFF/FFFFFF.png) | `#FFFFFF` | ![#000000](https://placehold.co/24x24/000000/000000.png) | `#000000` |
+| Card | ![#F7F9F8](https://placehold.co/24x24/F7F9F8/F7F9F8.png) | `#F7F9F8` | ![#111111](https://placehold.co/24x24/111111/111111.png) | `#111111` |
+| Primary text | ![#1A1A18](https://placehold.co/24x24/1A1A18/1A1A18.png) | `#1A1A18` | ![#F1EFE8](https://placehold.co/24x24/F1EFE8/F1EFE8.png) | `#F1EFE8` |
+| Secondary text | ![#5F5E5A](https://placehold.co/24x24/5F5E5A/5F5E5A.png) | `#5F5E5A` | ![#B4B2A9](https://placehold.co/24x24/B4B2A9/B4B2A9.png) | `#B4B2A9` |
+| Border | ![#D3D1C7](https://placehold.co/24x24/D3D1C7/D3D1C7.png) | `#D3D1C7` | ![#2D2D2D](https://placehold.co/24x24/2D2D2D/2D2D2D.png) | `#2D2D2D` |
 
 ## Repository layout
 
