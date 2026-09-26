@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: 'Prorasys - AI-Powered E-Commerce',
   description: 'Modern trust-aware commerce with AI recommendations',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/Prorasys%20Logo.png',
+    shortcut: '/Prorasys%20Logo.png',
+    apple: '/Prorasys%20Logo.png',
+  },
 };
 
 export const viewport: Viewport = {

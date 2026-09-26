@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Path, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, conint, constr, validator
-from typing import Optional, Dict
+from pydantic import BaseModel, Field, StringConstraints, validator
+from typing import Annotated, Dict, Optional
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
@@ -135,6 +135,12 @@ recommendation_engine = RecommendationEngine()
 trust_calculator = TrustScoreCalculator()
 
 # Pydantic Models
+RequestId = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=128)]
+ReviewText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=5000)]
+TimestampText = Annotated[str, StringConstraints(max_length=64)]
+ReviewRating = Annotated[int, Field(strict=True, ge=1, le=5)]
+RecommendationCount = Annotated[int, Field(strict=True, ge=1, le=50)]
+
 class RequestModel(BaseModel):
     class Config:
         extra = 'forbid'
@@ -146,15 +152,15 @@ class RequestModel(BaseModel):
         return value
 
 class ReviewData(RequestModel):
-    product_id: constr(strip_whitespace=True, min_length=1, max_length=128)
-    user_id: constr(strip_whitespace=True, min_length=1, max_length=128)
-    rating: conint(strict=True, ge=1, le=5)
-    text: constr(strip_whitespace=True, min_length=1, max_length=5000)
-    timestamp: Optional[constr(max_length=64)] = None
+    product_id: RequestId
+    user_id: RequestId
+    rating: ReviewRating
+    text: ReviewText
+    timestamp: Optional[TimestampText] = None
 
 class RecommendationRequest(RequestModel):
-    user_id: constr(strip_whitespace=True, min_length=1, max_length=128)
-    num_recommendations: conint(strict=True, ge=1, le=50) = 5
+    user_id: RequestId
+    num_recommendations: RecommendationCount = 5
 
 # Helper to extract features from text (Python version)
 def extract_features_from_text(text: str, category: str = 'general') -> Dict[str, float]:
