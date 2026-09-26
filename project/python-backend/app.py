@@ -29,6 +29,18 @@ load_dotenv()
 
 app = FastAPI(title="Prorasys AI Service")
 
+@app.middleware("http")
+async def strip_vercel_function_prefix(request: Request, call_next):
+    prefix = '/api/python'
+    path = request.scope.get('path', '')
+    if path == prefix or path.startswith(prefix + '/'):
+        stripped_path = path[len(prefix):] or '/'
+        request.scope['path'] = stripped_path
+        raw_path = request.scope.get('raw_path')
+        if raw_path and raw_path.startswith(prefix.encode('ascii')):
+            request.scope['raw_path'] = raw_path[len(prefix):] or b'/'
+    return await call_next(request)
+
 MAX_REQUEST_BYTES = 64 * 1024
 RATE_LIMIT = 60
 RATE_WINDOW_SECONDS = 60
