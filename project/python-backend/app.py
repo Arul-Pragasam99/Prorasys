@@ -252,9 +252,14 @@ async def ai_status():
         return {
             "status": "running",
             "models": {
-                "sentiment": sentiment_analyzer.model is not None,
-                "recommendation": recommendation_engine.model is not None,
-                "trust": trust_calculator.model is not None
+                "sentiment": sentiment_analyzer.is_trained,
+                "recommendation": recommendation_engine.is_trained,
+                "trust": trust_calculator.is_trained,
+            },
+            "fallbacks": {
+                "sentiment": not sentiment_analyzer.is_trained,
+                "recommendation": True,
+                "trust": not trust_calculator.is_trained,
             },
             "firebase": db is not None,
             "message": "AI service is running"

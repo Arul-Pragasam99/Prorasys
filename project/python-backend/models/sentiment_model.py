@@ -17,12 +17,45 @@ class SentimentAnalyzer:
         self.label_encoder = None
         self.model_path = "models/saved/sentiment_model.pkl"
         self.vectorizer_path = "models/saved/vectorizer.pkl"
+        self._model_validated = False
         
         # Load pre-trained model if exists
         if os.path.exists(self.model_path):
             self.load_model()
-        else:
-            self.build_model()
+
+    @property
+    def is_trained(self) -> bool:
+        return self._model_validated and self._has_fitted_model()
+
+    def _has_fitted_model(self) -> bool:
+        return (
+            self.model is not None
+            and self.vectorizer is not None
+            and len(getattr(self.model, 'classes_', [])) > 1
+            and hasattr(self.vectorizer, 'vocabulary_')
+        )
+
+    def _passes_smoke_test(self) -> bool:
+        model = self.model
+        vectorizer = self.vectorizer
+        if (
+            model is None
+            or vectorizer is None
+            or len(getattr(model, 'classes_', [])) < 2
+            or not hasattr(vectorizer, 'vocabulary_')
+        ):
+            return False
+
+        samples = [
+            'This product is excellent and amazing',
+            'This product is terrible and poor',
+        ]
+        try:
+            features = vectorizer.transform([self.preprocess_text(text) for text in samples])
+            predictions = [int(label) for label in model.predict(features)]
+            return predictions == [1, 0]
+        except Exception:
+            return False
     
     def preprocess_text(self, text):
         """Clean and preprocess text"""
@@ -117,6 +150,12 @@ class SentimentAnalyzer:
             else:
                 self.model = LogisticRegression(max_iter=1000, random_state=42)
                 self.model.fit(X, y)
+            self._model_validated = self._passes_smoke_test()
+            if not self._model_validated:
+                print("[WARN] Sentiment model failed polarity checks; using rule-based fallback")
+                self.model = None
+                self.vectorizer = None
+                return
             print(f"[OK] Sentiment model trained with {len(texts)} reviews")
             print(f"   Positive: {sum(y)} reviews, Negative: {len(y) - sum(y)} reviews")
             self.save_model()
@@ -145,8 +184,10 @@ class SentimentAnalyzer:
     
     def analyze(self, text: str) -> Dict:
         """Analyze sentiment of a single text"""
-        if self.model is None:
-            print("[WARN] Model not trained. Using rule-based fallback.")
+        if not self.is_trained:
+            return self.rule_based_sentiment(text)
+        model = self.model
+        if model is None:
             return self.rule_based_sentiment(text)
         
         try:
@@ -164,7 +205,7 @@ class SentimentAnalyzer:
                 X = self.vectorizer.transform([processed_text])
             
             # Predict
-            prediction = self.model.predict_proba(X)[0]
+            prediction = model.predict_proba(X)[0]
             
             # Handle case where model might have only 1 class
             if len(prediction) < 2:
@@ -217,7 +258,12 @@ class SentimentAnalyzer:
                 self.model = pickle.load(f)
             with open(self.vectorizer_path, 'rb') as f:
                 self.vectorizer = pickle.load(f)
+            self._model_validated = self._passes_smoke_test()
+            if not self._model_validated:
+                raise ValueError('Saved sentiment model failed polarity checks.')
             print("[OK] Sentiment model loaded successfully")
         except:
-            print("[WARN] Could not load saved model. Building new one.")
-            self.build_model()
+            print("[WARN] Could not load saved model. Using rule-based fallback.")
+            self.model = None
+            self.vectorizer = None
+            self._model_validated = False

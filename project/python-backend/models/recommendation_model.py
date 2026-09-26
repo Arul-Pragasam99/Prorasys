@@ -19,6 +19,15 @@ class RecommendationEngine:
         # Load pre-trained model if exists
         if os.path.exists(self.model_path):
             self.load_model()
+
+    @property
+    def is_trained(self) -> bool:
+        return (
+            self.model is not None
+            and self.svd_model is not None
+            and self.user_item_matrix is not None
+            and hasattr(self.svd_model, 'components_')
+        )
     
     def train(self, reviews_data: List[Dict]):
         """Train collaborative filtering model"""

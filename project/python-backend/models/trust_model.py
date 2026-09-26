@@ -17,6 +17,15 @@ class TrustScoreCalculator:
             self.load_model()
         else:
             self.build_model()
+
+    @property
+    def is_trained(self) -> bool:
+        return (
+            self.model is not None
+            and self.scaler is not None
+            and hasattr(self.model, 'estimators_')
+            and hasattr(self.scaler, 'mean_')
+        )
     
     def build_model(self):
         """Build trust score model"""
