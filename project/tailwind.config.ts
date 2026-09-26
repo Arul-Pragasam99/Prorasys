@@ -41,26 +41,26 @@ const config: Config = {
           dark: '#A32D2D',
         },
         surface: {
-          DEFAULT: '#FFFFFF',
-          dark: '#161615',
+          DEFAULT: 'var(--color-surface)',
+          dark: 'var(--color-surface)',
         },
         card: {
-          DEFAULT: '#F7F9F8',
-          dark: '#1F1F1D',
+          DEFAULT: 'var(--color-card)',
+          dark: 'var(--color-card)',
         },
         text: {
           primary: {
-            DEFAULT: '#1A1A18',
-            dark: '#F1EFE8',
+            DEFAULT: 'var(--color-text-primary)',
+            dark: 'var(--color-text-primary)',
           },
           secondary: {
-            DEFAULT: '#5F5E5A',
-            dark: '#B4B2A9',
+            DEFAULT: 'var(--color-text-secondary)',
+            dark: 'var(--color-text-secondary)',
           },
         },
         border: {
-          DEFAULT: '#D3D1C7',
-          dark: '#444441',
+          DEFAULT: 'var(--color-border)',
+          dark: 'var(--color-border)',
         },
       },
       borderRadius: {
