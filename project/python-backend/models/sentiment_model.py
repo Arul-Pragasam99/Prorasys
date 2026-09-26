@@ -6,17 +6,9 @@ from sklearn.preprocessing import LabelEncoder
 import json
 import os
 from typing import Dict, List
-import nltk
 from nltk.corpus import stopwords
 import re
 import pickle
-
-# Download NLTK data (first time)
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-    nltk.download('stopwords')
 
 class SentimentAnalyzer:
     def __init__(self):

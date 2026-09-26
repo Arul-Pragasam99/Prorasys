@@ -10,7 +10,7 @@ const rankingQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   feature: z.string().trim().max(80).optional(),
   minRating: z.coerce.number().finite().min(0).max(5).default(0),
-  maxPrice: z.coerce.number().finite().min(0).max(100_000_000).default(1000),
+  maxPrice: z.coerce.number().finite().min(0).max(100_000_000).default(100_000_000),
 }).strict();
 
 type FirestoreProduct = {

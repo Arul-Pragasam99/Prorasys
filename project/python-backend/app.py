@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Path, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, StringConstraints, validator
+from pydantic import BaseModel, Field, StringConstraints, field_validator
 from typing import Annotated, Dict, Optional
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -145,8 +145,9 @@ class RequestModel(BaseModel):
     class Config:
         extra = 'forbid'
 
-    @validator('product_id', 'user_id', check_fields=False)
-    def validate_identifier(cls, value):
+    @field_validator('product_id', 'user_id', check_fields=False)
+    @classmethod
+    def validate_identifier(cls, value: str) -> str:
         if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', value):
             raise ValueError('Invalid identifier.')
         return value
