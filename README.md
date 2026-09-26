@@ -28,25 +28,31 @@ The project includes AI-related sentiment, recommendation, and trust-score servi
 
 The light and dark themes use the following CSS variables from `project/src/app/globals.css`:
 
-| Token | Light | Dark |
-| --- | --- | --- |
-| Primary | <span style="color:#0F6E56">&#9632;</span> `#0F6E56` | <span style="color:#5DCAA5">&#9632;</span> `#5DCAA5` |
-| Primary light | <span style="color:#5DCAA5">&#9632;</span> `#5DCAA5` | <span style="color:#0F6E56">&#9632;</span> `#0F6E56` |
-| Secondary | <span style="color:#185FA5">&#9632;</span> `#185FA5` | <span style="color:#85B7EB">&#9632;</span> `#85B7EB` |
-| Secondary light | <span style="color:#85B7EB">&#9632;</span> `#85B7EB` | <span style="color:#185FA5">&#9632;</span> `#185FA5` |
-| Accent | <span style="color:#D85A30">&#9632;</span> `#D85A30` | <span style="color:#F0997B">&#9632;</span> `#F0997B` |
-| Accent light | <span style="color:#F0997B">&#9632;</span> `#F0997B` | <span style="color:#D85A30">&#9632;</span> `#D85A30` |
-| Success | <span style="color:#639922">&#9632;</span> `#639922` | <span style="color:#97C459">&#9632;</span> `#97C459` |
-| Success light | <span style="color:#97C459">&#9632;</span> `#97C459` | <span style="color:#639922">&#9632;</span> `#639922` |
-| Warning | <span style="color:#BA7517">&#9632;</span> `#BA7517` | <span style="color:#EF9F27">&#9632;</span> `#EF9F27` |
-| Warning light | <span style="color:#EF9F27">&#9632;</span> `#EF9F27` | <span style="color:#BA7517">&#9632;</span> `#BA7517` |
-| Danger | <span style="color:#A32D2D">&#9632;</span> `#A32D2D` | <span style="color:#F09595">&#9632;</span> `#F09595` |
-| Danger light | <span style="color:#F09595">&#9632;</span> `#F09595` | <span style="color:#A32D2D">&#9632;</span> `#A32D2D` |
-| Surface | <span style="color:#FFFFFF">&#9632;</span> `#FFFFFF` | <span style="color:#000000">&#9632;</span> `#000000` |
-| Card | <span style="color:#F7F9F8">&#9632;</span> `#F7F9F8` | <span style="color:#111111">&#9632;</span> `#111111` |
-| Primary text | <span style="color:#1A1A18">&#9632;</span> `#1A1A18` | <span style="color:#F1EFE8">&#9632;</span> `#F1EFE8` |
-| Secondary text | <span style="color:#5F5E5A">&#9632;</span> `#5F5E5A` | <span style="color:#B4B2A9">&#9632;</span> `#B4B2A9` |
-| Border | <span style="color:#D3D1C7">&#9632;</span> `#D3D1C7` | <span style="color:#2D2D2D">&#9632;</span> `#2D2D2D` |
+<table>
+  <thead>
+    <tr><th rowspan="2">Token</th><th colspan="2">Light</th><th colspan="2">Dark</th></tr>
+    <tr><th>Swatch</th><th>Hex</th><th>Swatch</th><th>Hex</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Primary</td><td bgcolor="#0F6E56" width="24">&nbsp;</td><td><code>#0F6E56</code></td><td bgcolor="#5DCAA5" width="24">&nbsp;</td><td><code>#5DCAA5</code></td></tr>
+    <tr><td>Primary light</td><td bgcolor="#5DCAA5" width="24">&nbsp;</td><td><code>#5DCAA5</code></td><td bgcolor="#0F6E56" width="24">&nbsp;</td><td><code>#0F6E56</code></td></tr>
+    <tr><td>Secondary</td><td bgcolor="#185FA5" width="24">&nbsp;</td><td><code>#185FA5</code></td><td bgcolor="#85B7EB" width="24">&nbsp;</td><td><code>#85B7EB</code></td></tr>
+    <tr><td>Secondary light</td><td bgcolor="#85B7EB" width="24">&nbsp;</td><td><code>#85B7EB</code></td><td bgcolor="#185FA5" width="24">&nbsp;</td><td><code>#185FA5</code></td></tr>
+    <tr><td>Accent</td><td bgcolor="#D85A30" width="24">&nbsp;</td><td><code>#D85A30</code></td><td bgcolor="#F0997B" width="24">&nbsp;</td><td><code>#F0997B</code></td></tr>
+    <tr><td>Accent light</td><td bgcolor="#F0997B" width="24">&nbsp;</td><td><code>#F0997B</code></td><td bgcolor="#D85A30" width="24">&nbsp;</td><td><code>#D85A30</code></td></tr>
+    <tr><td>Success</td><td bgcolor="#639922" width="24">&nbsp;</td><td><code>#639922</code></td><td bgcolor="#97C459" width="24">&nbsp;</td><td><code>#97C459</code></td></tr>
+    <tr><td>Success light</td><td bgcolor="#97C459" width="24">&nbsp;</td><td><code>#97C459</code></td><td bgcolor="#639922" width="24">&nbsp;</td><td><code>#639922</code></td></tr>
+    <tr><td>Warning</td><td bgcolor="#BA7517" width="24">&nbsp;</td><td><code>#BA7517</code></td><td bgcolor="#EF9F27" width="24">&nbsp;</td><td><code>#EF9F27</code></td></tr>
+    <tr><td>Warning light</td><td bgcolor="#EF9F27" width="24">&nbsp;</td><td><code>#EF9F27</code></td><td bgcolor="#BA7517" width="24">&nbsp;</td><td><code>#BA7517</code></td></tr>
+    <tr><td>Danger</td><td bgcolor="#A32D2D" width="24">&nbsp;</td><td><code>#A32D2D</code></td><td bgcolor="#F09595" width="24">&nbsp;</td><td><code>#F09595</code></td></tr>
+    <tr><td>Danger light</td><td bgcolor="#F09595" width="24">&nbsp;</td><td><code>#F09595</code></td><td bgcolor="#A32D2D" width="24">&nbsp;</td><td><code>#A32D2D</code></td></tr>
+    <tr><td>Surface</td><td bgcolor="#FFFFFF" width="24">&nbsp;</td><td><code>#FFFFFF</code></td><td bgcolor="#000000" width="24">&nbsp;</td><td><code>#000000</code></td></tr>
+    <tr><td>Card</td><td bgcolor="#F7F9F8" width="24">&nbsp;</td><td><code>#F7F9F8</code></td><td bgcolor="#111111" width="24">&nbsp;</td><td><code>#111111</code></td></tr>
+    <tr><td>Primary text</td><td bgcolor="#1A1A18" width="24">&nbsp;</td><td><code>#1A1A18</code></td><td bgcolor="#F1EFE8" width="24">&nbsp;</td><td><code>#F1EFE8</code></td></tr>
+    <tr><td>Secondary text</td><td bgcolor="#5F5E5A" width="24">&nbsp;</td><td><code>#5F5E5A</code></td><td bgcolor="#B4B2A9" width="24">&nbsp;</td><td><code>#B4B2A9</code></td></tr>
+    <tr><td>Border</td><td bgcolor="#D3D1C7" width="24">&nbsp;</td><td><code>#D3D1C7</code></td><td bgcolor="#2D2D2D" width="24">&nbsp;</td><td><code>#2D2D2D</code></td></tr>
+  </tbody>
+</table>
 
 ## Repository layout
 
