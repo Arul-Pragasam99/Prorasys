@@ -294,13 +294,13 @@ export default function HomePage() {
           </section>
 
         {/* Footer */}
-          <footer className="border-t border-border py-8 bg-card">
+          <footer className="border-t border-border py-8 bg-surface">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary inline-block" />
                 <span className="font-semibold text-gray-900 dark:text-white">Prorasys</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">AI-Powered Discovery</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Shop with Confidence</span>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 © {new Date().getFullYear()} Prorasys. All rights reserved.

@@ -1,210 +1,130 @@
-# Prorasys Commerce Rebuild
+# Prorasys
 
-## Project description
+Prorasys is a trust-aware shopping website. It brings product browsing, customer reviews, trust signals, and recommendations together so shoppers can compare products and make more informed decisions. It includes customer account, cart, wishlist, checkout/order, and administrator workflows.
 
-Prorasys is an e-commerce platform developed as a modern replacement for an older Flask and MySQL-based system. The project focuses on delivering a user-friendly online shopping experience with product browsing, reviews, cart management, wishlist support, authentication, and an administrative overview. The application is designed to preserve the core business idea of the original system while improving usability, maintainability, and deployment readiness through a modern Next.js and Firebase-based architecture.
+Live site: https://prorasys.vercel.app
 
-The platform is intended to support both customers and administrators by providing a simple storefront experience for shoppers and a structured management view for product and review oversight. It also lays the groundwork for future enhancements such as trust-based review scoring, personalized recommendations, and more complete order and user management workflows.
+## What the website does
 
-## Project summary
+- Browse and search a Firestore-backed product catalog.
+- View product details, ratings, reviews, and trust information.
+- Sign in or register with Firebase Authentication.
+- Save products to a wishlist, manage a cart, and create orders.
+- View personalized recommendations and product rankings.
+- Use admin pages to manage products, review moderation, users, orders, and analytics.
 
-This repository contains a modern e-commerce storefront rebuilt from the original Flask + MySQL application. The current implementation uses Next.js, TypeScript, Tailwind CSS, and Firebase to provide a more realistic shopping experience with a customer-facing storefront, product catalog, product detail pages, cart and wishlist flows, and an admin-style overview screen.
+The project includes AI-related sentiment, recommendation, and trust-score services. If trained model artifacts are unavailable or fail validation, the Python service uses fallback behavior where implemented. A running service does not by itself guarantee that every model is trained or accurate; `/api/ai/status` reports trained-model readiness and fallback availability.
 
-The goal of this project is to preserve the older system’s product/review/trust concepts while presenting them in a more maintainable, modern web application structure that can be deployed and extended easily.
+## Technology
 
-## What this app includes
+- **Web app:** Next.js 16 App Router, React 18, TypeScript
+- **Styles:** Tailwind CSS
+- **Authentication and data:** Firebase Authentication and Cloud Firestore
+- **Python API:** FastAPI, served locally by Uvicorn and deployed on Vercel as a Python function
+- **AI/ML:** scikit-learn, NumPy, pandas, NLTK stopwords (with a fallback when data is unavailable)
+- **Deployment:** Vercel; `vercel.json` routes `/api/python/*` to the FastAPI app
 
-- Home page with featured products and category highlights
-- Product catalog and product detail pages
-- Add-to-cart and save-for-later interactions
-- Customer login flow with Firebase-backed authentication state
-- Persistent cart and wishlist data stored through Firebase services
-- Admin overview page for moderation-style management views
-- Product review and ranking endpoints for future trust-scoring features
-- Responsive UI that works across desktop and mobile layouts
+## Color palette
 
-## Tech stack
+The light and dark themes use the following CSS variables from `project/src/app/globals.css`:
 
-- Frontend: Next.js 15 with App Router
-- Language: TypeScript
-- Styling: Tailwind CSS
-- Backend/data: Firebase Firestore and Firebase Authentication
-- UI helpers: Radix dialog, Framer Motion, Recharts, React Hook Form
-- Package manager: npm
+| Token | Light | Dark |
+| --- | --- | --- |
+| Primary | `#0F6E56` | `#5DCAA5` |
+| Primary light | `#5DCAA5` | `#0F6E56` |
+| Secondary | `#185FA5` | `#85B7EB` |
+| Secondary light | `#85B7EB` | `#185FA5` |
+| Accent | `#D85A30` | `#F0997B` |
+| Accent light | `#F0997B` | `#D85A30` |
+| Success | `#639922` | `#97C459` |
+| Success light | `#97C459` | `#639922` |
+| Warning | `#BA7517` | `#EF9F27` |
+| Warning light | `#EF9F27` | `#BA7517` |
+| Danger | `#A32D2D` | `#F09595` |
+| Danger light | `#F09595` | `#A32D2D` |
+| Surface | `#FFFFFF` | `#000000` |
+| Card | `#F7F9F8` | `#111111` |
+| Primary text | `#1A1A18` | `#F1EFE8` |
+| Secondary text | `#5F5E5A` | `#B4B2A9` |
+| Border | `#D3D1C7` | `#2D2D2D` |
 
-## Project structure
+## Repository layout
 
-- app/: Next.js route pages and layouts
-  - src/app/page.tsx: landing/home page
-  - src/app/products/page.tsx: catalog page
-  - src/app/products/[productId]/page.tsx: product detail page
-  - src/app/login/page.tsx: login experience
-  - src/app/cart/page.tsx: cart and wishlist interface
-  - src/app/admin/page.tsx: admin overview screen
-- components/: reusable UI modules
-  - src/components/commerce/: storefront header, product cards, cart panel, auth status
-  - src/components/auth/: login/auth UI components
-  - src/components/admin/: admin dashboard presentation
-- lib/: shared logic and service helpers
-  - src/lib/firebase.ts: Firebase client initialization
-  - src/lib/auth-service.ts: authentication helpers
-  - src/lib/cart-service.ts: cart and wishlist persistence helpers
-  - src/lib/product-service.ts: product and review access logic
-  - src/lib/store-data.ts and src/lib/mock-data.ts: fallback demo data
-- public/static assets are organized under the app’s static folders and can be reused for branding or images
+```text
+project/
+  src/app/             Next.js pages and API routes
+  src/components/      Shared storefront, auth, and admin components
+  src/lib/             Firebase clients, auth, cart, orders, and API security
+  api/python.py        Vercel entry point for FastAPI
+  python-backend/      FastAPI service and model implementations
+  public/              PWA manifest, icons, and static assets
+  firestore.rules      Firestore access rules
+  requirements.txt     Python dependencies used by Vercel
+```
 
 ## Prerequisites
 
-Make sure the following are installed:
+- Node.js and npm
+- Python 3.11 or 3.12 and pip
+- A Firebase project with Authentication and Cloud Firestore enabled
 
-- Node.js 18 or newer
-- npm
-- A Firebase project with Firestore enabled and Authentication enabled
+## Local setup
 
-## Installation
+Commands below use PowerShell on Windows. From the repository root:
 
-1. Open the project folder:
-   - cd d:\Prorasys\project
-2. Install dependencies:
-   - npm install
-3. Create a local environment file:
-   - Create a file named .env in the project root
-4. Add your Firebase configuration values to .env
-
-Example structure:
-
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
-
-# Server-only; use the same AI_SERVICE_API_KEY in Next.js and python-backend
-AI_SERVICE_API_KEY=replace-with-a-long-random-secret
-AI_TRAINING_TOKEN=replace-with-a-separate-long-random-secret
-FIREBASE_ADMIN_PROJECT_ID=your_project_id
-FIREBASE_ADMIN_CLIENT_EMAIL=your_service_account_email
-FIREBASE_ADMIN_PRIVATE_KEY="your_private_key"
-
-# Optional comma-separated browser origins for direct Python API access
-ALLOWED_ORIGINS=http://localhost:3000
-```
-
-Never prefix server secrets with `NEXT_PUBLIC_`. The Python API accepts loopback
-requests without `AI_SERVICE_API_KEY`; configure the key in both services before
-allowing remote access. Model training stays disabled until `AI_TRAINING_TOKEN`
-is configured. API rate-limit counters are process-local, so deployments with
-multiple instances should use a shared rate-limit store at the gateway or in the
-application before exposing high-traffic endpoints publicly.
-
-## Running locally
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-Then open the app in your browser at:
-
-- http://localhost:3000
-
-## Build and verification
-
-To verify the production build:
-
-```bash
-npm run build
-```
-
-The current project has been verified to build successfully with the existing structure.
-
-## Main application routes
-
-- /: landing page
-- /products: product catalog
-- /products/[productId]: product detail page
-- /recommendations: recommendations or related-items experience
-- /login: sign-in experience
-- /cart: cart and wishlist overview
-- /admin: admin overview screen
-
-## API routes
-
-The app also includes backend-style route handlers for data access:
-
-- /api/health: health check endpoint
-- /api/products: product listing API
-- /api/products/[productId]: product detail API
-- /api/reviews: review API
-- /api/rankings: ranking or trust-style API
-
-## Firebase integration notes
-
-The current app uses Firebase for:
-
-- Authentication state for sign-in/sign-out
-- Firestore-backed cart and wishlist persistence
-- Product and review data retrieval
-
-If Firebase credentials are missing or invalid, the app will fall back to local demo data in some flows, but full persistence will not work until the environment variables are configured correctly.
-
-## Data and content notes
-
-The storefront uses a mix of:
-
-- static or seeded demo content for UI rendering
-- Firebase-backed content for live product and review data
-- reusable components to keep the UI modular and straightforward to edit
-
-This makes it easier to evolve the experience from a demo build into a fuller e-commerce product.
-
-## Development workflow
-
-Typical workflow for future edits:
-
-1. Update or create components under src/components/
-2. Add or adjust page-level routes under src/app/
-3. Put shared logic and Firebase integrations in src/lib/
-4. Verify the app with npm run build
-5. Test the UI locally in the browser
-
-## Deployment notes
-
-For deployment, the app can be hosted on any platform that supports Next.js applications, such as:
-
-- Vercel
-- Netlify
-- Render
-- AWS / Azure / Docker-based hosting
-
-Before deploying, make sure:
-
-- the Firebase environment variables are set in the deployment environment
-- the project builds successfully with npm run build
-- authentication and Firestore rules are configured correctly in Firebase
-
-## Future expansion ideas
-
-The current app is already structured for future growth. Good next steps include:
-
-- full checkout and order history flows
-- admin CRUD pages for products and users
-- real review moderation tools
-- trust-score and recommendation enhancements
-- richer product filters and search
-
-## Quick reference
-
-Useful commands:
-
-```bash
+```powershell
+cd project
 npm install
-npm run dev
+py -3.12 -m venv python-backend/.venv
+python-backend/.venv/Scripts/Activate.ps1
+python -m pip install -r python-backend/requirements.txt
+```
+
+Before running the application, create a Firebase project with Authentication and Cloud Firestore enabled, configure Firebase for the web app and Python service, and install the dependencies above. Keep all credentials private and configure them through secure local or hosting settings.
+
+## Run locally
+
+With the Python virtual environment activated and Firebase configured, run from `project/`:
+
+```powershell
+npm run dev:all
+```
+
+This starts Next.js at `http://localhost:3000` and the Python service at `http://localhost:8000`. To run them separately, use `npm run dev` for Next.js and `npm run python:dev` for Python. The Python service uses port 8000 by default.
+
+## Using the site
+
+1. Open `http://localhost:3000` and register/sign in as a customer.
+2. Browse products, open product details, and add products to the cart or wishlist.
+3. Use checkout to create an order. Payment gateway processing is not configured by this repository.
+4. Reviews are available to signed-in customers; the product page checks delivered orders for purchase eligibility.
+5. Administrator pages require an account whose Firestore user profile has been provisioned with the `admin` role. Public signup should not be used to grant admin access.
+
+## Routes and health checks
+
+Web pages include `/`, `/products`, `/products/[productId]`, `/recommendations`, `/cart`, `/checkout`, `/orders`, `/profile`, `/login`, and `/admin` pages.
+
+Useful API routes:
+
+- `GET /api/health` checks the Next.js app.
+- `GET /api/ai/status` checks whether Next.js can reach Python and reports model/fallback readiness.
+- `GET /api/products` and `GET /api/rankings` read catalog and ranking data.
+- `POST /api/ai/recommendations` requires a signed-in Firebase user.
+- `POST /api/ai/analyze` requires a signed-in user and processes/saves a review; avoid casual production tests because it writes data.
+- Direct Python routes are mounted at `/api/python/*` and require `X-API-Key`; a browser request without that header should return `401`.
+
+Verify the production build from `project/` with:
+
+```powershell
 npm run build
 ```
 
-If you ever need to continue work from this repository later, this README should be enough to understand the project structure, setup steps, and current feature set.
+## Vercel deployment
+
+The repository config deploys the Next.js app and `api/python.py` as a Python function. Configure Firebase access and the private service-to-service credential through Vercel's secure project settings, then redeploy. The AI routes use the deployed Python function at `/api/python`.
+
+## Model artifacts and limitations
+
+The service can use validated trained models when they are supplied with the production deployment. Otherwise, sentiment uses a rule-based fallback, recommendations use a content-based fallback, and trust scoring uses a heuristic. Vercel function storage is temporary, so training output must be stored and deployed through a deliberate artifact process.
+
+Rate limits in the current application are process-local. For multi-instance or high-traffic production use, move rate limiting to a shared store or gateway.

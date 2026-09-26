@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Prorasys | AI-Driven E-Commerce Product Ranking Platform',
+  title: 'Prorasys | AI Driven E-Commerce Product Ranking Platform',
   description: 'Intelligent product discovery with trust-aware recommendations and personalized ranking for e-commerce platforms',
   manifest: '/manifest.json',
   icons: {
@@ -54,7 +54,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body className={`${inter.className} antialiased`}>
+      <body suppressHydrationWarning className={`${inter.className} antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <ServiceWorkerRegistration />
         <ThemeProvider>
