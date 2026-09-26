@@ -24,31 +24,29 @@ The project includes AI-related sentiment, recommendation, and trust-score servi
 - **AI/ML:** scikit-learn, NumPy, pandas, NLTK stopwords (with a fallback when data is unavailable)
 - **Deployment:** Vercel; `vercel.json` routes `/api/python/*` to the FastAPI app
 
-## Color palette
+## Theme colors
 
 The light and dark themes use the following CSS variables from `project/src/app/globals.css`:
 
-![Prorasys light and dark theme colors with swatches and hex codes](project/public/theme-palette.svg)
-
 | Token | Light | Dark |
 | --- | --- | --- |
-| Primary | `#0F6E56` | `#5DCAA5` |
-| Primary light | `#5DCAA5` | `#0F6E56` |
-| Secondary | `#185FA5` | `#85B7EB` |
-| Secondary light | `#85B7EB` | `#185FA5` |
-| Accent | `#D85A30` | `#F0997B` |
-| Accent light | `#F0997B` | `#D85A30` |
-| Success | `#639922` | `#97C459` |
-| Success light | `#97C459` | `#639922` |
-| Warning | `#BA7517` | `#EF9F27` |
-| Warning light | `#EF9F27` | `#BA7517` |
-| Danger | `#A32D2D` | `#F09595` |
-| Danger light | `#F09595` | `#A32D2D` |
-| Surface | `#FFFFFF` | `#000000` |
-| Card | `#F7F9F8` | `#111111` |
-| Primary text | `#1A1A18` | `#F1EFE8` |
-| Secondary text | `#5F5E5A` | `#B4B2A9` |
-| Border | `#D3D1C7` | `#2D2D2D` |
+| Primary | <span style="color:#0F6E56">&#9632;</span> `#0F6E56` | <span style="color:#5DCAA5">&#9632;</span> `#5DCAA5` |
+| Primary light | <span style="color:#5DCAA5">&#9632;</span> `#5DCAA5` | <span style="color:#0F6E56">&#9632;</span> `#0F6E56` |
+| Secondary | <span style="color:#185FA5">&#9632;</span> `#185FA5` | <span style="color:#85B7EB">&#9632;</span> `#85B7EB` |
+| Secondary light | <span style="color:#85B7EB">&#9632;</span> `#85B7EB` | <span style="color:#185FA5">&#9632;</span> `#185FA5` |
+| Accent | <span style="color:#D85A30">&#9632;</span> `#D85A30` | <span style="color:#F0997B">&#9632;</span> `#F0997B` |
+| Accent light | <span style="color:#F0997B">&#9632;</span> `#F0997B` | <span style="color:#D85A30">&#9632;</span> `#D85A30` |
+| Success | <span style="color:#639922">&#9632;</span> `#639922` | <span style="color:#97C459">&#9632;</span> `#97C459` |
+| Success light | <span style="color:#97C459">&#9632;</span> `#97C459` | <span style="color:#639922">&#9632;</span> `#639922` |
+| Warning | <span style="color:#BA7517">&#9632;</span> `#BA7517` | <span style="color:#EF9F27">&#9632;</span> `#EF9F27` |
+| Warning light | <span style="color:#EF9F27">&#9632;</span> `#EF9F27` | <span style="color:#BA7517">&#9632;</span> `#BA7517` |
+| Danger | <span style="color:#A32D2D">&#9632;</span> `#A32D2D` | <span style="color:#F09595">&#9632;</span> `#F09595` |
+| Danger light | <span style="color:#F09595">&#9632;</span> `#F09595` | <span style="color:#A32D2D">&#9632;</span> `#A32D2D` |
+| Surface | <span style="color:#FFFFFF">&#9632;</span> `#FFFFFF` | <span style="color:#000000">&#9632;</span> `#000000` |
+| Card | <span style="color:#F7F9F8">&#9632;</span> `#F7F9F8` | <span style="color:#111111">&#9632;</span> `#111111` |
+| Primary text | <span style="color:#1A1A18">&#9632;</span> `#1A1A18` | <span style="color:#F1EFE8">&#9632;</span> `#F1EFE8` |
+| Secondary text | <span style="color:#5F5E5A">&#9632;</span> `#5F5E5A` | <span style="color:#B4B2A9">&#9632;</span> `#B4B2A9` |
+| Border | <span style="color:#D3D1C7">&#9632;</span> `#D3D1C7` | <span style="color:#2D2D2D">&#9632;</span> `#2D2D2D` |
 
 ## Repository layout
 
