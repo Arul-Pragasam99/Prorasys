@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { rateLimit, readJson, safeText } from '@/lib/api-security';
+import { authorizeRequest, rateLimit, readJson, safeText } from '@/lib/api-security';
 
 const productSchema = z.object({
   name: safeText(160),
@@ -13,7 +13,10 @@ const productSchema = z.object({
   image: z.string().url().max(2048).optional().or(z.literal('')),
 }).strict();
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, 60);
+  if (limited) return limited;
+
   try {
     const q = query(collection(db, 'products'), orderBy('combinedScore', 'desc'));
     const snapshot = await getDocs(q);
@@ -27,6 +30,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, 10);
   if (limited) return limited;
+
+  const authorization = await authorizeRequest(request, { adminOnly: true });
+  if (authorization.response) return authorization.response;
 
   const parsed = await readJson(request, productSchema);
   if (parsed.response) return parsed.response;

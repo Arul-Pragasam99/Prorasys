@@ -14,6 +14,7 @@ import {
 } from '@/lib/cart-service';
 import { StoreProduct, StoreContextValue } from '@/lib/store-data';
 import { featuredProducts } from '@/lib/store-data';
+import { auth } from '@/lib/firebase';
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
@@ -98,9 +99,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const getRecommendations = async (uid: string) => {
     setLoadingRecommendations(true);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch('/api/ai/recommendations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({ user_id: uid, num_recommendations: 8 })
       });
       

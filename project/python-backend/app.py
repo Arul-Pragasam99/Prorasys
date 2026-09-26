@@ -1,10 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional, Dict
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, conint, constr, validator
+from typing import Optional, Dict
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import hmac
+import ipaddress
+import re
+import time
 from dotenv import load_dotenv
 import json
 from datetime import datetime
@@ -24,14 +29,76 @@ load_dotenv()
 
 app = FastAPI(title="Prorasys AI Service")
 
+MAX_REQUEST_BYTES = 64 * 1024
+RATE_LIMIT = 60
+RATE_WINDOW_SECONDS = 60
+rate_limit_buckets = {}
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[origin.strip() for origin in os.getenv(
+        'ALLOWED_ORIGINS', 'http://localhost:3000'
+    ).split(',') if origin.strip()],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "X-API-Key", "X-Training-Token"],
 )
+
+@app.middleware("http")
+async def secure_api_requests(request: Request, call_next):
+    if request.url.path.startswith('/api/') and request.method != 'OPTIONS':
+        content_length = request.headers.get('content-length')
+        if content_length:
+            try:
+                if int(content_length) > MAX_REQUEST_BYTES:
+                    return JSONResponse({'detail': 'Request body is too large.'}, status_code=413)
+            except ValueError:
+                return JSONResponse({'detail': 'Invalid Content-Length.'}, status_code=400)
+
+        api_key = os.getenv('AI_SERVICE_API_KEY')
+        client_host = request.client.host if request.client else ''
+        if api_key:
+            supplied_key = request.headers.get('x-api-key', '')
+            if not hmac.compare_digest(supplied_key, api_key):
+                return JSONResponse({'detail': 'Unauthorized.'}, status_code=401)
+        else:
+            try:
+                is_loopback = ipaddress.ip_address(client_host).is_loopback
+            except ValueError:
+                is_loopback = False
+            if not is_loopback:
+                return JSONResponse(
+                    {'detail': 'Configure AI_SERVICE_API_KEY for non-local access.'},
+                    status_code=503,
+                )
+
+        now = time.monotonic()
+        bucket_key = (client_host, request.url.path)
+        count, reset_at = rate_limit_buckets.get(bucket_key, (0, now + RATE_WINDOW_SECONDS))
+        if reset_at <= now:
+            count, reset_at = 0, now + RATE_WINDOW_SECONDS
+        if count >= RATE_LIMIT:
+            return JSONResponse(
+                {'detail': 'Too many requests. Please try again later.'},
+                status_code=429,
+                headers={'Retry-After': str(max(1, int(reset_at - now)))},
+            )
+        rate_limit_buckets[bucket_key] = (count + 1, reset_at)
+        if len(rate_limit_buckets) > 5000:
+            for key, value in list(rate_limit_buckets.items()):
+                if value[1] <= now:
+                    rate_limit_buckets.pop(key, None)
+            for key in list(rate_limit_buckets):
+                if len(rate_limit_buckets) <= 5000:
+                    break
+                rate_limit_buckets.pop(key, None)
+
+    response = await call_next(request)
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
 
 # Initialize Firebase Admin - Using service-account.json file
 def init_firebase():
@@ -68,16 +135,26 @@ recommendation_engine = RecommendationEngine()
 trust_calculator = TrustScoreCalculator()
 
 # Pydantic Models
-class ReviewData(BaseModel):
-    product_id: str
-    user_id: str
-    rating: int
-    text: str
-    timestamp: Optional[str] = None
+class RequestModel(BaseModel):
+    class Config:
+        extra = 'forbid'
 
-class RecommendationRequest(BaseModel):
-    user_id: str
-    num_recommendations: int = 5
+    @validator('product_id', 'user_id', check_fields=False)
+    def validate_identifier(cls, value):
+        if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', value):
+            raise ValueError('Invalid identifier.')
+        return value
+
+class ReviewData(RequestModel):
+    product_id: constr(strip_whitespace=True, min_length=1, max_length=128)
+    user_id: constr(strip_whitespace=True, min_length=1, max_length=128)
+    rating: conint(strict=True, ge=1, le=5)
+    text: constr(strip_whitespace=True, min_length=1, max_length=5000)
+    timestamp: Optional[constr(max_length=64)] = None
+
+class RecommendationRequest(RequestModel):
+    user_id: constr(strip_whitespace=True, min_length=1, max_length=128)
+    num_recommendations: conint(strict=True, ge=1, le=50) = 5
 
 # Helper to extract features from text (Python version)
 def extract_features_from_text(text: str, category: str = 'general') -> Dict[str, float]:
@@ -283,7 +360,8 @@ async def analyze_sentiment(review: ReviewData):
             'savedToFirebase': db is not None
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[ERROR] Sentiment analysis failed: {e}")
+        raise HTTPException(status_code=500, detail='Unable to analyze review.')
 
 @app.post("/api/ai/recommendations")
 async def get_recommendations(request: RecommendationRequest):
@@ -330,11 +408,17 @@ async def get_recommendations(request: RecommendationRequest):
             'total_products': len(product_data)
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[ERROR] Recommendations failed: {e}")
+        raise HTTPException(status_code=500, detail='Unable to get recommendations.')
 
 @app.post("/api/ai/trust-score/{product_id}")
-async def calculate_trust_score(product_id: str):
+async def calculate_trust_score(
+    product_id: str = Path(..., min_length=1, max_length=128)
+):
     """Calculate trust score"""
+    if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', product_id):
+        raise HTTPException(status_code=400, detail='Invalid product ID.')
+
     try:
         # Get reviews for product
         review_data = []
@@ -375,11 +459,19 @@ async def calculate_trust_score(product_id: str):
             'updatedInFirebase': db is not None and bool(review_data)
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[ERROR] Trust score calculation failed: {e}")
+        raise HTTPException(status_code=500, detail='Unable to calculate trust score.')
 
 @app.post("/api/ai/train")
-async def train_models():
+async def train_models(request: Request):
     """Train all AI models with existing data"""
+    training_token = os.getenv('AI_TRAINING_TOKEN')
+    if not training_token:
+        raise HTTPException(status_code=503, detail='Model training is disabled.')
+    supplied_token = request.headers.get('x-training-token', '')
+    if not hmac.compare_digest(supplied_token, training_token):
+        raise HTTPException(status_code=401, detail='Unauthorized.')
+
     try:
         # Get all reviews
         review_data = []
@@ -414,7 +506,7 @@ async def train_models():
         }
     except Exception as e:
         print(f"[ERROR] Training error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail='Unable to train models.')
 
 # Helper functions for mock data
 def get_mock_products():

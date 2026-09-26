@@ -1,8 +1,12 @@
 import requests
 import json
+import os
 
 # Base URL for AI service
 BASE_URL = "http://localhost:8000"
+session = requests.Session()
+if os.getenv("AI_SERVICE_API_KEY"):
+    session.headers["X-API-Key"] = os.environ["AI_SERVICE_API_KEY"]
 
 def test_health():
     """Test health check endpoint"""
@@ -11,7 +15,7 @@ def test_health():
     print("=" * 50)
     
     try:
-        response = requests.get(f"{BASE_URL}/")
+        response = session.get(f"{BASE_URL}/")
         print(f"✅ Status Code: {response.status_code}")
         print(f"📊 Response: {json.dumps(response.json(), indent=2)}")
         return response.status_code == 200
@@ -26,7 +30,7 @@ def test_status():
     print("=" * 50)
     
     try:
-        response = requests.get(f"{BASE_URL}/api/ai/status")
+        response = session.get(f"{BASE_URL}/api/ai/status")
         print(f"✅ Status Code: {response.status_code}")
         if response.status_code == 200:
             result = response.json()
@@ -49,8 +53,16 @@ def test_train():
     print("🧠 Testing Model Training")
     print("=" * 50)
     
+    training_token = os.getenv("AI_TRAINING_TOKEN")
+    if not training_token:
+        print("⏭️ Training skipped; AI_TRAINING_TOKEN is not configured")
+        return True
+
     try:
-        response = requests.post(f"{BASE_URL}/api/ai/train")
+        response = session.post(
+            f"{BASE_URL}/api/ai/train",
+            headers={"X-Training-Token": training_token},
+        )
         print(f"✅ Status Code: {response.status_code}")
         if response.status_code == 200:
             result = response.json()
@@ -94,7 +106,7 @@ def test_sentiment():
     for review in test_reviews:
         print(f"\n📝 Review: {review['text']}")
         try:
-            response = requests.post(
+            response = session.post(
                 f"{BASE_URL}/api/ai/analyze-sentiment",
                 json=review
             )
@@ -119,7 +131,7 @@ def test_recommendations():
     print("=" * 50)
     
     try:
-        response = requests.post(
+        response = session.post(
             f"{BASE_URL}/api/ai/recommendations",
             json={
                 "user_id": "test_user",
@@ -151,7 +163,7 @@ def test_trust_score():
     print("=" * 50)
     
     try:
-        response = requests.post(f"{BASE_URL}/api/ai/trust-score/test_product_1")
+        response = session.post(f"{BASE_URL}/api/ai/trust-score/test_product_1")
         print(f"✅ Status Code: {response.status_code}")
         if response.status_code == 200:
             result = response.json()
@@ -175,7 +187,7 @@ def main():
     
     # Check if service is running first
     try:
-        response = requests.get(f"{BASE_URL}/")
+        response = session.get(f"{BASE_URL}/")
         print("✅ AI Service is running!\n")
     except:
         print("❌ AI Service is NOT running!")

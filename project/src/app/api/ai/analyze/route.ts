@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { rateLimit, readJson, safeText, idSchema } from '@/lib/api-security';
+import { authorizeRequest, getAIServiceHeaders, rateLimit, readJson, safeText, idSchema } from '@/lib/api-security';
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/python` : 'http://localhost:8000');
@@ -17,11 +17,13 @@ export async function POST(request: NextRequest) {
     timestamp: z.string().datetime().optional(),
   }).strict());
   if (parsed.response) return parsed.response;
+  const authorization = await authorizeRequest(request, { expectedUserId: parsed.data.user_id });
+  if (authorization.response) return authorization.response;
 
   try {
     const response = await fetch(`${AI_SERVICE_URL}/api/ai/analyze-sentiment`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAIServiceHeaders(),
       body: JSON.stringify(parsed.data),
     });
 

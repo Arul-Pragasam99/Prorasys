@@ -1,11 +1,22 @@
 import requests
 import json
+import os
 
 def train_all_models():
+    training_token = os.getenv("AI_TRAINING_TOKEN")
+    if not training_token:
+        print("❌ Set AI_TRAINING_TOKEN to enable model training")
+        return
+
+    headers = {"X-Training-Token": training_token}
+    api_key = os.getenv("AI_SERVICE_API_KEY")
+    if api_key:
+        headers["X-API-Key"] = api_key
+
     url = "http://localhost:8000/api/ai/train"
     try:
         print("🧠 Training AI models...")
-        response = requests.post(url)
+        response = requests.post(url, headers=headers)
         
         if response.status_code == 200:
             result = response.json()

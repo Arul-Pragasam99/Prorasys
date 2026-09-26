@@ -81,7 +81,24 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# Server-only; use the same AI_SERVICE_API_KEY in Next.js and python-backend
+AI_SERVICE_API_KEY=replace-with-a-long-random-secret
+AI_TRAINING_TOKEN=replace-with-a-separate-long-random-secret
+FIREBASE_ADMIN_PROJECT_ID=your_project_id
+FIREBASE_ADMIN_CLIENT_EMAIL=your_service_account_email
+FIREBASE_ADMIN_PRIVATE_KEY="your_private_key"
+
+# Optional comma-separated browser origins for direct Python API access
+ALLOWED_ORIGINS=http://localhost:3000
 ```
+
+Never prefix server secrets with `NEXT_PUBLIC_`. The Python API accepts loopback
+requests without `AI_SERVICE_API_KEY`; configure the key in both services before
+allowing remote access. Model training stays disabled until `AI_TRAINING_TOKEN`
+is configured. API rate-limit counters are process-local, so deployments with
+multiple instances should use a shared rate-limit store at the gateway or in the
+application before exposing high-traffic endpoints publicly.
 
 ## Running locally
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { idSchema, rateLimit, readJson, safeText } from '@/lib/api-security';
+import { authorizeRequest, idSchema, rateLimit, readJson, safeText } from '@/lib/api-security';
 
 type RouteContext = {
   params: Promise<{ productId: string }>;
@@ -32,6 +32,8 @@ export async function GET(_request: Request, context: RouteContext) {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   const limited = rateLimit(request, 10);
   if (limited) return limited;
+  const authorization = await authorizeRequest(request, { adminOnly: true });
+  if (authorization.response) return authorization.response;
 
   const { productId } = await context.params;
   if (!idSchema.safeParse(productId).success) {
@@ -45,6 +47,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 export async function DELETE(request: NextRequest, context: RouteContext) {
   const limited = rateLimit(request, 10);
   if (limited) return limited;
+  const authorization = await authorizeRequest(request, { adminOnly: true });
+  if (authorization.response) return authorization.response;
 
   const { productId } = await context.params;
   if (!idSchema.safeParse(productId).success) {

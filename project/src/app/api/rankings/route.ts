@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { FeatureExtractor } from '@/lib/feature-extraction';
+import { rateLimit, safeText } from '@/lib/api-security';
+
+const rankingQuerySchema = z.object({
+  category: safeText(80).default('general'),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  feature: z.string().trim().max(80).optional(),
+  minRating: z.coerce.number().finite().min(0).max(5).default(0),
+  maxPrice: z.coerce.number().finite().min(0).max(100_000_000).default(1000),
+}).strict();
 
 type FirestoreProduct = {
   id: string;
@@ -35,13 +45,22 @@ type FirestoreReview = {
 };
 
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, 30);
+  if (limited) return limited;
+
   try {
     const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category') || 'general';
-    const limit_ = parseInt(searchParams.get('limit') || '20');
-    const feature = searchParams.get('feature');
-    const minRating = parseFloat(searchParams.get('minRating') || '0');
-    const maxPrice = parseFloat(searchParams.get('maxPrice') || '1000');
+    const parsedQuery = rankingQuerySchema.safeParse({
+      category: searchParams.get('category') ?? undefined,
+      limit: searchParams.get('limit') ?? undefined,
+      feature: searchParams.get('feature') ?? undefined,
+      minRating: searchParams.get('minRating') ?? undefined,
+      maxPrice: searchParams.get('maxPrice') ?? undefined,
+    });
+    if (!parsedQuery.success) {
+      return NextResponse.json({ error: 'Invalid query parameters.' }, { status: 400 });
+    }
+    const { category, limit: limit_, feature, minRating, maxPrice } = parsedQuery.data;
 
     const productsSnapshot = await getDocs(collection(db, 'products'));
     const products: FirestoreProduct[] = productsSnapshot.docs.map(doc => ({
