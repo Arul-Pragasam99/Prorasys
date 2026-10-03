@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FakeReviewDetector } from '@/lib/fake-review-detection';
-import { rateLimit, readJson, safeText, idSchema } from '@/lib/api-security';
+import { adminDb } from '@/lib/firebase-admin';
+import { authorizeRequest, rateLimit, readJson, idSchema } from '@/lib/api-security';
 
 const fakeDetector = new FakeReviewDetector();
 
@@ -19,6 +20,12 @@ export async function POST(request: NextRequest) {
     }).strict(),
   }).strict());
   if (parsed.response) return parsed.response;
+
+    const authorization = await authorizeRequest(request, { adminOnly: true });
+    if (authorization.response) return authorization.response;
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Review analysis is unavailable.' }, { status: 503 });
+    }
 
   try {
     const { review, userId } = parsed.data;

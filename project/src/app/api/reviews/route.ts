@@ -15,12 +15,27 @@ export async function GET(request: NextRequest) {
   if (limited) return limited;
 
   if (!adminDb) {
-    return NextResponse.json([]);
+    return NextResponse.json({ error: 'Review service is unavailable.' }, { status: 503 });
   }
 
-  const snapshot = await adminDb.collection('reviews').orderBy('createdAt', 'desc').get();
-  const reviews = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  return NextResponse.json(reviews);
+  try {
+    const snapshot = await adminDb.collection('reviews').get();
+    const reviews: Array<Record<string, unknown> & { id: string }> = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    reviews.sort((left, right) => {
+      const leftValue = typeof left.createdAt === 'string' ? left.createdAt : left.timestamp;
+      const rightValue = typeof right.createdAt === 'string' ? right.createdAt : right.timestamp;
+      const leftDate = Date.parse(typeof leftValue === 'string' ? leftValue : '') || 0;
+      const rightDate = Date.parse(typeof rightValue === 'string' ? rightValue : '') || 0;
+      return rightDate - leftDate;
+    });
+    return NextResponse.json(reviews);
+  } catch (error) {
+    console.error('Review listing failed:', error);
+    return NextResponse.json({ error: 'Unable to fetch reviews.' }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {

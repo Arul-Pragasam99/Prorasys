@@ -1,5 +1,4 @@
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { adminDb } from './firebase-admin';
 
 export type ReviewCredibility = {
   userId: string;
@@ -66,27 +65,26 @@ export class FakeReviewDetector {
       return analysis;
     } catch (error) {
       console.error('Fake review detection error:', error);
-      return analysis;
+      throw error;
     }
   }
 
   private async getUserCredibility(userId: string): Promise<ReviewCredibility> {
     try {
+      if (!adminDb) throw new Error('Firebase Admin is unavailable.');
+
       // Get user's review history
-      const reviewsQuery = query(
-        collection(db, 'reviews'),
-        where('userId', '==', userId)
-      );
-      const snapshot = await getDocs(reviewsQuery);
-      const userReviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const reviewsSnapshot = await adminDb.collection('reviews').where('userId', '==', userId).get();
+      const userReviews = reviewsSnapshot.docs.map(snapshot => ({ id: snapshot.id, ...snapshot.data() }));
 
       // Get user data
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      const userData = userDoc.exists() ? userDoc.data() : {};
+      const userDoc = await adminDb.collection('users').doc(userId).get();
+      if (!userDoc.exists) throw new Error('User profile not found.');
+      const userData = userDoc.data() || {};
 
       const reviewCount = userReviews.length;
       const accountAge = this.calculateAccountAge(userData.createdAt);
-      const isVerified = userData.isVerified || false;
+      const isVerified = userData.emailVerified === true;
 
       let credibilityScore = 0.5;
       const flaggedReasons: string[] = [];
@@ -139,14 +137,7 @@ export class FakeReviewDetector {
       };
     } catch (error) {
       console.error('Error getting user credibility:', error);
-      return {
-        userId,
-        credibilityScore: 0.5,
-        reviewCount: 0,
-        accountAge: 0,
-        isVerified: false,
-        flaggedReasons: ['Error analyzing user credibility'],
-      };
+      throw error;
     }
   }
 
@@ -211,12 +202,10 @@ export class FakeReviewDetector {
     let suspiciousScore = 0;
 
     try {
+      if (!adminDb) throw new Error('Firebase Admin is unavailable.');
+
       // Get recent reviews
-      const reviewsQuery = query(
-        collection(db, 'reviews'),
-        where('userId', '==', userId)
-      );
-      const snapshot = await getDocs(reviewsQuery);
+      const snapshot = await adminDb.collection('reviews').where('userId', '==', userId).get();
       const userReviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       // Check for review bombing (many reviews in short time)
@@ -253,6 +242,7 @@ export class FakeReviewDetector {
       }
     } catch (error) {
       console.error('Error checking review patterns:', error);
+      throw error;
     }
 
     return {
