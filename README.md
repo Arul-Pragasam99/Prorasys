@@ -127,4 +127,4 @@ The repository config deploys the Next.js app and `api/python.py` as a Python fu
 
 The service can use validated trained models when they are supplied with the production deployment. Otherwise, sentiment uses a rule-based fallback, recommendations use a content-based fallback, and trust scoring uses a heuristic. Vercel function storage is temporary, so training output must be stored and deployed through a deliberate artifact process.
 
-Rate limits in the current application are process-local. For multi-instance or high-traffic production use, move rate limiting to a shared store or gateway.
+Rate limits in the current application are process-local. For multi-instance or high-traffic production use, move rate limiting to a shared store or gateway. 
