@@ -20,12 +20,10 @@ python-backend/logs/
 #firestore rules
 firestore.rules
 
-#seed files
-scripts/seed-products.json
-scripts/seed-users.json
-scripts/seed-orders.json
-scripts/seed-reviews.json
 
+scripts/seed-products.js
+scripts/seed-reviews.js
+scripts/seed-users.js
 
 # Firebase credentials (anywhere in project)
 service-account.json
