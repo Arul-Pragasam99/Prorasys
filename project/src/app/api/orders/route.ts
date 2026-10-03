@@ -10,12 +10,12 @@ const orderSchema = z.object({
     quantity: z.number().int().min(1).max(50),
   }).strict()).min(1).max(50),
   shippingAddress: z.object({
-    fullName: safeText(120),
-    address: safeText(500),
-    city: safeText(100),
-    state: safeText(100),
-    pincode: z.string().trim().min(3).max(20),
-    phone: z.string().trim().min(7).max(24),
+    fullName: safeText(120).min(2),
+    address: safeText(500).min(5),
+    city: safeText(100).min(2),
+    state: safeText(100).min(2),
+    pincode: z.string().trim().regex(/^[1-9]\d{5}$/),
+    phone: z.string().trim().regex(/^(?:\+91[\s-]?)?[6-9]\d{9}$/),
   }).strict(),
 }).strict();
 

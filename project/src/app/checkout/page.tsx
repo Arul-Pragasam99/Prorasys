@@ -47,8 +47,16 @@ export default function CheckoutPage() {
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!shippingData.fullName || !shippingData.address || !shippingData.city || !shippingData.pincode) {
+    if (Object.values(shippingData).some((value) => !value.trim())) {
       alert('Please fill in all shipping details');
+      return;
+    }
+    if (!/^[1-9]\d{5}$/.test(shippingData.pincode.trim())) {
+      alert('Enter a valid 6-digit pincode.');
+      return;
+    }
+    if (!/^(?:\+91[\s-]?)?[6-9]\d{9}$/.test(shippingData.phone.trim())) {
+      alert('Enter a valid 10-digit Indian mobile number.');
       return;
     }
     setStep('payment');
@@ -166,6 +174,9 @@ export default function CheckoutPage() {
                       onChange={(e) => setShippingData({ ...shippingData, fullName: e.target.value })}
                       className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       placeholder="John Doe"
+                      minLength={2}
+                      maxLength={120}
+                      autoComplete="name"
                       required
                     />
                   </div>
@@ -179,6 +190,9 @@ export default function CheckoutPage() {
                       onChange={(e) => setShippingData({ ...shippingData, address: e.target.value })}
                       className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       placeholder="123 Main St"
+                      minLength={5}
+                      maxLength={500}
+                      autoComplete="street-address"
                       required
                     />
                   </div>
@@ -193,6 +207,9 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingData({ ...shippingData, city: e.target.value })}
                         className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                         placeholder="Mumbai"
+                        minLength={2}
+                        maxLength={100}
+                        autoComplete="address-level2"
                         required
                       />
                     </div>
@@ -206,6 +223,9 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingData({ ...shippingData, state: e.target.value })}
                         className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                         placeholder="Maharashtra"
+                        minLength={2}
+                        maxLength={100}
+                        autoComplete="address-level1"
                         required
                       />
                     </div>
@@ -221,6 +241,10 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingData({ ...shippingData, pincode: e.target.value })}
                         className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                         placeholder="400001"
+                        inputMode="numeric"
+                        pattern="[1-9][0-9]{5}"
+                        maxLength={6}
+                        autoComplete="postal-code"
                         required
                       />
                     </div>
@@ -233,7 +257,10 @@ export default function CheckoutPage() {
                         value={shippingData.phone}
                         onChange={(e) => setShippingData({ ...shippingData, phone: e.target.value })}
                         className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        placeholder="9876543210"
+                        placeholder="9876543210 or +91 9876543210"
+                        pattern="(?:\+91[\s-]?)?[6-9][0-9]{9}"
+                        maxLength={15}
+                        autoComplete="tel"
                         required
                       />
                     </div>
