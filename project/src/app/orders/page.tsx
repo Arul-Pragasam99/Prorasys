@@ -40,7 +40,7 @@ export default function OrdersPage() {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!window.confirm('Cancel this order? This cannot be undone.')) return;
+    if (!window.confirm(`Cancel order #${orderId.slice(0, 8)}? This cannot be undone.`)) return;
 
     setCancellingOrderId(orderId);
     const cancelled = await cancelOrder(orderId);

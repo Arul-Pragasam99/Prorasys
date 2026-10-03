@@ -162,7 +162,14 @@ export default function AdminPage() {
     }
   };
 
-  const handleOrderStatusChange = async (orderId: string, status: string) => {
+  const handleOrderStatusChange = async (orderId: string, status: string, currentStatus: string) => {
+    if (status === currentStatus) return;
+    const orderLabel = orderId.slice(0, 8);
+    const confirmed = window.confirm(
+      `Change order #${orderLabel} from ${currentStatus} to ${status}?`,
+    );
+    if (!confirmed) return;
+
     try {
       await updateDoc(doc(db, 'orders', orderId), {
         status,
@@ -176,8 +183,8 @@ export default function AdminPage() {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!window.confirm('Cancel this customer order?')) return;
-    await handleOrderStatusChange(orderId, 'cancelled');
+    const order = adminOrders.find((candidate) => candidate.id === orderId);
+    await handleOrderStatusChange(orderId, 'cancelled', order?.status || 'pending');
   };
 
   const statItems = [
@@ -377,7 +384,7 @@ export default function AdminPage() {
                     </div>
                     <select
                       value={order.status || 'pending'}
-                      onChange={(event) => handleOrderStatusChange(order.id, event.target.value)}
+                      onChange={(event) => handleOrderStatusChange(order.id, event.target.value, order.status || 'pending')}
                       disabled={order.status === 'cancelled'}
                       className="rounded-theme border border-border bg-card px-3 py-2 text-sm text-text-primary"
                     >
