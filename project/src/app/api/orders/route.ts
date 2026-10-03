@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { authorizeRequest, idSchema, rateLimit, readJson, safeText } from '@/lib/api-security';
 
 const orderSchema = z.object({
+  paymentMethod: z.literal('cash_on_delivery'),
   items: z.array(z.object({
     productId: idSchema,
     quantity: z.number().int().min(1).max(50),
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
         taxAmount,
         shippingAmount,
         totalAmount: subtotal + taxAmount + shippingAmount,
+        paymentMethod: parsed.data.paymentMethod,
         status: 'pending',
         shippingAddress: parsed.data.shippingAddress,
         createdAt: now,

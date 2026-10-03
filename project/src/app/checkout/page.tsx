@@ -7,7 +7,7 @@ import { useStore } from '@/components/commerce/StoreProvider';
 import { createOrder } from '@/lib/order-service';
 import { saveCartSnapshot } from '@/lib/cart-service';
 import { auth } from '@/lib/firebase';
-import { Loader2, CheckCircle, Truck, Package, MapPin, CreditCard, ArrowLeft } from 'lucide-react';
+import { Loader2, CheckCircle, Truck, Package, MapPin, Banknote, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
@@ -16,6 +16,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [placedOrderTotal, setPlacedOrderTotal] = useState<number | null>(null);
   const [subtotal, setSubtotal] = useState(0);
 
   const [shippingData, setShippingData] = useState({
@@ -64,6 +65,7 @@ export default function CheckoutPage() {
       );
 
       setOrderId(order.id);
+      setPlacedOrderTotal(order.totalAmount);
       
       const uid = auth.currentUser?.uid;
       if (uid) await saveCartSnapshot(uid, { cart: [], wishlist: [] });
@@ -77,6 +79,8 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  const total = subtotal + (subtotal * 0.1) + (subtotal > 10000 ? 0 : 100);
 
   if (step === 'confirmation' && orderId) {
     return (
@@ -94,7 +98,7 @@ export default function CheckoutPage() {
             <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center gap-3 text-sm">
                 <Truck className="w-4 h-4 text-primary" />
-                <span className="text-text-secondary">You can now review your purchased products</span>
+                <span className="text-text-secondary">Pay ₹{(placedOrderTotal ?? total).toFixed(0)} in cash when your order is delivered.</span>
               </div>
             </div>
 
@@ -117,8 +121,6 @@ export default function CheckoutPage() {
       </main>
     );
   }
-
-  const total = subtotal + (subtotal * 0.1) + (subtotal > 10000 ? 0 : 100);
 
   return (
     <main className="min-h-screen bg-surface text-text-primary">
@@ -249,48 +251,27 @@ export default function CheckoutPage() {
             {step === 'payment' && (
               <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
                 <h2 className="text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  Payment Details
+                  <Banknote className="w-5 h-5 text-primary" />
+                  Payment Method
                 </h2>
                 <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <p className="text-sm text-text-secondary">💳 Test Mode</p>
-                    <p className="text-xs text-text-secondary mt-1">Use any card number for testing</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1">
-                      Card Number *
-                    </label>
+                  <label className="flex items-start gap-3 rounded-theme border border-primary bg-primary/5 p-4">
                     <input
-                      type="text"
-                      className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                      placeholder="4242 4242 4242 4242"
-                      required
+                      type="radio"
+                      name="paymentMethod"
+                      value="cash_on_delivery"
+                      defaultChecked
+                      className="mt-1 accent-primary"
                     />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-text-secondary mb-1">
-                        Expiry Date *
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        placeholder="MM/YY"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-text-secondary mb-1">
-                        CVV *
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2.5 border border-border rounded-theme bg-surface text-text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        placeholder="123"
-                        required
-                      />
-                    </div>
+                    <span>
+                      <span className="block font-medium text-text-primary">Cash on delivery</span>
+                      <span className="mt-1 block text-sm text-text-secondary">
+                        Pay ₹{total.toFixed(0)} in cash when your order arrives. No card details needed.
+                      </span>
+                    </span>
+                  </label>
+                  <div className="rounded-theme border border-border p-4 text-sm text-text-secondary">
+                    Online payment is currently unavailable.
                   </div>
                   <div className="flex gap-3">
                     <button
@@ -311,7 +292,7 @@ export default function CheckoutPage() {
                           Processing...
                         </>
                       ) : (
-                        'Pay ₹' + total.toFixed(0)
+                        'Place COD order - ₹' + total.toFixed(0)
                       )}
                     </button>
                   </div>

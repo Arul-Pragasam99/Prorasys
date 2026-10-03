@@ -149,6 +149,9 @@ export default function OrdersPage() {
                   <div>
                     <p className="text-sm text-text-secondary">Total</p>
                     <p className="text-lg font-bold text-primary">₹{order.totalAmount}</p>
+                    {order.paymentMethod === 'cash_on_delivery' && (
+                      <p className="mt-1 text-sm text-text-secondary">Cash on delivery</p>
+                    )}
                   </div>
                   {order.status === 'delivered' && (
                     <Link

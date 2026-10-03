@@ -2,6 +2,7 @@ import { collection, doc, getDocs, getDoc, updateDoc, query, where } from 'fireb
 import { auth, db } from '@/lib/firebase';
 
 export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderPaymentMethod = 'cash_on_delivery';
 
 export type OrderItem = {
   productId: string;
@@ -18,6 +19,7 @@ export type Order = {
   userDisplayName: string;
   items: OrderItem[];
   totalAmount: number;
+  paymentMethod?: OrderPaymentMethod;
   status: OrderStatus;
   shippingAddress: {
     fullName: string;
@@ -48,7 +50,7 @@ export async function createOrder(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`,
     },
-    body: JSON.stringify({ items, shippingAddress }),
+    body: JSON.stringify({ items, shippingAddress, paymentMethod: 'cash_on_delivery' }),
   });
   const result = await response.json();
   if (!response.ok) {
