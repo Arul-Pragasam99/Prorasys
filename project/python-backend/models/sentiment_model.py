@@ -9,14 +9,16 @@ from typing import Dict, List
 from nltk.corpus import stopwords
 import re
 import pickle
+from pathlib import Path
 
 class SentimentAnalyzer:
     def __init__(self):
         self.model = None
         self.vectorizer = None
         self.label_encoder = None
-        self.model_path = "models/saved/sentiment_model.pkl"
-        self.vectorizer_path = "models/saved/vectorizer.pkl"
+        model_dir = Path(__file__).resolve().parent / 'saved'
+        self.model_path = model_dir / 'sentiment_model.pkl'
+        self.vectorizer_path = model_dir / 'vectorizer.pkl'
         self._model_validated = False
         
         # Load pre-trained model if exists
@@ -185,7 +187,7 @@ class SentimentAnalyzer:
     
     def save_model(self):
         """Save the trained model"""
-        os.makedirs('models/saved', exist_ok=True)
+        Path(self.model_path).parent.mkdir(parents=True, exist_ok=True)
         with open(self.model_path, 'wb') as f:
             pickle.dump(self.model, f)
         with open(self.vectorizer_path, 'wb') as f:

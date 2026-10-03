@@ -6,12 +6,13 @@ from sklearn.preprocessing import StandardScaler
 import json
 import os
 import pickle
+from pathlib import Path
 
 class TrustScoreCalculator:
     def __init__(self):
         self.model = None
         self.scaler = None
-        self.model_path = "models/saved/trust_model.pkl"
+        self.model_path = Path(__file__).resolve().parent / 'saved' / 'trust_model.pkl'
         
         if os.path.exists(self.model_path):
             self.load_model()
@@ -178,7 +179,7 @@ class TrustScoreCalculator:
     
     def save_model(self):
         """Save the trained model"""
-        os.makedirs('models/saved', exist_ok=True)
+        Path(self.model_path).parent.mkdir(parents=True, exist_ok=True)
         with open(self.model_path, 'wb') as f:
             pickle.dump({
                 'model': self.model,

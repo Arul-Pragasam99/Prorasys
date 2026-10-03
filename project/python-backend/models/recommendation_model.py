@@ -7,6 +7,7 @@ from typing import List, Dict
 import json
 import os
 import pickle
+from pathlib import Path
 
 class RecommendationEngine:
     def __init__(self):
@@ -14,7 +15,7 @@ class RecommendationEngine:
         self.svd_model = None
         self.product_features = None
         self.model = None
-        self.model_path = "models/saved/recommendation_model.pkl"
+        self.model_path = Path(__file__).resolve().parent / 'saved' / 'recommendation_model.pkl'
         
         # Load pre-trained model if exists
         if os.path.exists(self.model_path):
@@ -120,7 +121,7 @@ class RecommendationEngine:
     
     def save_model(self):
         """Save the trained model"""
-        os.makedirs('models/saved', exist_ok=True)
+        Path(self.model_path).parent.mkdir(parents=True, exist_ok=True)
         with open(self.model_path, 'wb') as f:
             pickle.dump({
                 'user_item_matrix': self.user_item_matrix,
