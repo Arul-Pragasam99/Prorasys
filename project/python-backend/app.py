@@ -246,22 +246,24 @@ def read_root():
 
 @app.get("/api/ai/status")
 async def ai_status():
-    """Check AI service status"""
+    """Report model readiness without advertising fallback inference."""
     try:
+        models = {
+            "sentiment": sentiment_analyzer.is_trained,
+            "recommendation": recommendation_engine.is_trained,
+            "trust": trust_calculator.is_trained,
+        }
         return {
             "status": "running",
-            "models": {
-                "sentiment": sentiment_analyzer.is_trained,
-                "recommendation": recommendation_engine.is_trained,
-                "trust": trust_calculator.is_trained,
-            },
+            "ready": all(models.values()),
+            "models": models,
             "fallbacks": {
-                "sentiment": not sentiment_analyzer.is_trained,
-                "recommendation": True,
-                "trust": not trust_calculator.is_trained,
+                "sentiment": False,
+                "recommendation": False,
+                "trust": False,
             },
             "firebase": db is not None,
-            "message": "AI service is running"
+            "message": "AI service is running with trained models only"
         }
     except Exception as e:
         return {
@@ -272,6 +274,9 @@ async def ai_status():
 @app.post("/api/ai/analyze-sentiment")
 async def analyze_sentiment(review: ReviewData):
     """Analyze sentiment without writing customer-controlled data to Firestore."""
+    if not sentiment_analyzer.is_trained:
+        raise HTTPException(status_code=503, detail='Trained sentiment model is not available.')
+
     try:
         sentiment_result = sentiment_analyzer.analyze(review.text)
         rating_score = review.rating / 5.0
@@ -304,35 +309,28 @@ async def analyze_sentiment(review: ReviewData):
 @app.post("/api/ai/recommendations")
 async def get_recommendations(request: RecommendationRequest):
     """Get personalized recommendations"""
+    if not recommendation_engine.is_trained:
+        raise HTTPException(status_code=503, detail='Trained recommendation model is not available.')
+    if not db:
+        raise HTTPException(status_code=503, detail='Firebase data is not available.')
+
     try:
-        # Get all products (from Firestore or mock)
+        products = db.collection('products').stream()
         product_data = []
-        if db:
-            try:
-                products = db.collection('products').stream()
-                for product in products:
-                    prod_data = product.to_dict()
-                    prod_data['id'] = product.id
-                    product_data.append(prod_data)
-                print(f"[OK] Loaded {len(product_data)} products from Firestore")
-            except Exception as e:
-                print(f"[WARN] Error loading products from Firestore: {e}")
-                product_data = get_mock_products()
-        else:
-            product_data = get_mock_products()
-        
+        for product in products:
+            product_record = product.to_dict()
+            product_record['id'] = product.id
+            product_data.append(product_record)
+        if not product_data:
+            raise HTTPException(status_code=503, detail='No products are available for recommendations.')
+
         # Get user interactions from cart
         user_interactions = []
-        if db:
-            try:
-                cart_ref = db.collection('carts').document(request.user_id)
-                cart_data = cart_ref.get()
-                if cart_data.exists:
-                    cart = cart_data.to_dict()
-                    user_interactions = cart.get('cart', [])
-            except Exception as e:
-                print(f"[WARN] Error loading cart: {e}")
-        
+        cart_ref = db.collection('carts').document(request.user_id)
+        cart_data = cart_ref.get()
+        if cart_data.exists:
+            user_interactions = (cart_data.to_dict() or {}).get('cart', [])
+
         # Get recommendations
         recommendations = recommendation_engine.get_recommendations(
             user_id=request.user_id,
@@ -345,9 +343,11 @@ async def get_recommendations(request: RecommendationRequest):
             'recommendations': recommendations,
             'total_products': len(product_data)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ERROR] Recommendations failed: {e}")
-        raise HTTPException(status_code=500, detail='Unable to get recommendations.')
+        raise HTTPException(status_code=503, detail='Trained recommendations are unavailable.')
 
 @app.post("/api/ai/trust-score/{product_id}")
 async def calculate_trust_score(
@@ -356,28 +356,21 @@ async def calculate_trust_score(
     """Calculate trust score"""
     if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', product_id):
         raise HTTPException(status_code=400, detail='Invalid product ID.')
+    if not trust_calculator.is_trained:
+        raise HTTPException(status_code=503, detail='Trained trust model is not available.')
+    if not db:
+        raise HTTPException(status_code=503, detail='Firebase data is not available.')
 
     try:
         # Get reviews for product
-        review_data = []
-        if db:
-            try:
-                reviews = db.collection('reviews').where('productId', '==', product_id).stream()
-                for review in reviews:
-                    data = review.to_dict()
-                    review_data.append(data)
-                print(f"[OK] Loaded {len(review_data)} reviews from Firestore")
-            except Exception as e:
-                print(f"[WARN] Error loading reviews: {e}")
-                review_data = get_mock_reviews()
-        else:
-            review_data = get_mock_reviews()
+        reviews = db.collection('reviews').where('productId', '==', product_id).stream()
+        review_data = [review.to_dict() for review in reviews]
         
         # Calculate trust score
         trust_result = trust_calculator.calculate(review_data)
         
         # Update product if connected
-        if db and review_data:
+        if review_data:
             try:
                 product_ref = db.collection('products').document(product_id)
                 product_ref.update({
@@ -394,8 +387,10 @@ async def calculate_trust_score(
         return {
             **trust_result,
             'productId': product_id,
-            'updatedInFirebase': db is not None and bool(review_data)
+            'updatedInFirebase': bool(review_data)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ERROR] Trust score calculation failed: {e}")
         raise HTTPException(status_code=500, detail='Unable to calculate trust score.')
@@ -411,64 +406,48 @@ async def train_models(request: Request):
         raise HTTPException(status_code=401, detail='Unauthorized.')
 
     try:
-        # Get all reviews
+        if not db:
+            raise HTTPException(status_code=503, detail='Firebase training data is not available.')
+
+        # Training must use stored review records; synthetic mock data is not a substitute.
         review_data = []
-        if db:
-            try:
-                reviews = db.collection('reviews').stream()
-                for review in reviews:
-                    data = review.to_dict()
-                    data['id'] = review.id
-                    review_data.append(data)
-                print(f"[INFO] Loaded {len(review_data)} reviews from Firestore")
-            except Exception as e:
-                print(f"[WARN] Error loading reviews: {e}")
-                review_data = get_mock_reviews()
-        else:
-            review_data = get_mock_reviews()
-            print(f"[INFO] Using {len(review_data)} mock reviews for training")
+        reviews = db.collection('reviews').stream()
+        for review in reviews:
+            data = review.to_dict()
+            data['id'] = review.id
+            review_data.append(data)
         
         if not review_data:
-            return {"status": "warning", "message": "No training data available"}
+            raise HTTPException(status_code=422, detail='No Firestore reviews are available for training.')
         
         # Train models
         print(f"[INFO] Training models with {len(review_data)} reviews...")
         sentiment_analyzer.train(review_data)
         recommendation_engine.train(review_data)
         trust_calculator.train(review_data)
+
+        models = {
+            "sentiment": sentiment_analyzer.is_trained,
+            "recommendation": recommendation_engine.is_trained,
+            "trust": trust_calculator.is_trained,
+        }
+        if not all(models.values()):
+            raise HTTPException(
+                status_code=422,
+                detail={"message": "Training data did not produce every validated model.", "models": models},
+            )
         
         return {
             "status": "success", 
-            "message": "Models trained successfully",
+            "message": "All trained models passed readiness checks",
+            "models": models,
             "reviews_used": len(review_data)
         }
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
         print(f"[ERROR] Training error: {e}")
         raise HTTPException(status_code=500, detail='Unable to train models.')
-
-# Helper functions for mock data
-def get_mock_products():
-    return [
-        {'id': '1', 'name': 'Product 1', 'combinedScore': 0.8, 'price': 100, 'category': 'Electronics'},
-        {'id': '2', 'name': 'Product 2', 'combinedScore': 0.7, 'price': 50, 'category': 'Clothing'},
-        {'id': '3', 'name': 'Product 3', 'combinedScore': 0.9, 'price': 200, 'category': 'Books'},
-        {'id': '4', 'name': 'Product 4', 'combinedScore': 0.6, 'price': 75, 'category': 'Electronics'},
-        {'id': '5', 'name': 'Product 5', 'combinedScore': 0.85, 'price': 150, 'category': 'Clothing'},
-    ]
-
-def get_mock_reviews():
-    return [
-        {'text': 'This product is amazing! I love it!', 'rating': 5, 'sentimentScore': 0.9},
-        {'text': 'Very poor quality. Disappointed.', 'rating': 1, 'sentimentScore': 0.1},
-        {'text': 'Good value for money.', 'rating': 4, 'sentimentScore': 0.7},
-        {'text': 'Not worth the price.', 'rating': 2, 'sentimentScore': 0.3},
-        {'text': 'Excellent product! Highly recommend!', 'rating': 5, 'sentimentScore': 0.8},
-        {'text': 'Works fine but nothing special.', 'rating': 3, 'sentimentScore': 0.5},
-        {'text': 'Best purchase ever!', 'rating': 5, 'sentimentScore': 0.95},
-        {'text': 'Terrible customer service.', 'rating': 2, 'sentimentScore': 0.2},
-        {'text': 'Really good quality.', 'rating': 4, 'sentimentScore': 0.75},
-        {'text': 'Would buy again.', 'rating': 4, 'sentimentScore': 0.7},
-    ]
 
 if __name__ == "__main__":
     import uvicorn

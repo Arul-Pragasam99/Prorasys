@@ -40,6 +40,8 @@ class TrustScoreCalculator:
     
     def train(self, reviews_data: List[Dict]):
         """Train trust score model"""
+        self.model = None
+        self.scaler = None
         if not reviews_data:
             print("[WARN] No training data available")
             return
@@ -127,6 +129,13 @@ class TrustScoreCalculator:
                 'reviewCount': 0,
                 'trustLevel': 'no_reviews'
             }
+
+        if not self.is_trained:
+            raise RuntimeError('Trained trust model is not available.')
+        model = self.model
+        scaler = self.scaler
+        if model is None or scaler is None:
+            raise RuntimeError('Trained trust model is not available.')
         
         # Extract features
         ratings = [r.get('rating', 3) for r in reviews]
@@ -137,40 +146,17 @@ class TrustScoreCalculator:
         avg_sentiment = np.mean(sentiment_scores)
         review_count = len(reviews)
         
-        # Use model if available and enough data
-        if self.model is not None and self.scaler is not None and review_count >= 3:
-            try:
-                features = np.array([[
-                    avg_rating,
-                    np.std(ratings) if len(ratings) > 1 else 0,
-                    avg_sentiment,
-                    np.std(sentiment_scores) if len(sentiment_scores) > 1 else 0,
-                    review_count,
-                    min(1, review_count / 50)
-                ]])
-                
-                features_scaled = self.scaler.transform(features)
-                trust_score = float(self.model.predict(features_scaled)[0])
-                
-                # Clamp between 0 and 1
-                trust_score = max(0, min(1, trust_score))
-            except Exception as e:
-                print(f"[WARN] Model prediction error: {e}")
-                # Fallback to heuristic
-                trust_score = (
-                    0.4 * avg_rating / 5 +
-                    0.3 * avg_sentiment +
-                    0.2 * min(1, review_count / 50) +
-                    0.1 * (1 - (np.std(ratings) / 5 if len(ratings) > 1 else 0))
-                )
-        else:
-            # Heuristic for few reviews or when model is not available
-            trust_score = (
-                0.4 * avg_rating / 5 +
-                0.3 * avg_sentiment +
-                0.2 * min(1, review_count / 50) +
-                0.1 * (1 - (np.std(ratings) / 5 if len(ratings) > 1 else 0))
-            )
+        features = np.array([[
+            avg_rating,
+            np.std(ratings) if len(ratings) > 1 else 0,
+            avg_sentiment,
+            np.std(sentiment_scores) if len(sentiment_scores) > 1 else 0,
+            review_count,
+            min(1, review_count / 50)
+        ]])
+        features_scaled = scaler.transform(features)
+        trust_score = float(model.predict(features_scaled)[0])
+        trust_score = max(0, min(1, trust_score))
         
         # Determine trust level
         if trust_score >= 0.8:

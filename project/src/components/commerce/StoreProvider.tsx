@@ -13,7 +13,6 @@ import {
   CartItem 
 } from '@/lib/cart-service';
 import { StoreProduct, StoreContextValue } from '@/lib/store-data';
-import { featuredProducts } from '@/lib/store-data';
 import { auth } from '@/lib/firebase';
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
@@ -100,42 +99,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setLoadingRecommendations(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) throw new Error('Authentication required for recommendations.');
       const response = await fetch('/api/ai/recommendations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({ user_id: uid, num_recommendations: 8 })
       });
-      
+
       if (!response.ok) {
-        console.warn('AI service unavailable, using fallback recommendations');
-        const fallback = featuredProducts.slice(0, 8).map(p => ({
-          ...p,
-          recommendation_score: 0.7 + (Math.random() * 0.25),
-        }));
-        setAiRecommendations(fallback);
-        return;
+        throw new Error('Trained recommendations are unavailable.');
       }
       
       const data = await response.json();
-      if (data.recommendations && data.recommendations.length > 0) {
-        setAiRecommendations(data.recommendations);
-      } else {
-        const fallback = featuredProducts.slice(0, 8).map(p => ({
-          ...p,
-          recommendation_score: 0.7 + (Math.random() * 0.25),
-        }));
-        setAiRecommendations(fallback);
-      }
+      setAiRecommendations(Array.isArray(data.recommendations) ? data.recommendations : []);
     } catch (error) {
-      console.warn('AI service error, using fallback recommendations');
-      const fallback = featuredProducts.slice(0, 8).map(p => ({
-        ...p,
-        recommendation_score: 0.7 + (Math.random() * 0.25),
-      }));
-      setAiRecommendations(fallback);
+      console.warn('Trained recommendations unavailable:', error);
+      setAiRecommendations([]);
     } finally {
       setLoadingRecommendations(false);
     }

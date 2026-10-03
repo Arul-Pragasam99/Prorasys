@@ -31,6 +31,10 @@ class RecommendationEngine:
     
     def train(self, reviews_data: List[Dict]):
         """Train collaborative filtering model"""
+        self.user_item_matrix = None
+        self.svd_model = None
+        self.product_features = None
+        self.model = None
         if not reviews_data:
             print("[WARN] No training data available")
             return
@@ -39,16 +43,15 @@ class RecommendationEngine:
             # Create user-item matrix
             df = pd.DataFrame(reviews_data)
             
-            # Extract user_id, product_id, rating
-            if 'userId' not in df.columns:
-                df['userId'] = [f"user_{i%10}" for i in range(len(df))]
-            if 'productId' not in df.columns:
-                df['productId'] = [f"product_{i%5}" for i in range(len(df))]
-            
+            # Train only from actual user/product/rating records.
+            if not {'userId', 'productId', 'rating'}.issubset(df.columns):
+                print("[WARN] Reviews lack user, product, or rating fields")
+                return
             df = df[['userId', 'productId', 'rating']].dropna()
-            
-            if len(df) < 10:
-                print("[WARN] Not enough data for recommendation model")
+            df = df[df['rating'].between(1, 5)]
+
+            if len(df) < 10 or df['userId'].nunique() < 2 or df['productId'].nunique() < 2:
+                print("[WARN] Not enough distinct user/product ratings for recommendation training")
                 return
             
             # Create pivot table
@@ -60,9 +63,10 @@ class RecommendationEngine:
             )
             
             # Apply SVD for dimensionality reduction
-            n_components = min(20, len(user_item_matrix.columns) - 1)
+            n_components = min(20, len(user_item_matrix.columns) - 1, len(user_item_matrix.index))
             if n_components < 1:
-                n_components = 1
+                print("[WARN] Not enough user/product dimensions for recommendation training")
+                return
                 
             self.svd_model = TruncatedSVD(n_components=n_components, random_state=42)
             self.user_item_matrix = user_item_matrix
@@ -79,55 +83,40 @@ class RecommendationEngine:
     
     def get_recommendations(self, user_id: str, all_products: List[Dict], 
                            user_interactions: List, num_recommendations: int = 5) -> List[Dict]:
-        """Get personalized recommendations"""
-        try:
-            # Get user's existing interactions
-            interacted_product_ids = [p.get('id') for p in user_interactions if p.get('id')]
-            
-            # Get product IDs user hasn't interacted with
-            candidate_products = [
-                p for p in all_products 
-                if p.get('id') not in interacted_product_ids
-            ]
-            
-            if not candidate_products:
-                # If no products to recommend, return top rated
-                return sorted(
-                    all_products,
-                    key=lambda x: x.get('combinedScore', 0),
-                    reverse=True
-                )[:num_recommendations]
-            
-            # Simple content-based filtering
-            for product in candidate_products:
-                score = 0
-                # Boost based on rating
-                score += product.get('combinedScore', 0) * 0.5
-                # Boost based on price (preference)
-                price = product.get('price', 0)
-                if price > 0:
-                    score += 0.3 * (1 - min(price / 1000, 1))
-                # Boost based on reviews
-                score += min(product.get('reviewCount', 0) / 100, 1) * 0.2
-                product['recommendation_score'] = score
-            
-            # Sort by score and return top N
-            recommendations = sorted(
-                candidate_products,
-                key=lambda x: x.get('recommendation_score', 0),
-                reverse=True
-            )[:num_recommendations]
-            
-            return recommendations
-            
-        except Exception as e:
-            print(f"[WARN] Recommendation error: {e}")
-            # Fallback to top rated products
-            return sorted(
-                all_products,
-                key=lambda x: x.get('combinedScore', 0),
-                reverse=True
-            )[:num_recommendations]
+        """Rank products with trained SVD ratings and a trained-data cold-start baseline."""
+        if not self.is_trained:
+            raise RuntimeError('Trained recommendation model is not available.')
+
+        matrix = self.user_item_matrix
+        if matrix is None or self.svd_model is None:
+            raise RuntimeError('Trained recommendation model is not available.')
+
+        if user_id in matrix.index:
+            user_vector = matrix.loc[[user_id]]
+            latent_vector = self.svd_model.transform(user_vector)
+            predicted_ratings = latent_vector @ self.svd_model.components_
+            product_scores = dict(zip(matrix.columns, predicted_ratings[0]))
+        else:
+            # Cold-start users use the mean of observed ratings from the training matrix.
+            product_scores = matrix.replace(0, np.nan).mean(axis=0).dropna().to_dict()
+
+        interacted_ids = {
+            str(item.get('id')) for item in user_interactions
+            if isinstance(item, dict) and item.get('id') is not None
+        }
+        product_by_id = {str(product.get('id')): product for product in all_products}
+        ranked = []
+        for product_id, rating in product_scores.items():
+            product_key = str(product_id)
+            product = product_by_id.get(product_key)
+            if product is None or product_key in interacted_ids:
+                continue
+            ranked.append({
+                **product,
+                'recommendation_score': max(0.0, min(1.0, float(rating) / 5.0)),
+            })
+
+        return sorted(ranked, key=lambda product: product['recommendation_score'], reverse=True)[:num_recommendations]
     
     def save_model(self):
         """Save the trained model"""

@@ -15,6 +15,12 @@ python-backend/.env
 python-backend/__pycache__/
 python-backend/*.pyc
 python-backend/models/saved/
+!python-backend/models/saved/
+python-backend/models/saved/*
+!python-backend/models/saved/sentiment_model.pkl
+!python-backend/models/saved/vectorizer.pkl
+!python-backend/models/saved/recommendation_model.pkl
+!python-backend/models/saved/trust_model.pkl
 python-backend/logs/
 
 #firestore rules

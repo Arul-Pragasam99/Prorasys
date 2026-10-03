@@ -33,24 +33,26 @@ export async function POST(request: NextRequest) {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`AI service returned ${response.status}`);
+        return NextResponse.json(
+          { error: 'Trained recommendations are unavailable.' },
+          { status: response.status === 503 ? 503 : 502 },
+        );
       }
 
       const data = await response.json();
       return NextResponse.json(data);
     } catch (fetchError) {
       clearTimeout(timeoutId);
-      // Return empty recommendations instead of error
       return NextResponse.json(
-        { recommendations: [], error: 'AI service unavailable' },
-        { status: 200 }
+        { error: 'Trained recommendations are unavailable.' },
+        { status: 503 }
       );
     }
   } catch (error) {
     console.error('AI recommendations error:', error);
     return NextResponse.json(
-      { recommendations: [], error: 'AI service unavailable' },
-      { status: 200 }
+      { error: 'Trained recommendations are unavailable.' },
+      { status: 503 }
     );
   }
 }

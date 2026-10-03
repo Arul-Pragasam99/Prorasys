@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { ProductCard } from '@/components/commerce/ProductCard';
 import { useStore } from '@/components/commerce/StoreProvider';
-import { fetchProductsFromFirestore } from '@/lib/product-service';
 import { Sparkles, Loader2, RefreshCw, TrendingUp, Star, Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function RecommendationsPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useStore();
+  const { isAuthenticated, isLoading, aiRecommendations, loadingRecommendations, getRecommendations } = useStore();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -25,66 +24,32 @@ export default function RecommendationsPage() {
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadProducts();
+    if (isLoading || !isAuthenticated || loadingRecommendations) {
+      setLoadingProducts(isLoading || loadingRecommendations);
+      return;
     }
-  }, [isAuthenticated]);
 
-  const loadProducts = async () => {
-    try {
-      setLoadingProducts(true);
-      setError(null);
-
-      const data = await fetchProductsFromFirestore();
-
-      if (!data || data.length === 0) {
-        setError('No products found. Please add products to your store.');
-        setLoadingProducts(false);
-        return;
-      }
-
-      const realProducts = data.filter((p: any) => {
-        const name = p.name?.toLowerCase() || '';
-        return !name.includes('dummy') && !name.includes('demo') && !name.includes('test');
-      });
-
-      if (realProducts.length === 0) {
-        setError('No real products found. Please add real products to your store.');
-        setLoadingProducts(false);
-        return;
-      }
-
-      const enhancedProducts = realProducts.map((p: any) => {
-        let score = 0.5;
-        if (p.avgRating) score += (p.avgRating / 5) * 0.3;
-        if (p.combinedScore) score += (p.combinedScore / 10) * 0.2;
-        if (p.reviewCount) score += Math.min(p.reviewCount / 100, 1) * 0.15;
-        score += Math.random() * 0.1;
-
-        return {
-          ...p,
-          price: p.price || 0,
-          rating: p.avgRating || p.rating || 4.0,
-          recommendation_score: Math.min(1, score),
-        };
-      });
-
-      enhancedProducts.sort((a, b) => (b.recommendation_score || 0) - (a.recommendation_score || 0));
-
-      setProducts(enhancedProducts);
-      setFilteredProducts(enhancedProducts);
-    } catch (err) {
-      console.error('Error loading products:', err);
-      setError('Failed to load products. Please refresh the page.');
-    } finally {
+    if (!aiRecommendations?.length) {
+      setProducts([]);
+      setFilteredProducts([]);
+      setError('Trained recommendations are unavailable.');
       setLoadingProducts(false);
+      return;
     }
-  };
+
+    setError(null);
+    setProducts(aiRecommendations);
+    setFilteredProducts(aiRecommendations);
+    setLoadingProducts(false);
+  }, [aiRecommendations, isAuthenticated, isLoading, loadingRecommendations]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadProducts();
-    setRefreshing(false);
+    try {
+      await getRecommendations?.();
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   if (isLoading || !isAuthenticated) {

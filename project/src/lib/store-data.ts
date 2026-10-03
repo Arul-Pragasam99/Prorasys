@@ -20,6 +20,7 @@ export type StoreProduct = {
   reviewCount?: number;
   featureScores?: Record<string, number>;
   rank?: number;
+  recommendation_score?: number;
 };
 
 // CartItem is a StoreProduct with quantity

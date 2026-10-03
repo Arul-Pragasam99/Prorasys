@@ -82,9 +82,12 @@ class SentimentAnalyzer:
     
     def train(self, reviews_data: List[Dict]):
         """Train the sentiment model with review data"""
+        self.model = None
+        self.vectorizer = None
+        self._model_validated = False
         if not reviews_data:
-            print("[WARN] No training data available - using mock data")
-            reviews_data = self.get_mock_training_data()
+            print("[WARN] No labeled review data available")
+            return
         
         # Prepare data
         texts = []
@@ -94,44 +97,24 @@ class SentimentAnalyzer:
             text = r.get('text', '')
             if not text:
                 continue
-            rating = r.get('rating', 3)
-            
+            sentiment_label = str(r.get('sentimentLabel', '')).lower()
+            rating = r.get('rating')
+            if sentiment_label == 'positive' or (sentiment_label not in ('positive', 'negative') and rating in (4, 5)):
+                label = 1
+            elif sentiment_label == 'negative' or (sentiment_label not in ('positive', 'negative') and rating in (1, 2)):
+                label = 0
+            else:
+                continue
             texts.append(self.preprocess_text(text))
-            # Convert ratings to binary sentiment (1 = positive, 0 = negative)
-            label = 1 if rating > 3 else 0
             labels.append(label)
-        
-        if len(texts) < 10:
-            print(f"[WARN] Only {len(texts)} reviews. Adding more mock data...")
-            mock_reviews = self.get_mock_training_data()
-            for r in mock_reviews:
-                text = r.get('text', '')
-                if text:
-                    texts.append(self.preprocess_text(text))
-                    rating = r.get('rating', 3)
-                    labels.append(1 if rating > 3 else 0)
-        
-        # Check if we have both classes
+
         unique_labels = set(labels)
         if len(unique_labels) < 2:
-            print("[WARN] Need both positive and negative examples. Adding balanced data...")
-            balanced_reviews = [
-                {'text': 'This product is amazing! I love it!', 'rating': 5},
-                {'text': 'Very poor quality. Disappointed.', 'rating': 1},
-                {'text': 'Good value for money.', 'rating': 4},
-                {'text': 'Not worth the price.', 'rating': 2},
-                {'text': 'Excellent product! Highly recommend!', 'rating': 5},
-                {'text': 'Terrible experience. Would not buy again.', 'rating': 1},
-            ]
-            for r in balanced_reviews:
-                text = r.get('text', '')
-                if text:
-                    texts.append(self.preprocess_text(text))
-                    rating = r.get('rating', 3)
-                    labels.append(1 if rating > 3 else 0)
-        
+            print("[WARN] Sentiment training requires both positive and negative labeled reviews")
+            return
+
         if len(texts) < 10:
-            print("[ERROR] Still not enough training data")
+            print(f"[WARN] Only {len(texts)} labeled reviews; at least 10 are required")
             return
         
         # Convert to numpy arrays
@@ -152,7 +135,7 @@ class SentimentAnalyzer:
                 self.model.fit(X, y)
             self._model_validated = self._passes_smoke_test()
             if not self._model_validated:
-                print("[WARN] Sentiment model failed polarity checks; using rule-based fallback")
+                print("[WARN] Sentiment model failed polarity checks and is unavailable")
                 self.model = None
                 self.vectorizer = None
                 return
@@ -161,55 +144,34 @@ class SentimentAnalyzer:
             self.save_model()
         except Exception as e:
             print(f"[ERROR] Training error: {e}")
-    
-    def get_mock_training_data(self):
-        """Generate mock training data"""
-        return [
-            {'text': 'This product is amazing! Best purchase ever!', 'rating': 5},
-            {'text': 'Very poor quality. Broke after one use.', 'rating': 1},
-            {'text': 'Good value for money.', 'rating': 4},
-            {'text': 'Not worth the price.', 'rating': 2},
-            {'text': 'Excellent product! Highly recommend!', 'rating': 5},
-            {'text': 'Terrible experience. Would not buy again.', 'rating': 1},
-            {'text': 'Great product, works perfectly!', 'rating': 5},
-            {'text': 'Disappointing quality.', 'rating': 2},
-            {'text': 'Really good quality.', 'rating': 4},
-            {'text': 'Worst purchase ever.', 'rating': 1},
-            {'text': 'Works fine, nothing special.', 'rating': 3},
-            {'text': 'Absolutely fantastic!', 'rating': 5},
-            {'text': 'Not worth it.', 'rating': 2},
-            {'text': 'Highly recommended!', 'rating': 5},
-            {'text': 'Poor customer service.', 'rating': 2},
-        ]
+            self.model = None
+            self.vectorizer = None
+            self._model_validated = False
     
     def analyze(self, text: str) -> Dict:
         """Analyze sentiment of a single text"""
         if not self.is_trained:
-            return self.rule_based_sentiment(text)
+            raise RuntimeError('Validated sentiment model is not available.')
         model = self.model
         if model is None:
-            return self.rule_based_sentiment(text)
+            raise RuntimeError('Validated sentiment model is not available.')
         
         try:
             # Preprocess text
             processed_text = self.preprocess_text(text)
             
             if not processed_text:
-                return {'label': 'NEUTRAL', 'score': 0.5}
+                raise ValueError('Review text contains no analyzable words.')
             
-            # Transform text
-            if self.vectorizer is not None:
-                X = self.vectorizer.transform([processed_text])
-            else:
-                self.vectorizer = TfidfVectorizer(max_features=1000)
-                X = self.vectorizer.transform([processed_text])
+            if self.vectorizer is None:
+                raise RuntimeError('Validated sentiment vectorizer is not available.')
+            X = self.vectorizer.transform([processed_text])
             
             # Predict
             prediction = model.predict_proba(X)[0]
             
-            # Handle case where model might have only 1 class
             if len(prediction) < 2:
-                return self.rule_based_sentiment(text)
+                raise RuntimeError('Sentiment model was not trained for both classes.')
             
             score = float(prediction[1])  # Probability of positive
             
@@ -219,28 +181,7 @@ class SentimentAnalyzer:
             }
         except Exception as e:
             print(f"[WARN] Analysis error: {e}")
-            return self.rule_based_sentiment(text)
-    
-    def rule_based_sentiment(self, text: str) -> Dict:
-        """Simple rule-based sentiment as fallback"""
-        text = text.lower()
-        positive_words = ['good', 'great', 'amazing', 'excellent', 'fantastic', 'awesome', 'love', 'best', 'wonderful']
-        negative_words = ['bad', 'terrible', 'poor', 'awful', 'horrible', 'worst', 'hate', 'disappointing', 'not worth']
-        
-        score = 0.5
-        for word in positive_words:
-            if word in text:
-                score += 0.1
-        for word in negative_words:
-            if word in text:
-                score -= 0.1
-        
-        score = max(0, min(1, score))
-        
-        return {
-            'label': 'POSITIVE' if score > 0.5 else 'NEGATIVE' if score < 0.5 else 'NEUTRAL',
-            'score': score
-        }
+            raise RuntimeError('Sentiment model inference failed.') from e
     
     def save_model(self):
         """Save the trained model"""
@@ -263,7 +204,7 @@ class SentimentAnalyzer:
                 raise ValueError('Saved sentiment model failed polarity checks.')
             print("[OK] Sentiment model loaded successfully")
         except:
-            print("[WARN] Could not load saved model. Using rule-based fallback.")
+            print("[WARN] Could not load a validated sentiment model.")
             self.model = None
             self.vectorizer = None
             self._model_validated = False
