@@ -1,5 +1,5 @@
-import { collection, doc, getDocs, getDoc, addDoc, updateDoc, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { collection, doc, getDocs, getDoc, updateDoc, query, where } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
 
@@ -32,28 +32,29 @@ export type Order = {
   deliveredAt?: string;
 };
 
-export async function createOrder(userId: string, userEmail: string, userDisplayName: string, items: OrderItem[], shippingAddress: any) {
-  try {
-    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    const orderData = {
-      userId,
-      userEmail,
-      userDisplayName,
-      items,
-      totalAmount,
-      status: 'pending' as OrderStatus,
-      shippingAddress,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+export async function createOrder(
+  items: Array<Pick<OrderItem, 'productId' | 'quantity'>>,
+  shippingAddress: Order['shippingAddress'],
+): Promise<Order> {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Authentication required.');
+  await currentUser.reload();
+  if (!currentUser.emailVerified) throw new Error('Verify your email before placing an order.');
+  const idToken = await currentUser.getIdToken(true);
 
-    const docRef = await addDoc(collection(db, 'orders'), orderData);
-    return { id: docRef.id, ...orderData };
-  } catch (error) {
-    console.error('Error creating order:', error);
-    throw error;
+  const response = await fetch('/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ items, shippingAddress }),
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error || 'Unable to create order.');
   }
+  return result as Order;
 }
 
 export async function getOrdersByUser(userId: string): Promise<Order[]> {

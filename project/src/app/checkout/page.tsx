@@ -6,12 +6,13 @@ import { Header } from '@/components/commerce/Header';
 import { useStore } from '@/components/commerce/StoreProvider';
 import { createOrder } from '@/lib/order-service';
 import { saveCartSnapshot } from '@/lib/cart-service';
+import { auth } from '@/lib/firebase';
 import { Loader2, CheckCircle, Truck, Package, MapPin, CreditCard, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, isAuthenticated, userRole, cart, refreshCart } = useStore();
+  const { isAuthenticated, userRole, cart, refreshCart } = useStore();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -57,31 +58,21 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      const orderItems = cart.map(item => ({
-        productId: item.id,
-        productName: item.name,
-        price: item.price || 0,
-        quantity: item.quantity || 1,
-        image: item.image,
-      }));
-
       const order = await createOrder(
-        user!.uid,
-        user!.email || '',
-        user!.displayName || 'Customer',
-        orderItems,
-        shippingData
+        cart.map((item) => ({ productId: item.id, quantity: item.quantity || 1 })),
+        shippingData,
       );
 
       setOrderId(order.id);
       
-      await saveCartSnapshot(user!.uid, { cart: [], wishlist: [] });
+      const uid = auth.currentUser?.uid;
+      if (uid) await saveCartSnapshot(uid, { cart: [], wishlist: [] });
       await refreshCart?.();
       
       setStep('confirmation');
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }

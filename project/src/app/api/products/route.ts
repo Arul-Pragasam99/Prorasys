@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { adminDb } from '@/lib/firebase-admin';
 import { authorizeRequest, rateLimit, readJson, safeText } from '@/lib/api-security';
 
 const productSchema = z.object({
@@ -36,9 +37,12 @@ export async function POST(request: NextRequest) {
 
   const parsed = await readJson(request, productSchema);
   if (parsed.response) return parsed.response;
+  if (!adminDb) {
+    return NextResponse.json({ error: 'Product service is unavailable.' }, { status: 503 });
+  }
 
   try {
-    const ref = await addDoc(collection(db, 'products'), {
+    const ref = await adminDb.collection('products').add({
       ...parsed.data,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

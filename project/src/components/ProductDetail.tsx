@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/components/commerce/StoreProvider';
 import { canUserReviewProduct } from '@/lib/order-service';
 import { Star, ArrowLeft, ShoppingBag, Heart, Sparkles, MessageCircle, Send, Loader2, Shield, CheckCircle } from 'lucide-react';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 
 interface Review {
   id: string;
@@ -84,35 +83,40 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
     setError(null);
 
     try {
-      const reviewData = {
-        productId: product.id,
-        userId: user.uid,
-        userName: user.displayName || 'Anonymous',
-        rating: rating,
-        text: reviewText.trim(),
-        sentimentLabel: 'neutral',
-        sentimentScore: 0.5,
-        isFlagged: false,
-        flagReasons: [],
-        timestamp: new Date().toISOString(),
-        isVerifiedPurchase: canReview,
-      };
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Authentication required.');
+      await currentUser.reload();
+      if (!currentUser.emailVerified) throw new Error('Verify your email before submitting a review.');
+      const idToken = await currentUser.getIdToken(true);
 
-      const docRef = await addDoc(collection(db, 'reviews'), reviewData);
-      
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          rating,
+          text: reviewText.trim(),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Unable to submit review.');
+
       const newReview: Review = {
-        id: docRef.id,
-        productId: product.id,
-        userName: user.displayName || 'Anonymous',
-        text: reviewText.trim(),
-        starRating: rating,
-        sentimentLabel: 'neutral',
-        sentimentScore: 0.5,
-        credibilityWeight: 1,
-        isFlagged: false,
-        flagReasons: [],
-        timestamp: new Date().toISOString(),
-        isVerifiedPurchase: canReview,
+        id: result.id,
+        productId: result.productId,
+        userName: result.userName,
+        text: result.text,
+        starRating: result.starRating,
+        sentimentLabel: result.sentimentLabel,
+        sentimentScore: result.sentimentScore,
+        credibilityWeight: result.credibilityWeight,
+        isFlagged: result.isFlagged,
+        flagReasons: result.flagReasons,
+        timestamp: result.timestamp,
+        isVerifiedPurchase: result.isVerifiedPurchase,
       };
 
       setLocalReviews([newReview, ...localReviews]);
@@ -120,18 +124,11 @@ export function ProductDetail({ product, reviews }: ProductDetailProps) {
       setRating(0);
       setReviewText('');
 
-      const newAvgRating = (averageRating * localReviews.length + rating) / (localReviews.length + 1);
-      const productRef = doc(db, 'products', product.id);
-      await updateDoc(productRef, {
-        avgRating: newAvgRating,
-        reviewCount: (localReviews.length + 1),
-      });
-
       setTimeout(() => setSubmitSuccess(false), 3000);
 
     } catch (err) {
       console.error('Error submitting review:', err);
-      setError('Failed to submit review. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to submit review. Please try again.');
     } finally {
       setSubmitting(false);
     }

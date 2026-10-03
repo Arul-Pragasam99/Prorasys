@@ -12,7 +12,6 @@ import re
 import time
 from dotenv import load_dotenv
 import json
-from datetime import datetime
 import sys
 import io
 
@@ -272,20 +271,13 @@ async def ai_status():
 
 @app.post("/api/ai/analyze-sentiment")
 async def analyze_sentiment(review: ReviewData):
-    """Analyze sentiment using local model and update product"""
+    """Analyze sentiment without writing customer-controlled data to Firestore."""
     try:
-        # 1. READ REVIEW TEXT → ANALYZE SENTIMENT
         sentiment_result = sentiment_analyzer.analyze(review.text)
-        
-        # 2. CALCULATE SENTIMENT SCORE
         rating_score = review.rating / 5.0
         sentiment_score = sentiment_result['score']
-        
-        # 3. UPDATE COMBINED SCORE
         combined_score = (sentiment_score + rating_score) / 2
-        
-        # 4. EXTRACT FEATURES FROM REVIEW
-        # Get product category from Firestore
+
         product_category = 'general'
         if db:
             try:
@@ -294,94 +286,16 @@ async def analyze_sentiment(review: ReviewData):
                     product_category = product_doc.to_dict().get('category', 'general')
             except:
                 pass
-        
+
         feature_scores = extract_features_from_text(review.text, product_category)
-        
-        # 5. SAVE REVIEW TO FIRESTORE
-        review_data = {
-            'productId': review.product_id,
-            'userId': review.user_id,
-            'rating': review.rating,
-            'text': review.text,
-            'sentimentScore': sentiment_score,
-            'combinedScore': combined_score,
-            'sentimentLabel': sentiment_result['label'],
-            'timestamp': review.timestamp or datetime.now().isoformat(),
-            'featureScores': feature_scores,
-        }
-        
-        if db:
-            # Save review
-            review_ref = db.collection('reviews').document()
-            review_ref.set(review_data)
-            print(f"[OK] Review saved to Firestore: {review.product_id}")
-            
-            # 6. UPDATE PRODUCT IN FIRESTORE
-            try:
-                # Get all reviews for this product
-                reviews_query = db.collection('reviews').where('productId', '==', review.product_id).stream()
-                all_reviews = []
-                for doc in reviews_query:
-                    all_reviews.append(doc.to_dict())
-                
-                if all_reviews:
-                    # Calculate average rating
-                    ratings = [r.get('rating', 3) for r in all_reviews]
-                    avg_rating = sum(ratings) / len(ratings)
-                    
-                    # Calculate average sentiment
-                    sentiments = [r.get('sentimentScore', 0.5) for r in all_reviews]
-                    avg_sentiment = sum(sentiments) / len(sentiments)
-                    
-                    # Calculate combined score
-                    avg_combined = sum([r.get('combinedScore', 0.5) for r in all_reviews]) / len(all_reviews)
-                    
-                    # Calculate trust level
-                    trust_result = trust_calculator.calculate(all_reviews)
-                    
-                    # Aggregate feature scores from all reviews
-                    aggregated_features = {}
-                    for r in all_reviews:
-                        if r.get('featureScores'):
-                            for feature, score in r['featureScores'].items():
-                                if feature not in aggregated_features:
-                                    aggregated_features[feature] = []
-                                aggregated_features[feature].append(score)
-                    
-                    # Average feature scores
-                    final_feature_scores = {}
-                    for feature, scores in aggregated_features.items():
-                        final_feature_scores[feature] = sum(scores) / len(scores)
-                    
-                    # Update product
-                    product_ref = db.collection('products').document(review.product_id)
-                    product_ref.update({
-                        'avgRating': avg_rating,
-                        'combinedScore': avg_combined,
-                        'sentimentScore': avg_sentiment,
-                        'trustLevel': trust_result['trustLevel'],
-                        'reviewCount': len(all_reviews),
-                        'featureScores': final_feature_scores,
-                        'updatedAt': datetime.now().isoformat()
-                    })
-                    print(f"[OK] Product {review.product_id} updated in Firestore")
-                    print(f"   - Avg Rating: {avg_rating:.2f}")
-                    print(f"   - Combined Score: {avg_combined:.2f}")
-                    print(f"   - Trust Level: {trust_result['trustLevel']}")
-                    print(f"   - Review Count: {len(all_reviews)}")
-                    print(f"   - Features: {len(final_feature_scores)}")
-            except Exception as e:
-                print(f"[WARN] Error updating product: {e}")
-        else:
-            print(f"[INFO] Review saved locally (mock mode): {review.product_id}")
-        
+
         return {
             'sentiment': sentiment_result['label'],
             'sentimentScore': sentiment_score,
             'ratingScore': rating_score,
             'combinedScore': combined_score,
             'featureScores': feature_scores,
-            'savedToFirebase': db is not None
+            'savedToFirebase': False,
         }
     except Exception as e:
         print(f"[ERROR] Sentiment analysis failed: {e}")

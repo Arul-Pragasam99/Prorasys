@@ -125,7 +125,7 @@ export function getAIServiceHeaders(): HeadersInit {
 
 export async function authorizeRequest(
   request: Request,
-  options: { adminOnly?: boolean; expectedUserId?: string } = {},
+  options: { adminOnly?: boolean; expectedUserId?: string; requireVerifiedEmail?: boolean } = {},
 ): Promise<{ uid: string; name?: string; response: null } | { uid: null; name: null; response: NextResponse }> {
   if (!adminAuth) {
     return {
@@ -146,12 +146,20 @@ export async function authorizeRequest(
   }
 
   try {
-    const decoded = await adminAuth.verifyIdToken(token);
+    const decoded = await adminAuth.verifyIdToken(token, true);
     if (options.expectedUserId && decoded.uid !== options.expectedUserId) {
       return {
         uid: null,
         name: null,
         response: NextResponse.json({ error: 'Forbidden.' }, { status: 403 }),
+      };
+    }
+
+    if (options.requireVerifiedEmail && decoded.email_verified !== true) {
+      return {
+        uid: null,
+        name: null,
+        response: NextResponse.json({ error: 'Verify your email before continuing.' }, { status: 403 }),
       };
     }
 

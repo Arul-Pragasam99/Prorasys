@@ -8,6 +8,19 @@ import { Shield, Star, Users, Sparkles, Mail, Lock, User, Eye, EyeOff } from 'lu
 import { useStore } from '@/components/commerce/StoreProvider';
 import { loginUser, registerUser, loginWithGoogle, resetPassword } from '@/lib/auth-service';
 
+function getSafeRedirect(value: string | null): string {
+  if (!value) return '/';
+
+  try {
+    const baseUrl = 'https://prorasys.invalid';
+    const targetUrl = new URL(value, baseUrl);
+    if (targetUrl.origin !== baseUrl) return '/';
+    return `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+  } catch {
+    return '/';
+  }
+}
+
 export default function LoginPage() {
   return (
     <Suspense fallback={<main className="min-h-screen bg-surface text-text-primary"><Header /><div className="mx-auto max-w-7xl px-4 py-12 text-text-secondary">Loading...</div></main>}>
@@ -19,7 +32,7 @@ export default function LoginPage() {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
+  const redirect = getSafeRedirect(searchParams.get('redirect'));
   const { user, isAuthenticated } = useStore();
 
   const [isLogin, setIsLogin] = useState(true);
@@ -44,8 +57,6 @@ function LoginPageContent() {
     confirmPassword: '',
     name: '',
   });
-
-  const [signupRole, setSignupRole] = useState<'customer' | 'admin'>('customer');
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -86,7 +97,7 @@ function LoginPageContent() {
           setLoading(false);
           return;
         }
-        const result = await registerUser(formData.email, formData.password, signupRole, formData.name);
+        const result = await registerUser(formData.email, formData.password, formData.name);
         if (result) {
           setSuccess('Account created! Redirecting...');
           setTimeout(() => router.push(redirect), 1500);
@@ -328,23 +339,6 @@ function LoginPageContent() {
                         required={!isLogin}
                       />
                     </div>
-                  </div>
-                )}
-
-                {!isLogin && (
-                  <div>
-                    <label className="label">Account Type</label>
-                    <select
-                      value={signupRole}
-                      onChange={(e) => setSignupRole(e.target.value as 'customer' | 'admin')}
-                      className="input"
-                    >
-                      <option value="customer">Customer</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {signupRole === 'admin' ? 'Admins can manage products and reviews' : 'Customers can browse, review, and purchase'}
-                    </p>
                   </div>
                 )}
 

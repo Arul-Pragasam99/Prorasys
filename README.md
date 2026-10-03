@@ -110,7 +110,7 @@ Useful API routes:
 - `GET /api/ai/status` checks whether Next.js can reach Python and reports model/fallback readiness.
 - `GET /api/products` and `GET /api/rankings` read catalog and ranking data.
 - `POST /api/ai/recommendations` requires a signed-in Firebase user.
-- `POST /api/ai/analyze` requires a signed-in user and processes/saves a review; avoid casual production tests because it writes data.
+- `POST /api/ai/analyze` requires a signed-in user and performs sentiment analysis only. Verified reviews are saved through `POST /api/reviews` after checking for a delivered purchase.
 - Direct Python routes are mounted at `/api/python/*` and require `X-API-Key`; a browser request without that header should return `401`.
 
 Verify the production build from `project/` with:

@@ -25,7 +25,6 @@ export type AuthUser = {
 export async function registerUser(
   email: string, 
   password: string, 
-  role: 'customer' | 'admin' = 'customer',
   displayName?: string
 ) {
   try {
@@ -41,7 +40,7 @@ export async function registerUser(
       uid: credential.user.uid,
       email: credential.user.email,
       displayName: displayName || credential.user.displayName || 'Anonymous',
-      role: role,
+      role: 'customer',
       emailVerified: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

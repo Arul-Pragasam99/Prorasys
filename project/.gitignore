@@ -9,9 +9,6 @@ __pycache__/
 *.pyc
 .vscode/
 
-# file for firebase rules
-firestore.rules
-
 # Python backend sensitive files
 python-backend/service-account.json
 python-backend/.env
@@ -19,6 +16,9 @@ python-backend/__pycache__/
 python-backend/*.pyc
 python-backend/models/saved/
 python-backend/logs/
+
+#firestore rules
+firestore.rules
 
 # Firebase credentials (anywhere in project)
 service-account.json
