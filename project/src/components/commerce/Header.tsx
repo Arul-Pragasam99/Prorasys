@@ -62,11 +62,11 @@ export function Header() {
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/products', label: 'Products', icon: Package },
-    { href: '/recommendations', label: 'AI Picks', icon: Sparkles },
+    { href: '/recommendations', label: 'Recommendations', icon: Sparkles },
     { href: '/orders', label: 'Orders', icon: OrdersIcon },
   ];
   const visibleNavLinks = userRole === 'admin'
-    ? navLinks.filter(({ href }) => href !== '/orders')
+    ? navLinks.filter(({ href }) => href !== '/orders' && href !== '/recommendations')
     : navLinks;
 
   // Navbar uses the site's theme tokens (--color-surface / --color-border)

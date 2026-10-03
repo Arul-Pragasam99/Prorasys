@@ -11,7 +11,6 @@ import {
   Heart, 
   Star, 
   TrendingUp, 
-  Clock, 
   CheckCircle,
   ArrowRight,
   Sparkles,
@@ -31,8 +30,6 @@ interface CustomerStats {
   averageRating: number;
   wishlistCount: number;
   cartCount: number;
-  productsViewed: number;
-  trustScore: number;
 }
 
 export default function HomePage() {
@@ -45,10 +42,7 @@ export default function HomePage() {
     averageRating: 0,
     wishlistCount: 0,
     cartCount: 0,
-    productsViewed: 0,
-    trustScore: 0,
   });
-  const [loadingStats, setLoadingStats] = useState(true);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -69,27 +63,22 @@ export default function HomePage() {
   useEffect(() => {
     if (isAuthenticated && user && userRole === 'customer') {
       fetchCustomerStats();
-      fetchRecentOrders();
     }
   }, [isAuthenticated, user, userRole]);
 
-  const fetchRecentOrders = async () => {
-    if (!user) return;
-    const orders = await getOrdersByUser(user.uid);
-    setRecentOrders(orders.slice(0, 3));
-  };
-
   const fetchCustomerStats = async () => {
     try {
-      setLoadingStats(true);
-      
       // Fetch user's reviews
       const reviewsQuery = query(
         collection(db, 'reviews'),
-        where('userId', '==', user?.uid)
+        where('userId', '==', user.uid)
       );
-      const reviewsSnapshot = await getDocs(reviewsQuery);
+      const [reviewsSnapshot, orders] = await Promise.all([
+        getDocs(reviewsQuery),
+        getOrdersByUser(user.uid),
+      ]);
       const userReviews = reviewsSnapshot.docs.map(doc => doc.data());
+      setRecentOrders(orders.slice(0, 3));
       
       // Calculate review stats
       const totalReviews = userReviews.length;
@@ -99,22 +88,15 @@ export default function HomePage() {
         avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
       }
       
-      // Get trust score from user profile or calculate
-      const trustScore = user?.trustScore || 85 + Math.floor(Math.random() * 10);
-      
       setStats({
-        totalOrders: Math.floor(Math.random() * 20) + 5,
+        totalOrders: orders.length,
         totalReviews,
         averageRating: avgRating,
         wishlistCount: wishlist.length,
         cartCount: cart.length,
-        productsViewed: Math.floor(Math.random() * 30) + 10,
-        trustScore,
       });
     } catch (error) {
       console.error('Error fetching customer stats:', error);
-    } finally {
-      setLoadingStats(false);
     }
   };
 
@@ -341,7 +323,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats Grid */}
-        <div ref={statsRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+        <div ref={statsRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
           <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -389,22 +371,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Extended Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-warning/10 rounded-lg">
-                <Clock className="w-4 h-4 text-warning" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Products Viewed</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.productsViewed}</p>
-              </div>
-            </div>
-          </div>
-
           <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -413,18 +379,6 @@ export default function HomePage() {
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Orders</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalOrders}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-success/10 rounded-lg">
-                <CheckCircle className="w-4 h-4 text-success" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trust Score</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.trustScore}%</p>
               </div>
             </div>
           </div>
@@ -534,26 +488,6 @@ export default function HomePage() {
           </section>
         </div>
 
-        {/* Trust Score Bar */}
-        <div className="mt-8 p-4 bg-primary/5 rounded-xl border border-primary/20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">Your Trust Score</span>
-            <span className="text-sm font-bold text-primary">{stats.trustScore}%</span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-primary to-success rounded-full transition-all duration-1000"
-              style={{ width: `${stats.trustScore}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-            {stats.trustScore >= 80 
-              ? '🌟 Excellent trust score! Keep engaging with the community.'
-              : stats.trustScore >= 60
-              ? '📈 Good trust score. Write more reviews to improve.'
-              : '💪 Start writing reviews to build your trust score.'}
-          </p>
-        </div>
       </section>
     </main>
   );

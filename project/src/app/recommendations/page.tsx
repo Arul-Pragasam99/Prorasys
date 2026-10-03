@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export default function RecommendationsPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, aiRecommendations, loadingRecommendations, getRecommendations } = useStore();
+  const { isAuthenticated, isLoading, userRole, aiRecommendations, loadingRecommendations, getRecommendations } = useStore();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -20,8 +20,10 @@ export default function RecommendationsPage() {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/login?redirect=/recommendations');
+    } else if (!isLoading && userRole === 'admin') {
+      router.replace('/admin');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, userRole]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || loadingRecommendations) {
@@ -51,6 +53,10 @@ export default function RecommendationsPage() {
       setRefreshing(false);
     }
   };
+
+  if (userRole === 'admin') {
+    return null;
+  }
 
   if (isLoading || !isAuthenticated) {
     return (
@@ -134,7 +140,7 @@ export default function RecommendationsPage() {
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-primary" />
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">AI Powered Recommendations</p>
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">Personalized Recommendations</p>
             </div>
             <h1 className="mt-2 text-3xl font-bold text-text-primary">Personalized for You</h1>
             <p className="mt-1 text-text-secondary">{filteredProducts.length} real products ranked by AI</p>
@@ -197,14 +203,6 @@ export default function RecommendationsPage() {
           ))}
         </div>
 
-        <div className="mt-8 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-theme-xl border border-primary/20">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <p className="text-sm text-text-primary">
-              Powered by <span className="font-medium text-primary">AI</span> • Products are ranked based on sentiment analysis and customer reviews
-            </p>
-          </div>
-        </div>
       </div>
     </main>
   );

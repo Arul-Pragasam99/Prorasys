@@ -33,8 +33,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setUser(authUser);
         setIsAuthenticated(true);
         setUserRole(authUser.role || 'customer');
-        await loadCartData(authUser.uid);
-        await getRecommendations(authUser.uid);
+        if (authUser.role === 'admin') {
+          setCart([]);
+          setWishlist([]);
+          setAiRecommendations([]);
+        } else {
+          await loadCartData(authUser.uid);
+          await getRecommendations(authUser.uid);
+        }
       } else {
         setUser(null);
         setIsAuthenticated(false);
