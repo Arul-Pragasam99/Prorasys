@@ -13,7 +13,7 @@ Live site: https://prorasys.vercel.app
 - View personalized recommendations and product rankings.
 - Use admin pages to manage products, review moderation, users, orders, and analytics.
 
-The project includes sentiment, recommendation, and trust-score models. Inference uses validated trained artifacts only; if a required model is missing or invalid, its endpoint returns an unavailable response instead of using fallback AI. `/api/ai/status` reports service reachability separately from model readiness. Seed reviews are generated demo data; production-quality models should be trained on representative, genuinely labeled customer reviews.
+The project includes sentiment, recommendation, and trust-score models. Inference uses validated trained artifacts only; if a required model is missing or invalid, its endpoint returns an unavailable response instead of using fallback AI. `/api/ai/status` reports service reachability separately from model readiness.
 
 ## Technology
 
@@ -94,14 +94,13 @@ This starts Next.js at `http://localhost:3000` and the Python service at `http:/
 
 ## Demo model training
 
-From `project/`, seed the additional labeled review examples and train all models:
+From `project/`, train all models:
 
 ```powershell
-node scripts/seed-reviews.js
 npm run python:train
 ```
 
-The seeder requires the ignored local `python-backend/service-account.json`. It adds each training batch once and marks generated reviews as unverified. The trainer uses Firestore reviews only and exits unsuccessfully if any model fails validation.
+The trainer uses Firestore reviews only and exits unsuccessfully if any model fails validation.
 
 ## Using the site
 
@@ -138,4 +137,4 @@ The repository config deploys the Next.js app and `api/python.py` as a Python fu
 
 The service can use validated trained models when they are supplied with the production deployment. Otherwise, sentiment uses a rule-based fallback, recommendations use a content-based fallback, and trust scoring uses a heuristic. Vercel function storage is temporary, so training output must be stored and deployed through a deliberate artifact process.
 
-Rate limits in the current application are process-local. For multi-instance or high-traffic production use, move rate limiting to a shared store or gateway. 
+Rate limits in the current application are process-local. For multi-instance or high-traffic production use, move rate limiting to a shared store or gateway.
