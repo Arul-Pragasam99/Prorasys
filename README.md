@@ -13,7 +13,7 @@ Live site: https://prorasys.vercel.app
 - View personalized recommendations and product rankings.
 - Use admin pages to manage products, review moderation, users, orders, and analytics.
 
-The project includes sentiment, recommendation, and trust-score models. Inference uses validated trained artifacts only; if a required model is missing or invalid, its endpoint returns an unavailable response instead of using fallback AI. `/api/ai/status` reports service reachability separately from model readiness.
+The project includes sentiment, recommendation, and trust-score models. Python model inference uses trained artifacts only; if a required model is missing or invalid, the corresponding endpoint returns an unavailable response. When AI recommendations are unavailable, the storefront falls back to popular catalog products. `/api/ai/status` reports service reachability separately from model readiness.
 
 ## Technology
 
@@ -64,7 +64,7 @@ project/
 
 ## Prerequisites
 
-- Node.js and npm
+- Node.js 22 or newer and npm
 - Python 3.11 or 3.12 and pip
 - A Firebase project with Authentication and Cloud Firestore enabled
 
@@ -76,8 +76,8 @@ Commands below use PowerShell on Windows. From the repository root:
 cd project
 npm install
 py -3.12 -m venv python-backend/.venv
-python-backend/.venv/Scripts/Activate.ps1
-python -m pip install -r python-backend/requirements.txt
+.\python-backend\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
 Before running the application, create a Firebase project with Authentication and Cloud Firestore enabled, configure Firebase for the web app and Python service, and install the dependencies above. Keep all credentials private and configure them through secure local or hosting settings.
@@ -121,7 +121,7 @@ Useful API routes:
 - `GET /api/products` and `GET /api/rankings` read catalog and ranking data.
 - `POST /api/ai/recommendations` requires a signed-in Firebase user.
 - `POST /api/ai/analyze` requires a signed-in user and performs sentiment analysis only. Verified reviews are saved through `POST /api/reviews` after checking for a delivered purchase.
-- Direct Python routes are mounted at `/api/python/*` and require `X-API-Key`; a browser request without that header should return `401`.
+- Direct Python routes are mounted at `/api/python/*` and are protected by `AI_SERVICE_API_KEY` via `X-API-Key` when configured. Without a key, the Python service only allows loopback access. In deployment, configure the key; a request without the header should return `401`.
 
 Verify the production build from `project/` with:
 
@@ -135,6 +135,6 @@ The repository config deploys the Next.js app and `api/python.py` as a Python fu
 
 ## Model artifacts and limitations
 
-The service can use validated trained models when they are supplied with the production deployment. Otherwise, sentiment uses a rule-based fallback, recommendations use a content-based fallback, and trust scoring uses a heuristic. Vercel function storage is temporary, so training output must be stored and deployed through a deliberate artifact process.
+The Python service does not use rule-based, content-based, or heuristic fallbacks for model inference. Train the models from Firestore reviews with `npm run python:train`; the command fails if the reviews do not produce all validated models. Model artifacts are written under `python-backend/models/saved/`. Vercel function storage is temporary, so training output must be stored and deployed through a deliberate artifact process. The storefront separately uses popular catalog products when AI recommendations are unavailable.
 
 Rate limits in the current application are process-local. For multi-instance or high-traffic production use, move rate limiting to a shared store or gateway.
