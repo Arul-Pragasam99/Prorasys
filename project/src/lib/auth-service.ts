@@ -88,6 +88,25 @@ export async function loginUser(email: string, password: string) {
       emailVerified: credential.user.emailVerified || false,
     };
   } catch (error) {
+    const errorCode =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : undefined;
+
+    if (
+      errorCode === 'auth/wrong-password' ||
+      errorCode === 'auth/invalid-credential' ||
+      errorCode === 'auth/invalid-login-credentials'
+    ) {
+      throw Object.assign(
+        new Error('Incorrect email or password. Please try again or click "Forgot password".'),
+        { code: errorCode }
+      );
+    }
+
     console.error('Login error:', error);
     throw error;
   }

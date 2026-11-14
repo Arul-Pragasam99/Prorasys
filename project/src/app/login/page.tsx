@@ -114,8 +114,12 @@ function LoginPageContent() {
         return;
       } else if (err.code === 'auth/user-not-found') {
         setError('No account found with this email. Please sign up first.');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Incorrect password. Please try again or click "Forgot password".');
+      } else if (
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/invalid-credential' ||
+        err.code === 'auth/invalid-login-credentials'
+      ) {
+        setError('Incorrect email or password. Please try again or click "Forgot password".');
       } else if (err.code === 'auth/invalid-email') {
         setError('Invalid email address. Please check and try again.');
       } else if (err.code === 'auth/too-many-requests') {
@@ -123,7 +127,7 @@ function LoginPageContent() {
       } else if (err.code === 'auth/weak-password') {
         setError('Password is too weak. Please use at least 6 characters.');
       } else {
-        setError(err.message || 'Authentication failed. Please try again.');
+        setError('Authentication failed. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -148,8 +152,7 @@ function LoginPageContent() {
       } else if (err.code === 'auth/account-exists-with-different-credential') {
         setError('An account exists with this email. Please sign in using your password.');
       } else {
-        // Only show error for other types of errors
-        setError(err.message || 'Google login failed. Please try again.');
+        setError('Google login failed. Please try again.');
       }
     } finally {
       setGoogleLoading(false);
@@ -176,7 +179,7 @@ function LoginPageContent() {
         setResetMessage('If an account exists with this email, a reset link has been sent.');
         setShowForgotPassword(false);
       } else {
-        setResetError(err.message || 'Unable to send reset email. Please try again.');
+        setResetError('Unable to send reset email. Please try again.');
       }
     } finally {
       setResetLoading(false);
