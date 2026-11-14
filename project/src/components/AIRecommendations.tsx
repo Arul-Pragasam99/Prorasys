@@ -10,7 +10,7 @@ interface AIRecommendationsProps {
 }
 
 export function AIRecommendations({ productId }: AIRecommendationsProps) {
-  const { user, aiRecommendations, loadingRecommendations } = useStore();
+  const { user, aiRecommendations, recommendationMode, loadingRecommendations } = useStore();
   const [recommendations, setRecommendations] = useState<any[]>([]);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export function AIRecommendations({ productId }: AIRecommendationsProps) {
           {loadingRecommendations ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin text-primary" />
-              <span>Finding personalized recommendations...</span>
+              <span>Loading recommendations...</span>
             </>
           ) : (
             <span>Sign in for personalized recommendations</span>
@@ -46,8 +46,12 @@ export function AIRecommendations({ productId }: AIRecommendationsProps) {
     <div className="mt-8">
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-text-primary">AI Recommended for You</h3>
-        <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">Powered by AI</span>
+        <h3 className="font-semibold text-text-primary">
+          {recommendationMode === 'ai' ? 'AI Recommended for You' : 'Popular Products'}
+        </h3>
+        {recommendationMode === 'ai' && (
+          <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">Powered by AI</span>
+        )}
       </div>
       
       <div className="grid grid-cols-2 gap-3">

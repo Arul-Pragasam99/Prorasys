@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export default function RecommendationsPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, userRole, aiRecommendations, loadingRecommendations, getRecommendations } = useStore();
+  const { isAuthenticated, isLoading, userRole, aiRecommendations, recommendationMode, loadingRecommendations, getRecommendations } = useStore();
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -34,7 +34,7 @@ export default function RecommendationsPage() {
     if (!aiRecommendations?.length) {
       setProducts([]);
       setFilteredProducts([]);
-      setError('Trained recommendations are unavailable.');
+      setError('There are no products in the catalog to recommend yet.');
       setLoadingProducts(false);
       return;
     }
@@ -43,7 +43,7 @@ export default function RecommendationsPage() {
     setProducts(aiRecommendations);
     setFilteredProducts(aiRecommendations);
     setLoadingProducts(false);
-  }, [aiRecommendations, isAuthenticated, isLoading, loadingRecommendations]);
+  }, [aiRecommendations, isAuthenticated, isLoading, loadingRecommendations, recommendationMode]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -128,6 +128,7 @@ export default function RecommendationsPage() {
     );
   }
 
+  const hasAiRecommendations = recommendationMode === 'ai';
   const avgScore = filteredProducts.reduce((acc, p) => acc + (p.recommendation_score || 0), 0) / filteredProducts.length;
   const topProduct = filteredProducts[0];
 
@@ -140,10 +141,18 @@ export default function RecommendationsPage() {
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-primary" />
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">Personalized Recommendations</p>
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                {hasAiRecommendations ? 'Personalized recommendations' : 'Catalog picks'}
+              </p>
             </div>
-            <h1 className="mt-2 text-3xl font-bold text-text-primary">Personalized for You</h1>
-            <p className="mt-1 text-text-secondary">{filteredProducts.length} real products ranked by AI</p>
+            <h1 className="mt-2 text-3xl font-bold text-text-primary">
+              {hasAiRecommendations ? 'Personalized for You' : 'Popular Products'}
+            </h1>
+            <p className="mt-1 text-text-secondary">
+              {hasAiRecommendations
+                ? `${filteredProducts.length} products ranked by recommendations`
+                : `${filteredProducts.length} products sorted by rating and review count`}
+            </p>
           </div>
 
           <button
@@ -164,9 +173,11 @@ export default function RecommendationsPage() {
           <div className="bg-card p-4 rounded-theme-xl border border-border text-center">
             <div className="flex items-center justify-center gap-1">
               <TrendingUp className="w-4 h-4 text-success" />
-              <p className="text-2xl font-bold text-success">{Math.round(avgScore * 100)}%</p>
+              <p className="text-2xl font-bold text-success">
+                {hasAiRecommendations ? `${Math.round(avgScore * 100)}%` : 'Popular'}
+              </p>
             </div>
-            <p className="text-xs text-text-secondary">Avg Match</p>
+            <p className="text-xs text-text-secondary">{hasAiRecommendations ? 'Avg Match' : 'Pick type'}</p>
           </div>
           <div className="bg-card p-4 rounded-theme-xl border border-border text-center">
             <div className="flex items-center justify-center gap-1">
@@ -190,16 +201,24 @@ export default function RecommendationsPage() {
               <span className="text-sm font-medium text-text-primary">
                 Top Pick: <span className="font-semibold text-primary">{topProduct.name}</span>
               </span>
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                {Math.round((topProduct.recommendation_score || 0) * 100)}% match
-              </span>
+              {hasAiRecommendations && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  {Math.round((topProduct.recommendation_score || 0) * 100)}% match
+                </span>
+              )}
             </div>
           </div>
         )}
 
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product: any, index: number) => (
-            <ProductCard key={product.id || `rec-${index}`} product={product} index={index} showAI={true} aiScore={product.recommendation_score || 0.8} />
+            <ProductCard
+              key={product.id || `rec-${index}`}
+              product={product}
+              index={index}
+              showAI={hasAiRecommendations}
+              aiScore={product.recommendation_score || 0}
+            />
           ))}
         </div>
 

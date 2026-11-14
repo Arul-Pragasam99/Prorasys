@@ -14,6 +14,7 @@ import {
 } from '@/lib/cart-service';
 import { StoreProduct, StoreContextValue } from '@/lib/store-data';
 import { auth } from '@/lib/firebase';
+import { fetchProductsFromFirestore } from '@/lib/product-service';
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
@@ -25,6 +26,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<StoreProduct[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<StoreProduct[]>([]);
+  const [recommendationMode, setRecommendationMode] = useState<'ai' | 'popular' | null>(null);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
   useEffect(() => {
@@ -37,6 +39,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setCart([]);
           setWishlist([]);
           setAiRecommendations([]);
+          setRecommendationMode(null);
         } else {
           await loadCartData(authUser.uid);
           await getRecommendations(authUser.uid);
@@ -48,6 +51,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setCart([]);
         setWishlist([]);
         setAiRecommendations([]);
+        setRecommendationMode(null);
       }
       setIsLoading(false);
     });
@@ -104,26 +108,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const getRecommendations = async (uid: string) => {
     setLoadingRecommendations(true);
     try {
-      const idToken = await auth.currentUser?.getIdToken();
-      if (!idToken) throw new Error('Authentication required for recommendations.');
-      const response = await fetch('/api/ai/recommendations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ user_id: uid, num_recommendations: 8 })
-      });
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) throw new Error('Authentication required for recommendations.');
+        const response = await fetch('/api/ai/recommendations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ user_id: uid, num_recommendations: 8 })
+        });
 
-      if (!response.ok) {
-        throw new Error('Trained recommendations are unavailable.');
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+            setAiRecommendations(data.recommendations);
+            setRecommendationMode('ai');
+            return;
+          }
+        } else {
+          console.warn(`AI recommendations returned HTTP ${response.status}; using catalog-based picks.`);
+        }
+      } catch (error) {
+        console.warn('AI recommendations are unavailable; using catalog-based picks.', error);
       }
-      
-      const data = await response.json();
-      setAiRecommendations(Array.isArray(data.recommendations) ? data.recommendations : []);
-    } catch (error) {
-      console.warn('Trained recommendations unavailable:', error);
-      setAiRecommendations([]);
+
+      const products = await fetchProductsFromFirestore();
+      const interactedIds = new Set([...cart, ...wishlist].map((product) => product.id));
+      const availableProducts = products.filter((product) => !interactedIds.has(product.id));
+      const rankedProducts = [...(availableProducts.length > 0 ? availableProducts : products)]
+        .sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount)
+        .slice(0, 8);
+
+      setAiRecommendations(rankedProducts);
+      setRecommendationMode('popular');
     } finally {
       setLoadingRecommendations(false);
     }
@@ -163,6 +182,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
     setWishlist([]);
     setAiRecommendations([]);
+    setRecommendationMode(null);
   };
 
   const value: StoreContextValue = {
@@ -181,6 +201,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     logout,
     refreshCart,
     aiRecommendations,
+    recommendationMode,
     loadingRecommendations,
     getRecommendations: () => user ? getRecommendations(user.uid) : Promise.resolve(),
   };

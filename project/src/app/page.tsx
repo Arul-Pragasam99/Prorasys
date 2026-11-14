@@ -34,7 +34,7 @@ interface CustomerStats {
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, userRole, cart, wishlist, aiRecommendations } = useStore();
+  const { user, isAuthenticated, isLoading, userRole, cart, wishlist, aiRecommendations, recommendationMode } = useStore();
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState<CustomerStats>({
     totalOrders: 0,
@@ -211,23 +211,35 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Stats - ✅ Fixed contrast */}
-              <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <p className="text-3xl font-bold text-primary">10K+</p>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Happy Users</p>
+              {/* Product highlights */}
+              <div className="mt-12 sm:mt-16 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
+                <div className="min-h-24 bg-card/80 px-3 py-3 sm:p-4 rounded-2xl border border-border flex items-center justify-center gap-3 transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                  <span className="shrink-0 rounded-xl bg-primary/10 p-2"><Star className="h-5 w-5 text-primary" /></span>
+                  <div className="text-left">
+                    <p className="text-base font-semibold leading-tight text-primary">Reviews</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Sentiment insights</p>
+                  </div>
                 </div>
-                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <p className="text-3xl font-bold text-secondary">4.8★</p>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Avg Rating</p>
+                <div className="min-h-24 bg-card/80 px-3 py-3 sm:p-4 rounded-2xl border border-border flex items-center justify-center gap-3 transition-all duration-200 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-lg">
+                  <span className="shrink-0 rounded-xl bg-secondary/10 p-2"><Shield className="h-5 w-5 text-secondary" /></span>
+                  <div className="text-left">
+                    <p className="text-base font-semibold leading-tight text-secondary">Trust scores</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Review-based signals</p>
+                  </div>
                 </div>
-                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <p className="text-3xl font-bold text-accent">95%</p>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Trust Score</p>
+                <div className="min-h-24 bg-card/80 px-3 py-3 sm:p-4 rounded-2xl border border-border flex items-center justify-center gap-3 transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg">
+                  <span className="shrink-0 rounded-xl bg-accent/10 p-2"><Sparkles className="h-5 w-5 text-accent" /></span>
+                  <div className="text-left">
+                    <p className="text-base font-semibold leading-tight text-accent">Smart picks</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Tailored suggestions</p>
+                  </div>
                 </div>
-                <div className="bg-card p-4 rounded-theme-lg border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  <p className="text-3xl font-bold text-success">24/7</p>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Support</p>
+                <div className="min-h-24 bg-card/80 px-3 py-3 sm:p-4 rounded-2xl border border-border flex items-center justify-center gap-3 transition-all duration-200 hover:-translate-y-1 hover:border-success/40 hover:shadow-lg">
+                  <span className="shrink-0 rounded-xl bg-success/10 p-2"><Heart className="h-5 w-5 text-success" /></span>
+                  <div className="text-left">
+                    <p className="text-base font-semibold leading-tight text-success">Wishlist</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">Save for later</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -467,7 +479,9 @@ export default function HomePage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">For You</p>
-                <h2 className="mt-1 text-lg font-semibold text-text-primary">AI picks</h2>
+                <h2 className="mt-1 text-lg font-semibold text-text-primary">
+                  {recommendationMode === 'ai' ? 'AI picks' : 'Popular picks'}
+                </h2>
               </div>
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
@@ -479,7 +493,7 @@ export default function HomePage() {
                 </Link>
               ))}
               {(!aiRecommendations || aiRecommendations.length === 0) && (
-                <p className="text-sm text-text-secondary">Your personalized picks are being prepared.</p>
+                <p className="text-sm text-text-secondary">No products are available to recommend yet.</p>
               )}
             </div>
             <Link href="/recommendations" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">

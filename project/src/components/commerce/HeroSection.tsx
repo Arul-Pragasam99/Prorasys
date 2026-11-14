@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
-import { ArrowRight, Sparkles, Zap, Shield, Star } from 'lucide-react';
+import { ArrowRight, Heart, Sparkles, Zap, Shield, Star } from 'lucide-react';
 
 export function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
@@ -158,49 +158,49 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div ref={statsRef} className="grid grid-cols-2 gap-4">
-            <div className="bg-card/80 backdrop-blur-sm p-6 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+          {/* Product highlights */}
+          <div ref={statsRef} className="grid grid-cols-2 gap-3">
+            <div className="min-h-24 bg-card/80 backdrop-blur-sm p-3 rounded-2xl border border-border flex items-center justify-start transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-theme group-hover:scale-110 transition-transform">
-                  <Shield className="w-5 h-5 text-primary" />
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <Star className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-primary">10K+</p>
-                  <p className="text-sm text-text-secondary">Happy Customers</p>
+                <div className="text-left">
+                  <p className="text-base sm:text-lg font-semibold leading-tight text-primary">Reviews</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Sentiment insights</p>
                 </div>
               </div>
             </div>
-            <div className="bg-card/80 backdrop-blur-sm p-6 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+            <div className="min-h-24 bg-card/80 backdrop-blur-sm p-3 rounded-2xl border border-border flex items-center justify-start transition-all duration-200 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-secondary/10 rounded-theme group-hover:scale-110 transition-transform">
-                  <Star className="w-5 h-5 text-secondary" />
+                <div className="p-2 bg-secondary/10 rounded-xl">
+                  <Shield className="w-5 h-5 text-secondary" />
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-secondary">4.8★</p>
-                  <p className="text-sm text-text-secondary">Average Rating</p>
+                <div className="text-left">
+                  <p className="text-base sm:text-lg font-semibold leading-tight text-secondary">Trust scores</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Review-based signals</p>
                 </div>
               </div>
             </div>
-            <div className="bg-card/80 backdrop-blur-sm p-6 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+            <div className="min-h-24 bg-card/80 backdrop-blur-sm p-3 rounded-2xl border border-border flex items-center justify-start transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-accent/10 rounded-theme group-hover:scale-110 transition-transform">
+                <div className="p-2 bg-accent/10 rounded-xl">
                   <Sparkles className="w-5 h-5 text-accent" />
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-accent">95%</p>
-                  <p className="text-sm text-text-secondary">Trust Score</p>
+                <div className="text-left">
+                  <p className="text-base sm:text-lg font-semibold leading-tight text-accent">Smart picks</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Tailored suggestions</p>
                 </div>
               </div>
             </div>
-            <div className="bg-card/80 backdrop-blur-sm p-6 rounded-theme-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+            <div className="min-h-24 bg-card/80 backdrop-blur-sm p-3 rounded-2xl border border-border flex items-center justify-start transition-all duration-200 hover:-translate-y-1 hover:border-success/40 hover:shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-success/10 rounded-theme group-hover:scale-110 transition-transform">
-                  <Zap className="w-5 h-5 text-success" />
+                <div className="p-2 bg-success/10 rounded-xl">
+                  <Heart className="w-5 h-5 text-success" />
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-success">24/7</p>
-                  <p className="text-sm text-text-secondary">AI Support</p>
+                <div className="text-left">
+                  <p className="text-base sm:text-lg font-semibold leading-tight text-success">Wishlist</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Save for later</p>
                 </div>
               </div>
             </div>

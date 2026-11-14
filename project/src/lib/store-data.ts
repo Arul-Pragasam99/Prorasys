@@ -45,6 +45,7 @@ export type StoreContextValue = {
   logout: () => void;
   refreshCart?: () => Promise<void>;
   aiRecommendations?: StoreProduct[];
+  recommendationMode?: 'ai' | 'popular' | null;
   loadingRecommendations?: boolean;
   getRecommendations?: () => Promise<void>;
 };
