@@ -58,7 +58,6 @@ project/
   api/python.py        Vercel entry point for FastAPI
   python-backend/      FastAPI service and model implementations
   public/              PWA manifest, icons, and static assets
-  firestore.rules      Firestore access rules
   requirements.txt     Python dependencies used by Vercel
 ```
 
