@@ -32,6 +32,7 @@ service-account.json
 *.service-account.json
 *service-account*.json
 *.firebase*.json
+firestore.rules
 
 # ⭐ Add these too
 python-backend/*.pkl           # Pickle files (trained models)
