@@ -65,9 +65,11 @@ export function Header() {
     { href: '/recommendations', label: 'Recommendations', icon: Sparkles },
     { href: '/orders', label: 'Orders', icon: OrdersIcon },
   ];
-  const visibleNavLinks = userRole === 'admin'
-    ? navLinks.filter(({ href }) => href !== '/orders' && href !== '/recommendations')
-    : navLinks;
+  const visibleNavLinks = isAuthenticated
+    ? navLinks.filter(({ href }) =>
+        userRole !== 'admin' || (href !== '/orders' && href !== '/recommendations')
+      )
+    : [];
 
   // Navbar uses the site's theme tokens (--color-surface / --color-border)
   // defined in globals.css, so it automatically matches light/dark mode
