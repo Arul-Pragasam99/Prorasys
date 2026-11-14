@@ -37,6 +37,7 @@ interface AdminOrder {
   totalAmount?: number;
   status?: string;
   createdAt?: string;
+  deliveredAt?: string;
 }
 
 export default function AdminPage() {
@@ -171,11 +172,18 @@ export default function AdminPage() {
     if (!confirmed) return;
 
     try {
-      await updateDoc(doc(db, 'orders', orderId), {
+      const updatedAt = new Date().toISOString();
+      const updateData = {
         status,
-        updatedAt: new Date().toISOString(),
+        updatedAt,
+        ...(status === 'delivered' ? { deliveredAt: updatedAt } : {}),
+      };
+      await updateDoc(doc(db, 'orders', orderId), {
+        ...updateData,
       });
-      setAdminOrders((orders) => orders.map((order) => order.id === orderId ? { ...order, status } : order));
+      setAdminOrders((orders) => orders.map((order) =>
+        order.id === orderId ? { ...order, ...updateData } : order
+      ));
     } catch (error) {
       console.error('Error updating order status:', error);
       window.alert('Failed to update order status.');

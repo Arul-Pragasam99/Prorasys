@@ -23,10 +23,6 @@ python-backend/models/saved/*
 !python-backend/models/saved/trust_model.pkl
 python-backend/logs/
 
-#firestore rules
-firestore.rules
-
-
 scripts/seed-products.js
 scripts/seed-reviews.js
 scripts/seed-users.js
