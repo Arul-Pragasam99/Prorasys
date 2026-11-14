@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/commerce/Header';
 import { ProductDetail } from '@/components/ProductDetail';
-import { fetchProductsFromFirestore, fetchReviewsFromFirestore } from '@/lib/product-service';
+import { fetchProductFromFirestore, fetchReviewsFromFirestore } from '@/lib/product-service';
 import { products as fallbackProducts, reviews as fallbackReviews } from '@/lib/mock-data';
 
 interface PageParams {
@@ -14,8 +14,10 @@ async function getProductData(productId: string) {
   let productReviews = fallbackReviews.filter((r) => r.productId === product.id);
 
   try {
-    const firestoreProducts = await fetchProductsFromFirestore();
-    const firestoreProduct = firestoreProducts.find((p) => p.id === productId);
+    const [firestoreProduct, firestoreReviews] = await Promise.all([
+      fetchProductFromFirestore(productId),
+      fetchReviewsFromFirestore(productId),
+    ]);
 
     if (firestoreProduct) {
       product = {
@@ -37,7 +39,7 @@ async function getProductData(productId: string) {
       };
     }
 
-    productReviews = (await fetchReviewsFromFirestore(productId)).map((reviewItem) => {
+    productReviews = firestoreReviews.map((reviewItem) => {
       const review = reviewItem as Record<string, unknown>;
       return {
         id: (review.id as string) ?? `${productId}-review`,

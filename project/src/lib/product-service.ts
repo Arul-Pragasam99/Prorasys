@@ -1,4 +1,4 @@
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export type FirestoreProduct = {
@@ -34,46 +34,59 @@ export type Product = {
   rank: number;
 };
 
+function mapFirestoreProduct(id: string, data: FirestoreProduct): Product {
+  return {
+    id,
+    name: data.name || 'Unnamed Product',
+    description: data.description || 'No description available',
+    price: data.price || 0,
+    category: data.category || 'General',
+    rating: data.avgRating || 4.0,
+    badge: data.combinedScore ? `${(data.combinedScore * 100).toFixed(0)}% Trust` : 'Featured',
+    color: 'from-brand-500 to-blue-500',
+    image: '/placeholder.jpg',
+    combinedScore: data.combinedScore || 0,
+    sentimentScore: data.sentimentScore || 0,
+    trustLevel: data.trustLevel || 'medium',
+    reviewCount: data.reviewCount || 0,
+    featureScores: data.featureScores || {},
+    rank: data.rank || 0,
+  };
+}
+
 export async function fetchProductsFromFirestore(): Promise<Product[]> {
   try {
     const q = query(collection(db, 'products'), orderBy('combinedScore', 'desc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => {
-      const data = doc.data() as FirestoreProduct;
-      return {
-        id: doc.id,
-        name: data.name || 'Unnamed Product',
-        description: data.description || 'No description available',
-        price: data.price || 0,
-        category: data.category || 'General',
-        rating: data.avgRating || 4.0,
-        badge: data.combinedScore ? `${(data.combinedScore * 100).toFixed(0)}% Trust` : 'Featured',
-        color: 'from-brand-500 to-blue-500',
-        image: '/placeholder.jpg',
-        combinedScore: data.combinedScore || 0,
-        sentimentScore: data.sentimentScore || 0,
-        trustLevel: data.trustLevel || 'medium',
-        reviewCount: data.reviewCount || 0,
-        featureScores: data.featureScores || {},
-        rank: data.rank || 0,
-      };
-    });
+    return snapshot.docs.map((productDoc) =>
+      mapFirestoreProduct(productDoc.id, productDoc.data() as FirestoreProduct)
+    );
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
   }
 }
 
+export async function fetchProductFromFirestore(productId: string): Promise<Product | null> {
+  try {
+    const snapshot = await getDoc(doc(db, 'products', productId));
+    return snapshot.exists()
+      ? mapFirestoreProduct(snapshot.id, snapshot.data() as FirestoreProduct)
+      : null;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
+}
+
 export async function fetchReviewsFromFirestore(productId: string) {
   try {
-    const q = query(collection(db, 'reviews'));
+    const q = query(collection(db, 'reviews'), where('productId', '==', productId));
     const snapshot = await getDocs(q);
-    return snapshot.docs
-      .map((doc) => ({ id: doc.id, ...(doc.data() as Record<string, unknown>) }))
-      .filter((review) => {
-        const reviewRecord = review as Record<string, unknown>;
-        return reviewRecord.productId === productId;
-      });
+    return snapshot.docs.map((reviewDoc) => ({
+      id: reviewDoc.id,
+      ...(reviewDoc.data() as Record<string, unknown>),
+    }));
   } catch (error) {
     console.error('Error fetching reviews:', error);
     return [];
